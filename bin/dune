@@ -1,0 +1,3 @@
+(executable
+ (public_name gamelle)
+ (libraries unix cmdliner))

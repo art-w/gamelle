@@ -1,7 +1,7 @@
 open Gamelle
 
-let myfont = Font.load @@ Option.get @@ Assets.read "ubuntu-mono.ttf"
-let img = Bitmap.load @@ Option.get @@ Assets.read "camel.png"
+let myfont = Assets.ubuntu_mono
+let img = Assets.camel
 let vx = ref 0.0
 let vy = ref 0.0
 let x = ref 0.0

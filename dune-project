@@ -21,5 +21,4 @@
     (tsdl-mixer (>= 0.6))
     (tsdl-ttf (>= 0.6))
     (ctypes (>= 0.21.1))
-    (result (>= 1.5))
-    (crunch (>= 3.3.1))))
+    (result (>= 1.5))))

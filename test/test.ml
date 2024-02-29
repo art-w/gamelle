@@ -1,7 +1,5 @@
-let bmp =
-  Gamelle.Bitmap.(scale 2.0 @@ load @@ Option.get @@ Assets.read "camel.png")
-
-let font = Gamelle.Font.load @@ Option.get @@ Assets.read "ubuntu-mono.ttf"
+let bmp = Gamelle.Bitmap.(scale 2.0 Assets.camel)
+let font = Assets.ubuntu_mono
 let boing = Gamelle.Sound.load "/usr/lib/slack/resources/animal_stick.mp3"
 
 (* let count = ref 0.0 *)

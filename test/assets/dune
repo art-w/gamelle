@@ -1,8 +1,11 @@
 (library
- (name assets))
+ (name assets)
+ (libraries gamelle))
 
 (rule
  (target assets.ml)
  (deps camel.png ubuntu-mono.ttf)
  (action
-  (run ocaml-crunch --mode=plain -o %{target} .)))
+  (with-stdout-to
+   assets.ml
+   (run %{bin:gamelle} assets))))
