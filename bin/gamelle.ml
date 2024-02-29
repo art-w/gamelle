@@ -1,10 +1,22 @@
 open Cmdliner
 
 let file_contents filename =
-  let h = open_in filename in
+  let h = open_in_bin filename in
   let r = In_channel.input_all h in
   close_in h;
   r
+
+let re_target = Str.regexp_string "<%GAME%>"
+
+let game_template script =
+  {|<canvas id=target tabindex=1></canvas>|}
+  ^ {|<script type="text/javascript">|} ^ script ^ {|</script>|}
+
+let inline_js_in_html html js =
+  let html = file_contents html in
+  let js = game_template (file_contents js) in
+  let html = Str.substitute_first re_target (fun _ -> js) html in
+  print_endline html
 
 let normalize_name name =
   String.map
@@ -44,10 +56,31 @@ let cmd_assets =
   let run () = list_files () in
   Cmd.v info Term.(const run $ const ())
 
+let html_template =
+  let env =
+    let doc = "Template HTML" in
+    Cmd.Env.info "" ~doc
+  in
+  Arg.(
+    required & opt (some file) None & info [ "template" ] ~docv:"TEMPLATE" ~env)
+
+let js_script =
+  let env =
+    let doc = "Js script" in
+    Cmd.Env.info "" ~doc
+  in
+  Arg.(required & opt (some file) None & info [ "script" ] ~docv:"SCRIPT" ~env)
+
+let cmd_html =
+  let doc = "Release HTML game" in
+  let info = Cmd.info "html" ~doc in
+  let run html js = inline_js_in_html html js in
+  Cmd.v info Term.(const run $ html_template $ js_script)
+
 let cmd =
   let doc = "Gamelle" in
   let version = "0.1" in
   let info = Cmd.info "gamelle" ~version ~doc in
-  Cmd.group info [ cmd_assets ]
+  Cmd.group info [ cmd_assets; cmd_html ]
 
 let () = exit (Cmd.eval cmd)
