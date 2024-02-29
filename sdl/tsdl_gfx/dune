@@ -1,0 +1,5 @@
+(library
+ (name tsdl_gfx)
+ (modules tsdl_gfx)
+ (libraries ctypes tsdl result)
+ (c_library_flags -lSDL2_gfx))

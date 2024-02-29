@@ -1,0 +1,4 @@
+(library
+ (name gamelle_jsoo)
+ (libraries brr)
+ (implements gamelle))

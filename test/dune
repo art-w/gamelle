@@ -1,0 +1,20 @@
+(library
+ (name test)
+ (modules test)
+ (libraries gamelle assets))
+
+(library
+ (name js_test)
+ (modules js_test)
+ (libraries gamelle assets))
+
+(executable
+ (name js_test_bin)
+ (modules js_test_bin)
+ (libraries js_test gamelle_sdl))
+
+(executable
+ (name js_test_js)
+ (modules js_test_js)
+ (modes js)
+ (libraries js_test gamelle_jsoo))

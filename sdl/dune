@@ -1,0 +1,4 @@
+(library
+ (name gamelle_sdl)
+ (libraries tsdl tsdl-image tsdl-mixer tsdl-ttf tsdl_gfx)
+ (implements gamelle))

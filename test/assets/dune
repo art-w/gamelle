@@ -1,0 +1,8 @@
+(library
+ (name assets))
+
+(rule
+ (target assets.ml)
+ (deps camel.png ubuntu-mono.ttf mono.ttf)
+ (action
+  (run ocaml-crunch --mode=plain -o %{target} .)))

@@ -1,0 +1,3 @@
+(library
+ (name gamelle)
+ (virtual_modules gamelle))
