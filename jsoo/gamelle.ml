@@ -3,6 +3,7 @@ open Common
 module Bitmap = Bitmap
 module Event = Event
 module Font = Font
+module Sound = Sound
 
 (* type ctx = C.t *)
 
@@ -51,18 +52,6 @@ let draw_circle (x, y) radius =
 let fill_circle _ _ = ()
 let draw_thick_line ~stroke:_ _ _ = ()
 let draw_string font ~size txt x y = Font.draw_at font ~size txt (x, y)
-
-module Sound = struct
-  type sound = unit
-
-  let load _ = ()
-  let play _ = ()
-
-  type music = unit
-
-  let load_music _ = ()
-  let play_music _ = ()
-end
 
 let run fn =
   print_endline "hello!";

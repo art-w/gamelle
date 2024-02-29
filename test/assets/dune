@@ -4,7 +4,7 @@
 
 (rule
  (target assets.ml)
- (deps camel.png ubuntu-mono.ttf)
+ (deps (source_tree .))
  (action
   (with-stdout-to
    assets.ml

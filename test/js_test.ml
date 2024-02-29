@@ -27,6 +27,7 @@ let () =
       if Event.is_pressed e Arrow_left then vx := !vx -. 100.0;
 
       if Event.is_pressed e Click_left then (
+        Sound.play Assets.stick;
         let mx, my = Event.mouse_pos e in
         let dx, dy = norm_max 100.0 (mx -. !x, my -. !y) in
         vx := !vx +. dx;

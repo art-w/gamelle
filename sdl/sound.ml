@@ -3,9 +3,15 @@ module Mixer = Tsdl_mixer.Mixer
 
 type sound = Mixer.chunk Lazy.t
 
-let load filename =
+let load_file filename =
   lazy
     (let& sound = Tsdl_mixer.Mixer.load_wav filename in
+     sound)
+
+let load binstring =
+  lazy
+    (let& rw = Tsdl.Sdl.rw_from_const_mem binstring in
+     let& sound = Tsdl_mixer.Mixer.load_wav_rw rw 1 in
      sound)
 
 let play (lazy sound) =
