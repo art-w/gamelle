@@ -1,7 +1,7 @@
 open Cmdliner
 
-let file_contents filename =
-  let h = open_in_bin filename in
+let file_contents full_name =
+  let h = open_in_bin full_name in
   let r = In_channel.input_all h in
   close_in h;
   r
@@ -20,40 +20,69 @@ let inline_js_in_html html js =
 
 let normalize_name name =
   String.map
-    (fun chr ->
-      if
-        (chr >= 'a' && chr <= 'z')
-        || (chr >= 'A' && chr <= 'Z')
-        || (chr >= '0' && chr <= '9')
-      then chr
-      else '_')
+    (function ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9') as c -> c | _ -> '_')
     name
 
-let load_extension = function
-  | ".ttf" -> Some "Gamelle.Font.load "
-  | ".png" | ".jpeg" | ".jpg" -> Some "Gamelle.Bitmap.load "
-  | ".txt" -> Some ""
-  | _ -> None
+let extension_loader ~basename ~ext =
+  match (basename, ext) with
+  | _, "Ttf" -> Some "Gamelle.Font.load"
+  | _, ("Png" | "Jpeg" | "Jpg") -> Some "Gamelle.Bitmap.load"
+  | "assets", _ | "dune", "No_ext" -> None
+  | _ -> Some "Fun.id"
 
-let output_file filename =
-  let name = try Filename.chop_extension filename with _ -> filename in
-  let name = normalize_name name in
-  let ext = try Filename.extension filename with _ -> ".txt" in
-  match load_extension ext with
-  | None -> ()
-  | Some load_fn -> (
-      match file_contents filename with
-      | exception _ -> ()
-      | contents -> Format.printf "let %s = %s%S@." name load_fn contents)
+let output_file (full_name, basename, loader) =
+  if Sys.is_regular_file full_name then (
+    Format.printf "  (** Generated from %s *)@." basename;
+    Format.printf "  let %s = %s %S@." basename loader (file_contents full_name))
 
-let list_files () =
-  Format.printf "(* %S *)@." (Sys.getcwd ());
-  Array.iter output_file (Sys.readdir (Sys.getcwd ()))
+let split_file_ext filename =
+  let name = normalize_name @@ Filename.remove_extension filename in
+  let raw_ext = Filename.extension filename in
+  let ext =
+    String.capitalize_ascii
+    @@
+    if raw_ext = "" then "No_ext"
+    else if String.starts_with ~prefix:"." raw_ext then
+      String.(sub raw_ext 1 (length raw_ext - 1))
+    else raw_ext
+  in
+  (name, ext)
+
+module StringMap = Map.Make (struct
+  type t = string
+
+  let compare = compare
+end)
+
+let gen_ml files cwd =
+  let files =
+    Array.fold_left
+      (fun map sysname ->
+        let basename, ext = split_file_ext sysname in
+        match extension_loader ~basename ~ext with
+        | Some loader ->
+            StringMap.add_to_list ext
+              (Filename.concat cwd sysname, basename, loader)
+              map
+        | None -> map)
+      StringMap.empty files
+  in
+  StringMap.iter
+    (fun ext files ->
+      Format.printf "module %s = struct@." ext;
+      List.iter output_file files;
+      Format.printf "end@.include %s@." ext)
+    files
+
+let list_files k =
+  let cwd = Sys.getcwd () in
+  Format.printf "(* %S *)@." cwd;
+  k (Sys.readdir cwd) cwd
 
 let cmd_assets =
   let doc = "Bundle game assets" in
   let info = Cmd.info "assets" ~doc in
-  let run () = list_files () in
+  let run () = list_files gen_ml in
   Cmd.v info Term.(const run $ const ())
 
 let html_template =

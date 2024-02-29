@@ -23,5 +23,10 @@
  (target index.html)
  (deps index.html.template js_test_js.bc.js)
  (action
-   (with-stdout-to index.html
-     (run %{bin:gamelle} html --template=index.html.template --script=js_test_js.bc.js))))
+  (with-stdout-to
+   index.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=index.html.template
+    --script=js_test_js.bc.js))))
