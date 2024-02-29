@@ -1,0 +1,9 @@
+(lang dune 3.5)
+
+(name mygame)
+
+(package
+  (name mygame)
+  (synopsis "mygame")
+  (depends
+    gamelle))

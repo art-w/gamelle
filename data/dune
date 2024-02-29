@@ -1,0 +1,11 @@
+(data_only_dirs template)
+
+(library
+ (name gamelle_template))
+
+(rule
+ (targets gamelle_template.ml)
+ (deps
+  (source_tree template))
+ (action
+  (run ocaml-crunch -m plain template -o %{targets})))

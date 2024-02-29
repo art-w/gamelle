@@ -1,7 +1,29 @@
 open Cmdliner
 
-let file_contents full_name =
-  let h = open_in_bin full_name in
+let mkdir_for ~root name =
+  let parts = String.split_on_char '/' name in
+  let rec go cwd = function
+    | [] | [ _ ] -> ()
+    | d :: ds ->
+        let cwd = Filename.concat cwd d in
+        if not (Sys.file_exists cwd) then Sys.mkdir cwd 0o777;
+        go cwd ds
+  in
+  go root parts
+
+let init_directory root =
+  Sys.mkdir root 0o777;
+  List.iter
+    (fun filename ->
+      mkdir_for ~root filename;
+      let contents = Option.get @@ Gamelle_template.read filename in
+      let h = open_out (Filename.concat root filename) in
+      output_string h contents;
+      close_out h)
+    Gamelle_template.file_list
+
+let file_contents filename =
+  let h = open_in_bin filename in
   let r = In_channel.input_all h in
   close_in h;
   r
@@ -27,12 +49,13 @@ let extension_loader ~basename ~ext =
   match (basename, ext) with
   | _, "Ttf" -> Some "Gamelle.Font.load"
   | _, ("Png" | "Jpeg" | "Jpg") -> Some "Gamelle.Bitmap.load"
+  | _, "Mp3" -> Some "Gamelle.Sound.load"
   | "assets", _ | "dune", "No_ext" -> None
   | _ -> Some "Fun.id"
 
 let output_file (full_name, basename, loader) =
   if Sys.is_regular_file full_name then (
-    Format.printf "  (** Generated from %s *)@." basename;
+    Format.printf "@.  (** Generated from %s *)@." basename;
     Format.printf "  let %s = %s %S@." basename loader (file_contents full_name))
 
 let split_file_ext filename =
@@ -100,16 +123,28 @@ let js_script =
   in
   Arg.(required & opt (some file) None & info [ "script" ] ~docv:"SCRIPT" ~env)
 
+let game_name =
+  let env =
+    let doc = "Name of directory" in
+    Cmd.Env.info "NAME" ~doc
+  in
+  Arg.(required & pos 0 (some string) None & info [] ~docv:"NAME" ~env)
+
 let cmd_html =
   let doc = "Release HTML game" in
   let info = Cmd.info "html" ~doc in
   let run html js = inline_js_in_html html js in
   Cmd.v info Term.(const run $ html_template $ js_script)
 
+let cmd_init =
+  let doc = "Initialize a new game directory" in
+  let info = Cmd.info "init" ~doc in
+  Cmd.v info Term.(const init_directory $ game_name)
+
 let cmd =
   let doc = "Gamelle" in
   let version = "0.1" in
   let info = Cmd.info "gamelle" ~version ~doc in
-  Cmd.group info [ cmd_assets; cmd_html ]
+  Cmd.group info [ cmd_assets; cmd_html; cmd_init ]
 
 let () = exit (Cmd.eval cmd)

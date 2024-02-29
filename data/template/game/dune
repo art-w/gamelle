@@ -1,0 +1,3 @@
+(library
+  (name mygame)
+  (libraries gamelle assets))
