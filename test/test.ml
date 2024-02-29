@@ -7,9 +7,18 @@ let boing = Gamelle.Sound.load "/usr/lib/slack/resources/animal_stick.mp3"
 let int = int_of_float
 let x, y = (ref 100.0, ref 100.0)
 
-let main ev =
+let update ev () =
   if Gamelle.Event.is_pressed ev (Char 'b') then Gamelle.Sound.play boing;
 
+  let dt = Gamelle.dt () in
+
+  if Gamelle.Event.is_pressed ev Arrow_left then x := !x -. (100.0 *. dt);
+  if Gamelle.Event.is_pressed ev Arrow_right then x := !x +. (100.0 *. dt);
+  if Gamelle.Event.is_pressed ev Arrow_down then y := !y +. (100.0 *. dt);
+  if Gamelle.Event.is_pressed ev Arrow_up then y := !y -. (100.0 *. dt);
+  ()
+
+let render () =
   (* count := !count +. 1.0 ; *)
   Format.printf "frames per seconds: %f@." (1.0 /. Gamelle.dt ());
   let count = 10. *. Gamelle.clock () in
@@ -23,13 +32,6 @@ let main ev =
   Gamelle.set_color 0xFFFFFFFF;
   Gamelle.draw_line (100.0, 100.0) (200.0, 200.0);
   Gamelle.draw_thick_line ~stroke:10.0 (200.0, 100.0) (100.0, 200.0);
-
-  let dt = Gamelle.dt () in
-
-  if Gamelle.Event.is_pressed ev Arrow_left then x := !x -. (100.0 *. dt);
-  if Gamelle.Event.is_pressed ev Arrow_right then x := !x +. (100.0 *. dt);
-  if Gamelle.Event.is_pressed ev Arrow_down then y := !y +. (100.0 *. dt);
-  if Gamelle.Event.is_pressed ev Arrow_up then y := !y -. (100.0 *. dt);
 
   Gamelle.draw (Gamelle.Bitmap.rotate (5. *. count) bmp) !x !y;
 
@@ -71,4 +73,4 @@ let main ev =
        ];
   ()
 
-let () = Gamelle.run main
+let () = Gamelle.run () ~update ~render

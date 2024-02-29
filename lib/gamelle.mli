@@ -59,4 +59,9 @@ module Event : sig
 end
 
 val window_size : unit -> float * float
-val run : (Event.t -> unit) -> unit
+
+val run :
+  'state ->
+  update:(Event.t -> 'state -> 'state) ->
+  render:('state -> unit) ->
+  unit

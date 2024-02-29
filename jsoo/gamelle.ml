@@ -53,7 +53,7 @@ let fill_circle _ _ = ()
 let draw_thick_line ~stroke:_ _ _ = ()
 let draw_string font ~size txt x y = Font.draw_at font ~size txt (x, y)
 
-let run fn =
+let run state ~update ~render =
   print_endline "hello!";
   let canvas =
     match Document.find_el_by_id G.document (Jstr.of_string "target") with
@@ -63,9 +63,8 @@ let run fn =
         Window.of_el elt
   in
 
-  (* let w = Window.w canvas in *)
-  (* let h = Window.h canvas in *)
-  (* Console.(log ["wh";w;h]) ; *)
+  let w = Window.w canvas in
+  let h = Window.h canvas in
   global_canvas := Some canvas;
 
   Window.set_w canvas 640;
@@ -74,21 +73,17 @@ let run fn =
   let ctx = C.get_context canvas in
   global_ctx := Some ctx;
 
-  let rec animate () =
-    let _ = G.request_animation_frame loop in
+  let rec animate state =
+    let _ = G.request_animation_frame (loop state) in
     ()
-  and loop elapsed =
+  and loop state elapsed =
     prev_now := !now;
     now := elapsed /. 1000.0;
 
-    (* C.set_fill_style ctx (C.color @@ Jstr.of_string "#000000") ; *)
-    (* C.fill_rect ctx ~x:0.0 ~y:0.0 ~w:(float w) ~h:(float h) ; *)
-    fn !Event.current;
-
-    (* Bitmap.draw ~ctx img ~x:!count ~y:0.0 ; *)
-    (* Bitmap.draw ~ctx img ~x:50.0 ~y:50.0 ; *)
-
-    (* Console.(log ["done"]); *)
-    animate ()
+    let state = update !Event.current state in
+    C.set_fill_style ctx (C.color @@ Jstr.of_string "#000000");
+    C.fill_rect ctx ~x:0.0 ~y:0.0 ~w:(float w) ~h:(float h);
+    render state;
+    animate state
   in
-  animate ()
+  animate state

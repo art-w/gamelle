@@ -1,7 +1,7 @@
-(library
+(executable
  (name test)
  (modules test)
- (libraries gamelle assets))
+ (libraries gamelle.sdl assets))
 
 (library
  (name js_test)
