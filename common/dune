@@ -1,0 +1,3 @@
+(library
+  (public_name gamelle.common)
+  (name gamelle_common))

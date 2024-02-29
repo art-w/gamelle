@@ -1,21 +1,5 @@
 open! Common
-
-type key =
-  | Escape
-  | Control_left
-  | Control_right
-  | Arrow_left
-  | Arrow_right
-  | Arrow_up
-  | Arrow_down
-  | Char of char
-  | Click_left
-  | Click_right
-
-type t = { keypressed : key list; mouse_x : int; mouse_y : int }
-
-let mouse_pos t = (float t.mouse_x, float t.mouse_y)
-let default = { keypressed = []; mouse_x = 0; mouse_y = 0 }
+include Gamelle_common.Event
 
 let key_of_keycode kc =
   match () with
@@ -69,6 +53,6 @@ let update_mouse t =
       { t with keypressed = insert Click_right t.keypressed }
     else { t with keypressed = remove Click_right t.keypressed }
   in
-  { t with mouse_x = x; mouse_y = y }
+  { t with mouse_x = float x; mouse_y = float y }
 
 let is_pressed t key = List.mem key t.keypressed

@@ -1,5 +1,5 @@
 (library
  (public_name gamelle.jsoo)
  (name gamelle_jsoo)
- (libraries brr)
+ (libraries brr gamelle_common)
  (implements gamelle))
