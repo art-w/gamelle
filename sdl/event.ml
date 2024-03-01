@@ -11,7 +11,7 @@ let key_of_keycode kc =
   | _ when kc = Sdl.K.up -> Arrow_up
   | _ when kc = Sdl.K.down -> Arrow_down
   | _ when kc = Sdl.K.rctrl -> Control_right
-  | _ when kc >= Sdl.K.a && kc < Sdl.K.z ->
+  | _ when kc >= Sdl.K.a && kc <= Sdl.K.z ->
       Char (Char.chr (Char.code 'a' + kc - Sdl.K.a))
   | _ -> failwith (Printf.sprintf "unhandled %#i" kc)
 
