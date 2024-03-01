@@ -36,7 +36,7 @@ let update t e =
       (* Format.printf "unhandled event@." ; *)
       t
 
-let update t e = try update t e with _ -> t
+let update t e = try update t e with Exit as exn -> raise exn | _ -> t
 
 let rec insert v = function
   | [] -> [ v ]
