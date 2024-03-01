@@ -4,7 +4,8 @@
 
 (rule
  (target assets.ml)
- (deps (source_tree .))
+ (deps
+  (source_tree .))
  (action
   (with-stdout-to
    assets.ml
