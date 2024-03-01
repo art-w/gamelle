@@ -81,3 +81,7 @@ let fill_circle (x, y) radius =
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
   let& () = Gfx.filled_circle_rgba (render ()) ~x ~y ~rad:radius ~r ~g ~b ~a in
   ()
+
+let show_cursor b =
+  let& _ = Sdl.show_cursor b in
+()

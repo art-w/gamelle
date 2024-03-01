@@ -38,6 +38,7 @@ val draw_circle : float * float -> float -> unit
 val fill_circle : float * float -> float -> unit
 val draw_thick_line : stroke:float -> float * float -> float * float -> unit
 val draw_string : Font.t -> size:int -> string -> float -> float -> unit
+val show_cursor: bool -> unit
 
 module Event : sig
   type t

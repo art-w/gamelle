@@ -42,6 +42,8 @@ let set_color c =
 (* TODO *)
 let draw_poly _ = ()
 let fill_poly _ = ()
+
+let show_cursor _ = ()
 let tau = 8.0 *. atan 1.0
 
 let draw_circle (x, y) radius =
