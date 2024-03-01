@@ -22,4 +22,5 @@
     (tsdl-ttf (>= 0.6))
     (ctypes (>= 0.21.1))
     (result (>= 1.5))
-    (crunch (>= 3.3.1))))
+    (crunch (>= 3.3.1))
+    (inotify (>= 2.5))))
