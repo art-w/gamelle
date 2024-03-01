@@ -1,0 +1,9 @@
+(lang dune 3.5)
+
+(name morpion)
+
+(package
+  (name morpion)
+  (synopsis "morpion is the french name for tic-tac-toe")
+  (depends
+    gamelle))

@@ -1,0 +1,3 @@
+(library
+  (name morpion)
+  (libraries gamelle assets))

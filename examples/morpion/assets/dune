@@ -1,0 +1,11 @@
+(library
+ (name assets)
+ (libraries gamelle))
+
+(rule
+ (target assets.ml)
+ (deps (source_tree .))
+ (action
+  (with-stdout-to
+   assets.ml
+   (run %{bin:gamelle} assets))))
