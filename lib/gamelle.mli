@@ -5,9 +5,6 @@ module Bitmap : sig
   type t
 
   val load : string -> t
-  val rotate : float -> t -> t
-  val scale : float -> t -> t
-  val sub : t -> x:int -> y:int -> w:int -> h:int -> t
 end
 
 module Font : sig
@@ -29,24 +26,48 @@ module Sound : sig
   val play_music : music -> unit
 end
 
+module View : sig
+  type t
+  type 'a scene = view:t -> 'a
+
+  val ( & ) : unit scene -> unit scene -> unit scene
+  val translate : float * float -> 'a scene -> 'a scene
+  val scale : float -> 'a scene -> 'a scene
+  val rotate : float -> 'a scene -> 'a scene
+  val default : t
+  val translated : float * float -> t -> t
+  val scaled : float -> t -> t
+  val rotated : float -> t -> t
+end
+
 val clock : unit -> float
 val dt : unit -> float
-val draw : Bitmap.t -> float -> float -> unit
-val draw_line : color:Color.t -> float * float -> float * float -> unit
-val draw_rect : color:Color.t -> float * float -> float * float -> unit
-val fill_rect : color:Color.t -> float * float -> float * float -> unit
-val draw_poly : color:Color.t -> (float * float) list -> unit
-val fill_poly : color:Color.t -> (float * float) list -> unit
-val draw_circle : color:Color.t -> float * float -> float -> unit
-val fill_circle : color:Color.t -> float * float -> float -> unit
+val draw : view:View.t -> Bitmap.t -> float -> float -> unit
 
-val draw_thick_line :
-  color:Color.t -> stroke:float -> float * float -> float * float -> unit
+val draw_line :
+  view:View.t -> color:Color.t -> float * float -> float * float -> unit
+
+val draw_rect :
+  view:View.t -> color:Color.t -> float * float -> float * float -> unit
+
+val fill_rect :
+  view:View.t -> color:Color.t -> float * float -> float * float -> unit
+
+val draw_poly : view:View.t -> color:Color.t -> (float * float) list -> unit
+val fill_poly : view:View.t -> color:Color.t -> (float * float) list -> unit
+val draw_circle : view:View.t -> color:Color.t -> float * float -> float -> unit
+val fill_circle : view:View.t -> color:Color.t -> float * float -> float -> unit
+val show_cursor : bool -> unit
 
 val draw_string :
-  color:Color.t -> Font.t -> size:int -> string -> float -> float -> unit
-
-val show_cursor : bool -> unit
+  view:View.t ->
+  color:Color.t ->
+  Font.t ->
+  size:int ->
+  string ->
+  float ->
+  float ->
+  unit
 
 module Event : sig
   type t
@@ -73,5 +94,5 @@ val run :
   ?on_exit:('state -> unit) ->
   'state ->
   update:(Event.t -> 'state -> 'state) ->
-  render:('state -> unit) ->
+  render:(view:View.t -> 'state -> unit) ->
   unit

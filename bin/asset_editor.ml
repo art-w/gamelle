@@ -13,17 +13,17 @@ let update ev ((bmp, fst_pos, rects) as st) =
       let pos = Event.mouse_pos ev in
       (bmp, None, (fst_pos, pos) :: rects)
 
-let render (bmp, pos, rects) =
-  fill_rect ~color:Color.black (0., 0.) (400., 400.);
+let render ~view (bmp, pos, rects) =
+  fill_rect ~view ~color:Color.black (0., 0.) (400., 400.);
   show_cursor true;
-  draw bmp 0. 0.;
-  Option.iter (fun pos -> fill_circle ~color:Color.green pos 1.) pos;
+  draw ~view bmp 0. 0.;
+  Option.iter (fun pos -> fill_circle ~view ~color:Color.green pos 1.) pos;
   List.iter
     (fun ((x1, y1), (x2, y2)) ->
       (* some strong assumptions here *)
       let w = x2 -. x1 in
       let h = y2 -. y1 in
-      draw_rect ~color:Color.blue (x1, y1) (w, h))
+      draw_rect ~view ~color:Color.blue (x1, y1) (w, h))
     rects
 
 let print_rects ~file (_, _, rects) =

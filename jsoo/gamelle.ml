@@ -6,6 +6,7 @@ module Bitmap = Bitmap
 module Event = Event
 module Font = Font
 module Sound = Sound
+module View = Gamelle_common.View
 
 (* type ctx = C.t *)
 
@@ -29,17 +30,17 @@ let set_color c =
   C.set_fill_style (render ()) color;
   C.set_stroke_style (render ()) color
 
-let draw bmp x y = Bitmap.draw ~ctx:(render ()) bmp ~x ~y
+let draw ~view bmp x y = Bitmap.draw ~view ~ctx:(render ()) bmp ~x ~y
 
-let fill_rect ~color (x, y) (w, h) =
+let fill_rect ~view:_ ~color (x, y) (w, h) =
   set_color color;
   C.fill_rect (render ()) ~x ~y ~w ~h
 
-let draw_rect ~color (x, y) (w, h) =
+let draw_rect ~view:_ ~color (x, y) (w, h) =
   set_color color;
   C.stroke_rect (render ()) ~x ~y ~w ~h
 
-let draw_line ~color (x0, y0) (x1, y1) =
+let draw_line ~view:_ ~color (x0, y0) (x1, y1) =
   set_color color;
   let path = C.Path.create () in
   C.Path.move_to path ~x:x0 ~y:y0;
@@ -47,25 +48,25 @@ let draw_line ~color (x0, y0) (x1, y1) =
   C.stroke (render ()) path
 
 (* TODO *)
-let draw_poly ~color:_ _ = ()
-let fill_poly ~color:_ _ = ()
+let draw_poly ~view:_ ~color:_ _ = ()
+let fill_poly ~view:_ ~color:_ _ = ()
 let show_cursor _ = ()
 let tau = 8.0 *. atan 1.0
 
-let draw_circle ~color (x, y) radius =
+let draw_circle ~view:_ ~color (x, y) radius =
   set_color color;
   let path = C.Path.create () in
   C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
   C.stroke (render ()) path
 
-let fill_circle ~color:_ _ _ = ()
-let draw_thick_line ~color:_ ~stroke:_ _ _ = ()
-let draw_string ~color:_ font ~size txt x y = Font.draw_at font ~size txt (x, y)
+let fill_circle ~view:_ ~color:_ _ _ = ()
+
+let draw_string ~view:_ ~color:_ font ~size txt x y =
+  Font.draw_at font ~size txt (x, y)
 
 let run ?(on_exit = ignore) state ~update ~render =
   let _ = on_exit in
   (* wow *)
-  print_endline "hello!";
   let canvas =
     match Document.find_el_by_id G.document (Jstr.of_string "target") with
     | None -> failwith "missing 'target' canvas"
@@ -94,7 +95,7 @@ let run ?(on_exit = ignore) state ~update ~render =
     let state = update !Event.current state in
     C.set_fill_style ctx (C.color @@ Jstr.of_string "#000000");
     C.fill_rect ctx ~x:0.0 ~y:0.0 ~w:(float w) ~h:(float h);
-    render state;
+    render ~view:Gamelle_common.View.default state;
     animate state
   in
   animate state

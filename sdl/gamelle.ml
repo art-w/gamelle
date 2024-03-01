@@ -5,6 +5,7 @@ module Bitmap = Bitmap
 module Font = Font
 module Sound = Sound
 module Event = Event
+module View = Gamelle_common.View
 include Draw
 
 let clock = Common.clock
@@ -23,7 +24,7 @@ type run =
   | Run : {
       state : 'a;
       update : Event.t -> 'a -> 'a;
-      render : 'a -> unit;
+      render : view:View.t -> 'a -> unit;
       on_exit : 'a -> unit;
     }
       -> run
@@ -79,7 +80,7 @@ let run () =
     | No_run -> invalid_arg "No game currently running"
     | Run { state; update; render; on_exit } ->
         let state = update !events state in
-        render state;
+        render ~view:View.default state;
         current_run := Run { state; update; render; on_exit });
 
     Sdl.render_present renderer;

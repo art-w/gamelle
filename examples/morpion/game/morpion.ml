@@ -136,27 +136,27 @@ let update event state =
 
 let size = cell_size *. 3.
 
-let draw_background () =
+let draw_background ~view () =
   let color = Color.white in
-  fill_rect ~color (0., 0.) (size, size)
+  fill_rect ~view ~color (0., 0.) (size, size)
 
-let draw_grid () =
+let draw_grid ~view () =
   let color = Color.black in
-  draw_line ~color (cell_size, 0.) (cell_size, size) ;
-  draw_line ~color (cell_size *. 2., 0.) (cell_size *. 2., size) ;
-  draw_line ~color (0., cell_size) (size, cell_size) ;
-  draw_line ~color (0., cell_size *. 2.) (size, cell_size *. 2.)
+  draw_line ~view ~color (cell_size, 0.) (cell_size, size) ;
+  draw_line ~view ~color (cell_size *. 2., 0.) (cell_size *. 2., size) ;
+  draw_line ~view ~color (0., cell_size) (size, cell_size) ;
+  draw_line ~view ~color (0., cell_size *. 2.) (size, cell_size *. 2.)
 
-let draw_cell cell x y =
+let draw_cell ~view cell x y =
   match cell with
   | Some Circle ->
-      draw Assets.circle x y
+      draw ~view Assets.circle x y
   | Some Cross ->
-      draw Assets.cross x y
+      draw ~view Assets.cross x y
   | None ->
       ()
 
-let draw_board
+let draw_board ~view
     ({ left_top
      ; center_top
      ; right_top
@@ -167,17 +167,20 @@ let draw_board
      ; center_bottom
      ; right_bottom } :
       board ) =
-  draw_cell left_top 0. 0. ;
-  draw_cell center_top cell_size 0. ;
-  draw_cell right_top (cell_size *. 2.) 0. ;
-  draw_cell left_center 0. cell_size ;
-  draw_cell center_center cell_size cell_size ;
-  draw_cell right_center (cell_size *. 2.) cell_size ;
-  draw_cell left_bottom 0. (cell_size *. 2.) ;
-  draw_cell center_bottom cell_size (cell_size *. 2.) ;
-  draw_cell right_bottom (cell_size *. 2.) (cell_size *. 2.)
+  draw_cell ~view left_top 0. 0. ;
+  draw_cell ~view center_top cell_size 0. ;
+  draw_cell ~view right_top (cell_size *. 2.) 0. ;
+  draw_cell ~view left_center 0. cell_size ;
+  draw_cell ~view center_center cell_size cell_size ;
+  draw_cell ~view right_center (cell_size *. 2.) cell_size ;
+  draw_cell ~view left_bottom 0. (cell_size *. 2.) ;
+  draw_cell ~view center_bottom cell_size (cell_size *. 2.) ;
+  draw_cell ~view right_bottom (cell_size *. 2.) (cell_size *. 2.)
 
-let render {board; player= _} =
-  show_cursor true ; draw_background () ; draw_board board ; draw_grid ()
+let render ~view {board; player= _} =
+  show_cursor true ;
+  draw_background ~view () ;
+  draw_board ~view board ;
+  draw_grid ~view ()
 
 let () = run state ~update ~render

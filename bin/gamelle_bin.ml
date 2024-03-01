@@ -1,5 +1,7 @@
 open Cmdliner
 
+let is_regular_file f = Sys.file_exists f && not (Sys.is_directory f)
+
 let mkdir_for ~root name =
   let parts = String.split_on_char '/' name in
   let rec go cwd = function
@@ -66,7 +68,7 @@ let extension_loader ~sysname ~basename ~ext =
   | _ -> Some (Raw "Fun.id")
 
 let output_file (full_name, basename, loader) =
-  if Sys.file_exists full_name then (
+  if is_regular_file full_name then (
     Format.printf "@.  (** Generated from %s *)@." basename;
     match loader with
     | Raw loader ->

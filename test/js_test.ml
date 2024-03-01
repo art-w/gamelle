@@ -15,19 +15,26 @@ let norm_max max_speed (x, y) =
     (x /. d, y /. d)
   else (x, y)
 
-type state = { x : float; y : float; vx : float; vy : float }
+type state = {
+  x : float;
+  y : float;
+  vx : float;
+  vy : float;
+  mx : float;
+  my : float;
+}
 
-let update e { x; y; vx; vy } =
+let update e { x; y; vx; vy; _ } =
   if Event.is_pressed e Escape then raise Exit;
   let vy = if Event.is_pressed e Arrow_down then vy +. 100.0 else vy in
   let vy = if Event.is_pressed e Arrow_up then vy -. 100.0 else vy in
   let vx = if Event.is_pressed e Arrow_right then vx +. 100.0 else vx in
   let vx = if Event.is_pressed e Arrow_left then vx -. 100.0 else vx in
+  let mx, my = Event.mouse_pos e in
 
   let vx, vy =
     if Event.is_pressed e Click_left then (
       Sound.play Assets.stick;
-      let mx, my = Event.mouse_pos e in
       let dx, dy = norm_max 100.0 (mx -. x, my -. y) in
       (vx +. dx, vy +. dy))
     else (vx, vy)
@@ -46,13 +53,28 @@ let update e { x; y; vx; vy } =
 
   let vx = vx *. 0.9 in
   let vy = vy *. 0.9 in
-  { x; y; vx; vy }
+  { x; y; vx; vy; mx; my }
 
-let render { x; y; _ } =
-  set_color 0xAABFFFFF;
-  fill_rect (0., 0.) (window_size ());
-  draw img x y;
-  draw Assets.player x y;
-  draw_string myfont ~size:48 "Hello world" 10.0 100.0
+let black = Color.black
 
-let () = run { x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 } ~update ~render
+let render ~view { x; y; mx; my; _ } =
+  fill_rect ~color:black ~view (0., 0.) (window_size ());
+  fill_rect ~color:black ~view (0., 0.) (100.0, 100.0);
+  View.(
+    translate (mx, my) (fill_circle ~color:black (0.0, 0.0) 10.0)
+    & translate (x, y)
+        (scale 2.0
+           (draw_rect ~color:black (0.0, 0.0) (100.0, 100.0)
+           & translate (75. /. 2., 59. /. 2.)
+             @@ rotate (1.0 *. clock ())
+             @@ translate (-75. /. 2., -59. /. 2.)
+             @@ (* & draw_circle (-75.0 /. 2., -59.0 /. 2.) 59. *)
+             (fill_rect ~color:black (0.0, 0.0) (75., 59.)
+             & draw img 0. 0.
+             & draw_circle ~color:black (75.0 /. 2., 59.0 /. 2.) 10.))))
+    ~view
+
+let () =
+  run
+    { mx = 0.0; my = 0.0; x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 }
+    ~update ~render

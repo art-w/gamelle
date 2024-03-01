@@ -31,4 +31,4 @@ let watch cmxs_file =
 
 let run cmxs_file =
   watch cmxs_file;
-  Gamelle.run () ~update:(fun _ () -> ()) ~render:(fun () -> ())
+  Gamelle.run () ~update:(fun _ () -> ()) ~render:(fun ~view:_ () -> ())
