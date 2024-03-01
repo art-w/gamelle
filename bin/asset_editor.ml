@@ -1,43 +1,72 @@
 open Gamelle
 
 type pos = float * float
-type state = Bitmap.t * pos option * (pos * pos) list
+type state = {
+  bmp: Bitmap.t;
+  scale: float;
+  mouse: pos;
+  click: pos option;
+  rects: (pos * pos) list;
+}
 
-let update ev ((bmp, fst_pos, rects) as st) =
-  match (fst_pos, Event.is_pressed ev Click_left) with
-  | Some _, true | None, false -> st
-  | None, true ->
-      let pos = Event.mouse_pos ev in
-      (bmp, Some pos, rects)
+let fresh_state file = {
+  bmp = Bitmap.load file;
+  scale = 1.;
+  mouse = 0., 0.;
+  click = None;
+  rects = [];
+}
+
+let update ev st =
+  let (x, y) = Event.mouse_pos ev in
+  let mouse = x /. st.scale, y /. st.scale in
+  let st = { st with mouse } in
+  match (st.click, Event.is_pressed ev Click_left) with
+  | None, false -> begin
+    if Event.is_pressed ev Wheel_up then
+      { st with scale = st.scale +. 1. }
+    else if Event.is_pressed ev Wheel_down then
+      { st with scale = st.scale -. 1. }
+    else
+      st
+    end
+  | Some _, true -> st (* just keep dragging *)
+  | None, true -> { st with click = Some st.mouse }
   | Some fst_pos, false ->
-      let pos = Event.mouse_pos ev in
-      (bmp, None, (fst_pos, pos) :: rects)
+      { st with click = None; rects = (fst_pos, st.mouse) :: st.rects }
 
-let render ~view (bmp, pos, rects) =
-  fill_rect ~view ~color:Color.black (0., 0.) (400., 400.);
+let compute_rect ((x1, y1), (x2, y2)) =
+  (* some strong assumptions here *)
+  let w = x2 -. x1 in
+  let h = y2 -. y1 in
+  x1, y1, w, h
+
+let render ~view st =
+  fill_rect ~view ~color:Color.black (0.,0.) (500., 500.);
   show_cursor true;
-  draw ~view bmp 0. 0.;
-  Option.iter (fun pos -> fill_circle ~view ~color:Color.green pos 1.) pos;
+  let view = View.scaled st.scale view in
+  draw ~view st.bmp 0. 0.;
+  Option.iter (fun pos -> 
+    let (x,y,w,h) = compute_rect (pos, st.mouse) in
+    draw_rect ~view ~color:Color.green (x,y) (w,h)
+  ) st.click;
+  let pale_green = Color.(with_a green 0.2) in
   List.iter
-    (fun ((x1, y1), (x2, y2)) ->
-      (* some strong assumptions here *)
-      let w = x2 -. x1 in
-      let h = y2 -. y1 in
-      draw_rect ~view ~color:Color.blue (x1, y1) (w, h))
-    rects
+    (fun poss ->
+      let (x,y,w,h) = compute_rect poss in
+      fill_rect ~view ~color:pale_green (x, y) (w, h))
+    st.rects
 
-let print_rects ~file (_, _, rects) =
+let print_rects ~file { rects; _ } =
   let oc = open_out file in
   List.iter
-    (fun ((x1, y1), (x2, y2)) ->
-      (* some strong assumptions here *)
-      let w = x2 -. x1 in
-      let h = y2 -. y1 in
-      Printf.fprintf oc "%.0f %.0f %.0f %.0f\n%!" x1 y1 w h)
+    (fun poss ->
+      let (x,y,w,h) = compute_rect poss in
+      Printf.fprintf oc "%.0f %.0f %.0f %.0f\n%!" x y w h)
     rects;
   close_out oc
 
 let do_the_thing out file =
-  let bmp = Bitmap.load file in
+  let st = fresh_state file in
   let on_exit = print_rects ~file:out in
-  run (bmp, None, []) ~update ~render ~on_exit
+  run st ~update ~render ~on_exit
