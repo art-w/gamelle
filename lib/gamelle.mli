@@ -83,6 +83,8 @@ module Event : sig
     | Char of char
     | Click_left
     | Click_right
+    | Wheel_up
+    | Wheel_down
 
   val is_pressed : t -> key -> bool
   val mouse_pos : t -> float * float

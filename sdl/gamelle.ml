@@ -68,6 +68,7 @@ let run () =
     Common.now_prev := !Common.now;
     Common.now := t0;
     let e = Sdl.Event.create () in
+    events := Event.reset !events;
     while Sdl.poll_event (Some e) do
       events := Event.update !events e;
       events := Event.update_mouse !events

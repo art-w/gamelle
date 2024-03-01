@@ -9,6 +9,8 @@ type key =
   | Char of char
   | Click_left
   | Click_right
+  | Wheel_up
+  | Wheel_down
 
 type t = { keypressed : key list; mouse_x : float; mouse_y : float }
 

@@ -26,6 +26,8 @@ type state = {
 
 let update e { x; y; vx; vy; _ } =
   if Event.is_pressed e Escape then raise Exit;
+  let y = if Event.is_pressed e Wheel_down then y +. 10.0 else y in
+  let y = if Event.is_pressed e Wheel_up then y -. 10.0 else y in
   let vy = if Event.is_pressed e Arrow_down then vy +. 100.0 else vy in
   let vy = if Event.is_pressed e Arrow_up then vy -. 100.0 else vy in
   let vx = if Event.is_pressed e Arrow_right then vx +. 100.0 else vx in

@@ -17,6 +17,16 @@ let key_of_keycode kc =
 
 let key_of_event e = key_of_keycode (Sdl.Event.get e Sdl.Event.keyboard_keycode)
 
+let rec insert v = function
+  | [] -> [ v ]
+  | x :: xs when x = v -> x :: xs
+  | x :: xs -> x :: insert v xs
+
+let rec remove v = function
+  | [] -> []
+  | x :: xs when x = v -> xs
+  | x :: xs -> x :: remove v xs
+
 let update t e =
   let typ = Sdl.Event.get e Sdl.Event.typ in
   match () with
@@ -32,21 +42,31 @@ let update t e =
       | Some key ->
           { t with keypressed = List.filter (( <> ) key) t.keypressed }
       | None -> t)
+  | _ when typ = Sdl.Event.mouse_wheel -> (
+      match Sdl.Event.(get e mouse_wheel_y) with
+      | d when d > 0 ->
+          {
+            t with
+            keypressed = insert Wheel_up @@ remove Wheel_down t.keypressed;
+          }
+      | d when d < 0 ->
+          {
+            t with
+            keypressed = insert Wheel_down @@ remove Wheel_up t.keypressed;
+          }
+      | _ ->
+          {
+            t with
+            keypressed = remove Wheel_down @@ remove Wheel_up t.keypressed;
+          })
   | _ ->
       (* Format.printf "unhandled event@." ; *)
       t
 
 let update t e = try update t e with Exit as exn -> raise exn | _ -> t
 
-let rec insert v = function
-  | [] -> [ v ]
-  | x :: xs when x = v -> x :: xs
-  | x :: xs -> x :: insert v xs
-
-let rec remove v = function
-  | [] -> []
-  | x :: xs when x = v -> xs
-  | x :: xs -> x :: remove v xs
+let reset t =
+  { t with keypressed = remove Wheel_down @@ remove Wheel_up t.keypressed }
 
 let update_mouse t =
   let state, (x, y) = Sdl.get_mouse_state () in
