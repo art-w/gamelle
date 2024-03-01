@@ -11,4 +11,4 @@
    assets.ml
    (chdir
     ../assets
-    (run %{bin:gamelle} assets)))))
+    (run %{bin:gamelle} assets pack)))))

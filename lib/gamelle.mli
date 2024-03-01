@@ -1,5 +1,4 @@
 open Gg
-
 module Color : module type of Color
 
 module Bitmap : sig
@@ -35,14 +34,19 @@ val dt : unit -> float
 val draw : Bitmap.t -> float -> float -> unit
 val draw_line : color:Color.t -> float * float -> float * float -> unit
 val draw_rect : color:Color.t -> float * float -> float * float -> unit
-val fill_rect : color:Color.t ->  float * float -> float * float -> unit
+val fill_rect : color:Color.t -> float * float -> float * float -> unit
 val draw_poly : color:Color.t -> (float * float) list -> unit
 val fill_poly : color:Color.t -> (float * float) list -> unit
 val draw_circle : color:Color.t -> float * float -> float -> unit
 val fill_circle : color:Color.t -> float * float -> float -> unit
-val draw_thick_line : color:Color.t -> stroke:float -> float * float -> float * float -> unit
-val draw_string : color:Color.t -> Font.t -> size:int -> string -> float -> float -> unit
-val show_cursor: bool -> unit
+
+val draw_thick_line :
+  color:Color.t -> stroke:float -> float * float -> float * float -> unit
+
+val draw_string :
+  color:Color.t -> Font.t -> size:int -> string -> float -> float -> unit
+
+val show_cursor : bool -> unit
 
 module Event : sig
   type t
@@ -66,6 +70,7 @@ end
 val window_size : unit -> float * float
 
 val run :
+  ?on_exit:('state -> unit) ->
   'state ->
   update:(Event.t -> 'state -> 'state) ->
   render:('state -> unit) ->

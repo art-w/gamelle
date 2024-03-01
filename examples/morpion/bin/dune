@@ -14,6 +14,10 @@
  (target index.html)
  (deps index.html.template morpion_js.bc.js)
  (action
-   (with-stdout-to index.html
-     (run %{bin:gamelle} html --template=index.html.template --script=morpion_js.bc.js))))
-
+  (with-stdout-to
+   index.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=index.html.template
+    --script=morpion_js.bc.js))))

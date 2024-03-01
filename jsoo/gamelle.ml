@@ -47,8 +47,8 @@ let draw_line ~color (x0, y0) (x1, y1) =
   C.stroke (render ()) path
 
 (* TODO *)
-let draw_poly ~color:_  _ = ()
-let fill_poly ~color:_  _ = ()
+let draw_poly ~color:_ _ = ()
+let fill_poly ~color:_ _ = ()
 let show_cursor _ = ()
 let tau = 8.0 *. atan 1.0
 
@@ -62,7 +62,9 @@ let fill_circle ~color:_ _ _ = ()
 let draw_thick_line ~color:_ ~stroke:_ _ _ = ()
 let draw_string ~color:_ font ~size txt x y = Font.draw_at font ~size txt (x, y)
 
-let run state ~update ~render =
+let run ?(on_exit = ignore) state ~update ~render =
+  let _ = on_exit in
+  (* wow *)
   print_endline "hello!";
   let canvas =
     match Document.find_el_by_id G.document (Jstr.of_string "target") with

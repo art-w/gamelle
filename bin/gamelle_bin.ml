@@ -127,11 +127,27 @@ let list_files k =
   Format.printf "(* %S *)@." cwd;
   k (Sys.readdir cwd) cwd
 
-let cmd_assets =
-  let doc = "Bundle game assets" in
-  let info = Cmd.info "assets" ~doc in
-  let run () = list_files gen_ml in
-  Cmd.v info Term.(const run $ const ())
+module Assets = struct
+  let cmd_edit =
+    let doc = "Edit game asset" in
+    let info = Cmd.info "edit" ~doc in
+    let arg = Arg.(required & pos 0 (some file) None & info [] ~docv:"FILE") in
+    let run file =
+      Asset_editor.do_the_thing (file ^ ".parts") (file_contents file)
+    in
+    Cmd.v info Term.(const run $ arg)
+
+  let cmd_bundle =
+    let doc = "Bundle game assets" in
+    let info = Cmd.info "pack" ~doc in
+    let run () = list_files gen_ml in
+    Cmd.v info Term.(const run $ const ())
+
+  let cmd =
+    let doc = "Assets handling" in
+    let info = Cmd.info "assets" ~doc in
+    Cmd.group info [ cmd_bundle; cmd_edit ]
+end
 
 let html_template =
   let env =
@@ -182,6 +198,6 @@ let cmd =
   let doc = "Gamelle" in
   let version = "0.1" in
   let info = Cmd.info "gamelle" ~version ~doc in
-  Cmd.group info [ cmd_assets; cmd_html; cmd_init; cmd_hot ]
+  Cmd.group info [ Assets.cmd; cmd_html; cmd_init; cmd_hot ]
 
 let () = exit (Cmd.eval cmd)

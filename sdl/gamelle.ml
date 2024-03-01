@@ -24,6 +24,7 @@ type run =
       state : 'a;
       update : Event.t -> 'a -> 'a;
       render : 'a -> unit;
+      on_exit : 'a -> unit;
     }
       -> run
 
@@ -76,10 +77,10 @@ let run () =
 
     (match !current_run with
     | No_run -> invalid_arg "No game currently running"
-    | Run { state; update; render } ->
+    | Run { state; update; render; on_exit } ->
         let state = update !events state in
         render state;
-        current_run := Run { state; update; render });
+        current_run := Run { state; update; render; on_exit });
 
     Sdl.render_present renderer;
     let now = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
@@ -100,11 +101,17 @@ let run () =
   Sdl.destroy_renderer renderer;
   Sdl.destroy_window window
 
-let run state ~update ~render =
+let cleanup () =
+  match !current_run with
+  | No_run -> assert false
+  | Run { state; on_exit; _ } -> on_exit state
+
+let run ?(on_exit = ignore) state ~update ~render =
   match !current_run with
   | No_run ->
-      current_run := Run { state; update; render };
-      run ()
+      current_run := Run { state; update; render; on_exit };
+      run ();
+      cleanup ()
   | Run _ ->
       Format.printf "set new run@.";
-      current_run := Run { state; update; render }
+      current_run := Run { state; update; render; on_exit }
