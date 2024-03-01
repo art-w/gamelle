@@ -54,7 +54,7 @@ let extension_loader ~basename ~ext =
   | _ -> Some "Fun.id"
 
 let output_file (full_name, basename, loader) =
-  if Sys.is_regular_file full_name then (
+  if Sys.file_exists full_name then (
     Format.printf "@.  (** Generated from %s *)@." basename;
     Format.printf "  let %s = %s %S@." basename loader (file_contents full_name))
 
@@ -84,8 +84,11 @@ let gen_ml files cwd =
         let basename, ext = split_file_ext sysname in
         match extension_loader ~basename ~ext with
         | Some loader ->
-            StringMap.add_to_list ext
-              (Filename.concat cwd sysname, basename, loader)
+            let old_data =
+              Option.value (StringMap.find_opt ext map) ~default:[]
+            in
+            StringMap.add ext
+              ((Filename.concat cwd sysname, basename, loader) :: old_data)
               map
         | None -> map)
       StringMap.empty files
