@@ -8,6 +8,7 @@ module Bitmap : sig
   val load : string -> t
   val rotate : float -> t -> t
   val scale : float -> t -> t
+  val sub : t -> x:int -> y:int -> w:int -> h:int -> t
 end
 
 module Font : sig

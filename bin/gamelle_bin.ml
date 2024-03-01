@@ -45,18 +45,40 @@ let normalize_name name =
     (function ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9') as c -> c | _ -> '_')
     name
 
-let extension_loader ~basename ~ext =
+type loader = Raw of string | Parts of string * string * string list
+
+let extension_loader ~sysname ~basename ~ext =
   match (basename, ext) with
-  | _, "Ttf" -> Some "Gamelle.Font.load"
-  | _, ("Png" | "Jpeg" | "Jpg") -> Some "Gamelle.Bitmap.load"
-  | _, "Mp3" -> Some "Gamelle.Sound.load"
-  | "assets", _ | "dune", "No_ext" -> None
-  | _ -> Some "Fun.id"
+  | _, "Ttf" -> Some (Raw "Gamelle.Font.load")
+  | _, ("Png" | "Jpeg" | "Jpg") ->
+      let raw = "Gamelle.Bitmap.load" in
+      let parts = sysname ^ ".parts" in
+      (* TODO: file_exists after readdir? ... *)
+      if Sys.file_exists parts then
+        let parts =
+          file_contents parts |> String.split_on_char '\n'
+          |> List.filter (( <> ) "")
+        in
+        Some (Parts (raw, "Gamelle.Bitmap.sub", parts))
+      else Some (Raw raw)
+  | _, "Mp3" -> Some (Raw "Gamelle.Sound.load")
+  | "assets", _ | "dune", "No_ext" | _, "Parts" -> None
+  | _ -> Some (Raw "Fun.id")
 
 let output_file (full_name, basename, loader) =
   if Sys.file_exists full_name then (
     Format.printf "@.  (** Generated from %s *)@." basename;
-    Format.printf "  let %s = %s %S@." basename loader (file_contents full_name))
+    match loader with
+    | Raw loader ->
+        Format.printf "  let %s = %s %S@." basename loader
+          (file_contents full_name)
+    | Parts (loader, extract, parts) ->
+        Format.printf "  let %s =\n" basename;
+        Format.printf "    let raw = %s %S in\n" loader
+          (file_contents full_name);
+        Format.printf "    [|\n";
+        List.iter (Format.printf "      %s raw %s;\n" extract) parts;
+        Format.printf "    |]@.")
 
 let split_file_ext filename =
   let name = normalize_name @@ Filename.remove_extension filename in
@@ -82,7 +104,7 @@ let gen_ml files cwd =
     Array.fold_left
       (fun map sysname ->
         let basename, ext = split_file_ext sysname in
-        match extension_loader ~basename ~ext with
+        match extension_loader ~sysname ~basename ~ext with
         | Some loader ->
             let old_data =
               Option.value (StringMap.find_opt ext map) ~default:[]
