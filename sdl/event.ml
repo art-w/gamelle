@@ -3,17 +3,17 @@ include Gamelle_common.Event
 
 let key_of_keycode kc =
   match () with
-  | _ when kc = Sdl.K.escape -> Escape
-  | _ when kc = Sdl.K.lctrl -> Control_left
-  | _ when kc = Sdl.K.rctrl -> Control_right
-  | _ when kc = Sdl.K.left -> Arrow_left
-  | _ when kc = Sdl.K.right -> Arrow_right
-  | _ when kc = Sdl.K.up -> Arrow_up
-  | _ when kc = Sdl.K.down -> Arrow_down
-  | _ when kc = Sdl.K.rctrl -> Control_right
-  | _ when kc >= Sdl.K.a && kc <= Sdl.K.z ->
-      Char (Char.chr (Char.code 'a' + kc - Sdl.K.a))
-  | _ -> failwith (Printf.sprintf "unhandled %#i" kc)
+  | _ when kc = Sdl.K.escape -> Some Escape
+  | _ when kc = Sdl.K.lctrl -> Some Control_left
+  | _ when kc = Sdl.K.rctrl -> Some Control_right
+  | _ when kc = Sdl.K.left -> Some Arrow_left
+  | _ when kc = Sdl.K.right -> Some Arrow_right
+  | _ when kc = Sdl.K.up -> Some Arrow_up
+  | _ when kc = Sdl.K.down -> Some Arrow_down
+  | _ when kc = Sdl.K.rctrl -> Some Control_right
+  | _ when kc >= Sdl.K.a && kc < Sdl.K.z ->
+      Some (Char (Char.chr (Char.code 'a' + kc - Sdl.K.a)))
+  | _ -> None
 
 let key_of_event e = key_of_keycode (Sdl.Event.get e Sdl.Event.keyboard_keycode)
 
@@ -21,12 +21,17 @@ let update t e =
   let typ = Sdl.Event.get e Sdl.Event.typ in
   match () with
   | _ when typ = Sdl.Event.quit -> raise Exit
-  | _ when typ = Sdl.Event.key_down ->
+  | _ when typ = Sdl.Event.key_down -> (
       let key = key_of_event e in
-      { t with keypressed = key :: t.keypressed }
-  | _ when typ = Sdl.Event.key_up ->
+      match key with
+      | Some key -> { t with keypressed = key :: t.keypressed }
+      | None -> t)
+  | _ when typ = Sdl.Event.key_up -> (
       let key = key_of_event e in
-      { t with keypressed = List.filter (( <> ) key) t.keypressed }
+      match key with
+      | Some key ->
+          { t with keypressed = List.filter (( <> ) key) t.keypressed }
+      | None -> t)
   | _ ->
       (* Format.printf "unhandled event@." ; *)
       t
