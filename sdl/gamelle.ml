@@ -16,7 +16,18 @@ let window_size () =
   let x, y = Sdl.get_window_size (Option.get !global_window) in
   (float x, float y)
 
-let run state ~update ~render =
+type run =
+  | No_run : run
+  | Run : {
+      state : 'a;
+      update : Event.t -> 'a -> 'a;
+      render : 'a -> unit;
+    }
+      -> run
+
+let current_run = ref No_run
+
+let run () =
   let& () = Sdl.init Sdl.Init.(video + audio) in
   let _ = Tsdl_image.init Tsdl_image.Init.(jpg + png) in
   let& _ = Tsdl_mixer.Mixer.init Tsdl_mixer.Mixer.Init.(ogg + mp3) in
@@ -48,7 +59,7 @@ let run state ~update ~render =
 
   let events = ref Event.default in
 
-  let rec loop state : unit =
+  let rec loop () : unit =
     let t0 = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
     Common.now_prev := !Common.now;
     Common.now := t0;
@@ -61,8 +72,13 @@ let run state ~update ~render =
     (* Format.printf "playing: %b@." (Tsdl_mixer.Mixer.playing (Some 1)) ; *)
     set_color 0x0000000FF;
     let& () = Sdl.render_clear renderer in
-    let state = update !events state in
-    render state;
+
+    (match !current_run with
+    | No_run -> invalid_arg "No game currently running"
+    | Run { state; update; render } ->
+        let state = update !events state in
+        render state;
+        current_run := Run { state; update; render });
 
     Sdl.render_present renderer;
     let now = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
@@ -73,12 +89,21 @@ let run state ~update ~render =
     in
 
     Sdl.delay wait_time;
-    loop state
+    loop ()
   in
-  (try loop state with Exit -> ());
+  (try loop () with Exit -> ());
 
   Tsdl_mixer.Mixer.close_audio ();
   Tsdl_mixer.Mixer.quit ();
   Tsdl_image.quit ();
   Sdl.destroy_renderer renderer;
   Sdl.destroy_window window
+
+let run state ~update ~render =
+  match !current_run with
+  | No_run ->
+      current_run := Run { state; update; render };
+      run ()
+  | Run _ ->
+      Format.printf "set new run@.";
+      current_run := Run { state; update; render }

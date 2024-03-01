@@ -1,12 +1,18 @@
-(executable
- (name test)
- (modules test)
- (libraries gamelle.sdl assets))
-
 (library
  (name js_test)
- (modules js_test)
- (libraries gamelle assets))
+ (modules js_test assets)
+ (libraries gamelle))
+
+(rule
+ (target assets.ml)
+ (deps
+  (source_tree assets))
+ (action
+  (with-stdout-to
+   assets.ml
+   (chdir
+    assets
+    (run %{bin:gamelle} assets)))))
 
 (executable
  (name js_test_bin)

@@ -1,5 +1,9 @@
+.PHONY: run html
+
 run:
-	dune exec mygame
+	dune build
+	gamelle hotreload _build/default/game/mygame.cmxs &
+	dune build --watch
 
 html:
 	dune build

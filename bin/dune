@@ -1,3 +1,4 @@
 (executable
  (public_name gamelle)
- (libraries gamelle_template unix str cmdliner))
+ (name gamelle_bin)
+ (libraries gamelle.sdl gamelle_template unix str cmdliner dynlink inotify))

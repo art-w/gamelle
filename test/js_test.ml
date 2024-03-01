@@ -2,7 +2,7 @@ open Gamelle
 
 let myfont = Assets.ubuntu_mono
 let img = Assets.camel
-let max_speed = 1000.0
+let max_speed = 1000.045
 
 let norm (x, y) =
   let d = sqrt ((x *. x) +. (y *. y)) in
@@ -18,6 +18,7 @@ let norm_max max_speed (x, y) =
 type state = { x : float; y : float; vx : float; vy : float }
 
 let update e { x; y; vx; vy } =
+  if Event.is_pressed e Escape then raise Exit;
   let vy = if Event.is_pressed e Arrow_down then vy +. 100.0 else vy in
   let vy = if Event.is_pressed e Arrow_up then vy -. 100.0 else vy in
   let vx = if Event.is_pressed e Arrow_right then vx +. 100.0 else vx in
@@ -48,9 +49,10 @@ let update e { x; y; vx; vy } =
   { x; y; vx; vy }
 
 let render { x; y; _ } =
-  set_color 0x000050FF;
+  set_color 0xAABFFFFF;
   fill_rect (0., 0.) (window_size ());
   draw img x y;
+  draw Assets.player x y;
   draw_string myfont ~size:48 "Hello world" 10.0 100.0
 
 let () = run { x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 } ~update ~render

@@ -1,3 +1,11 @@
 (library
   (name mygame)
-  (libraries gamelle assets))
+  (libraries gamelle))
+
+(rule
+ (target assets.ml)
+ (deps (source_tree ../assets))
+ (action
+  (with-stdout-to
+   assets.ml
+   (chdir ../assets (run %{bin:gamelle} assets)))))

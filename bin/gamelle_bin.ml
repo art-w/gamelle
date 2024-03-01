@@ -130,6 +130,13 @@ let game_name =
   in
   Arg.(required & pos 0 (some string) None & info [] ~docv:"NAME" ~env)
 
+let game_file =
+  let env =
+    let doc = "Name of game .cmxs file" in
+    Cmd.Env.info "NAME" ~doc
+  in
+  Arg.(required & pos 0 (some string) None & info [] ~docv:"NAME" ~env)
+
 let cmd_html =
   let doc = "Release HTML game" in
   let info = Cmd.info "html" ~doc in
@@ -141,10 +148,15 @@ let cmd_init =
   let info = Cmd.info "init" ~doc in
   Cmd.v info Term.(const init_directory $ game_name)
 
+let cmd_hot =
+  let doc = "Run game with hot reload" in
+  let info = Cmd.info "hotreload" ~doc in
+  Cmd.v info Term.(const Hotreload.run $ game_file)
+
 let cmd =
   let doc = "Gamelle" in
   let version = "0.1" in
   let info = Cmd.info "gamelle" ~version ~doc in
-  Cmd.group info [ cmd_assets; cmd_html; cmd_init ]
+  Cmd.group info [ cmd_assets; cmd_html; cmd_init; cmd_hot ]
 
 let () = exit (Cmd.eval cmd)
