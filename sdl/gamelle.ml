@@ -1,4 +1,6 @@
 open Common
+open Gg
+module Color = Color
 module Bitmap = Bitmap
 module Font = Font
 module Sound = Sound
@@ -70,7 +72,6 @@ let run () =
     done;
 
     (* Format.printf "playing: %b@." (Tsdl_mixer.Mixer.playing (Some 1)) ; *)
-    set_color 0x0000000FF;
     let& () = Sdl.render_clear renderer in
 
     (match !current_run with

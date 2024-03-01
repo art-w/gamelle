@@ -137,15 +137,15 @@ let update event state =
 let size = cell_size *. 3.
 
 let draw_background () =
-  set_color 0x00FFFFFF ;
-  fill_rect (0., 0.) (size, size)
+  let color = Color.white in
+  fill_rect ~color (0., 0.) (size, size)
 
 let draw_grid () =
-  set_color 0 ;
-  draw_line (cell_size, 0.) (cell_size, size) ;
-  draw_line (cell_size *. 2., 0.) (cell_size *. 2., size) ;
-  draw_line (0., cell_size) (size, cell_size) ;
-  draw_line (0., cell_size *. 2.) (size, cell_size *. 2.)
+  let color = Color.black in
+  draw_line ~color (cell_size, 0.) (cell_size, size) ;
+  draw_line ~color (cell_size *. 2., 0.) (cell_size *. 2., size) ;
+  draw_line ~color (0., cell_size) (size, cell_size) ;
+  draw_line ~color (0., cell_size *. 2.) (size, cell_size *. 2.)
 
 let draw_cell cell x y =
   match cell with

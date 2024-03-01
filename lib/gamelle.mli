@@ -1,3 +1,7 @@
+open Gg
+
+module Color : module type of Color
+
 module Bitmap : sig
   type t
 
@@ -28,16 +32,15 @@ end
 val clock : unit -> float
 val dt : unit -> float
 val draw : Bitmap.t -> float -> float -> unit
-val set_color : int -> unit
-val draw_line : float * float -> float * float -> unit
-val draw_rect : float * float -> float * float -> unit
-val fill_rect : float * float -> float * float -> unit
-val draw_poly : (float * float) list -> unit
-val fill_poly : (float * float) list -> unit
-val draw_circle : float * float -> float -> unit
-val fill_circle : float * float -> float -> unit
-val draw_thick_line : stroke:float -> float * float -> float * float -> unit
-val draw_string : Font.t -> size:int -> string -> float -> float -> unit
+val draw_line : color:Color.t -> float * float -> float * float -> unit
+val draw_rect : color:Color.t -> float * float -> float * float -> unit
+val fill_rect : color:Color.t ->  float * float -> float * float -> unit
+val draw_poly : color:Color.t -> (float * float) list -> unit
+val fill_poly : color:Color.t -> (float * float) list -> unit
+val draw_circle : color:Color.t -> float * float -> float -> unit
+val fill_circle : color:Color.t -> float * float -> float -> unit
+val draw_thick_line : color:Color.t -> stroke:float -> float * float -> float * float -> unit
+val draw_string : color:Color.t -> Font.t -> size:int -> string -> float -> float -> unit
 val show_cursor: bool -> unit
 
 module Event : sig

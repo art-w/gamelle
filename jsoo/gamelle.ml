@@ -1,5 +1,7 @@
 open Brr
 open Common
+open Gg
+module Color = Color
 module Bitmap = Bitmap
 module Event = Event
 module Font = Font
@@ -18,42 +20,47 @@ let window_size () =
   let h = Window.h canvas in
   (float w, float h)
 
-let draw bmp x y = Bitmap.draw ~ctx:(render ()) bmp ~x ~y
-let fill_rect (x, y) (w, h) = C.fill_rect (render ()) ~x ~y ~w ~h
-let draw_rect (x, y) (w, h) = C.stroke_rect (render ()) ~x ~y ~w ~h
-
-let draw_line (x0, y0) (x1, y1) =
-  let path = C.Path.create () in
-  C.Path.move_to path ~x:x0 ~y:y0;
-  C.Path.line_to path ~x:x1 ~y:y1;
-  C.stroke (render ()) path
-
 let set_color c =
-  let r = (c lsr 24) land 0xFF in
-  let g = (c lsr 16) land 0xFF in
-  let b = (c lsr 8) land 0xFF in
-  let a = c land 0xFF in
+  let r, g, b, a = Color.to_srgbi c in
+  let a = int_of_float (a *. 255.) in
   let color =
     C.color (Jstr.of_string (Printf.sprintf "rgba(%i,%i,%i,%i)" r g b a))
   in
   C.set_fill_style (render ()) color;
   C.set_stroke_style (render ()) color
 
-(* TODO *)
-let draw_poly _ = ()
-let fill_poly _ = ()
+let draw bmp x y = Bitmap.draw ~ctx:(render ()) bmp ~x ~y
 
+let fill_rect ~color (x, y) (w, h) =
+  set_color color;
+  C.fill_rect (render ()) ~x ~y ~w ~h
+
+let draw_rect ~color (x, y) (w, h) =
+  set_color color;
+  C.stroke_rect (render ()) ~x ~y ~w ~h
+
+let draw_line ~color (x0, y0) (x1, y1) =
+  set_color color;
+  let path = C.Path.create () in
+  C.Path.move_to path ~x:x0 ~y:y0;
+  C.Path.line_to path ~x:x1 ~y:y1;
+  C.stroke (render ()) path
+
+(* TODO *)
+let draw_poly ~color:_  _ = ()
+let fill_poly ~color:_  _ = ()
 let show_cursor _ = ()
 let tau = 8.0 *. atan 1.0
 
-let draw_circle (x, y) radius =
+let draw_circle ~color (x, y) radius =
+  set_color color;
   let path = C.Path.create () in
   C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
   C.stroke (render ()) path
 
-let fill_circle _ _ = ()
-let draw_thick_line ~stroke:_ _ _ = ()
-let draw_string font ~size txt x y = Font.draw_at font ~size txt (x, y)
+let fill_circle ~color:_ _ _ = ()
+let draw_thick_line ~color:_ ~stroke:_ _ _ = ()
+let draw_string ~color:_ font ~size txt x y = Font.draw_at font ~size txt (x, y)
 
 let run state ~update ~render =
   print_endline "hello!";
