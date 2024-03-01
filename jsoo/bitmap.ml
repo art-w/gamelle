@@ -46,4 +46,4 @@ let draw ~view:_ ~ctx t ~x ~y =
 
 let rotate _ t = t
 let scale _ t = t
-let sub t ~x:_ ~y:_ ~w:_ ~h:_ = t
+let sub t _ _ _ _ = t

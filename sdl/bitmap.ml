@@ -10,6 +10,11 @@ let of_texture bmp =
   let& _, _, (w, h) = Sdl.query_texture bmp in
   { bmp; bmp_x = 0; bmp_y = 0; w; h }
 
+let sub t x y w h =
+  lazy
+    (let t = Lazy.force t in
+     { bmp = t.bmp; bmp_x = t.bmp_x + x; bmp_y = t.bmp_y + y; w; h })
+
 let load_file filename =
   lazy
     (let& bmp = Tsdl_image.load filename in

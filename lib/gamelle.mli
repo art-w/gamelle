@@ -5,6 +5,7 @@ module Bitmap : sig
   type t
 
   val load : string -> t
+  val sub : t -> int -> int -> int -> int -> t
 end
 
 module Font : sig
