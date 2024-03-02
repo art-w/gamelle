@@ -45,8 +45,8 @@ val clock : unit -> float
 val dt : unit -> float
 val draw : view:View.t -> Bitmap.t -> p2 -> unit
 val draw_line : view:View.t -> color:Color.t -> p2 -> p2 -> unit
-val draw_rect : view:View.t -> color:Color.t -> p2 -> size2 -> unit
-val fill_rect : view:View.t -> color:Color.t -> p2 -> size2 -> unit
+val draw_rect : view:View.t -> color:Color.t -> box2 -> unit
+val fill_rect : view:View.t -> color:Color.t -> box2 -> unit
 val draw_poly : view:View.t -> color:Color.t -> p2 list -> unit
 val fill_poly : view:View.t -> color:Color.t -> p2 list -> unit
 val draw_circle : view:View.t -> color:Color.t -> p2 -> size1 -> unit
@@ -78,6 +78,7 @@ module Event : sig
 end
 
 val window_size : unit -> size2
+val window_box : unit -> box2
 
 val run :
   ?on_exit:('state -> unit) ->

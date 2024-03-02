@@ -139,7 +139,7 @@ let size = cell_size *. 3.
 
 let draw_background ~view () =
   let color = Color.white in
-  fill_rect ~view ~color (P2.v 0. 0.) (Size2.v size size)
+  fill_rect ~view ~color (Box2.v (P2.v 0. 0.) (Size2.v size size))
 
 let draw_grid ~view () =
   let color = Color.black in

@@ -19,6 +19,8 @@ let window_size () =
   let x, y = Sdl.get_window_size (Option.get !global_window) in
   Size2.v (float x) (float y)
 
+let window_box () = Box2.v V2.zero (window_size ())
+
 type run =
   | No_run : run
   | Run : {

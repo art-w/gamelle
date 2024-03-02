@@ -21,6 +21,8 @@ let window_size () =
   let h = Window.h canvas in
   Size2.v (float w) (float h)
 
+let window_box () = Box2.v V2.zero (window_size ())
+
 let set_color c =
   let r, g, b, a = Color.to_srgbi c in
   let a = int_of_float (a *. 255.) in
@@ -34,15 +36,15 @@ let draw ~view bmp p =
   let x, y = V2.to_tuple p in
   Bitmap.draw ~view ~ctx:(render ()) bmp ~x ~y
 
-let fill_rect ~view:_ ~color p s =
-  let x, y = V2.to_tuple p in
-  let w, h = V2.to_tuple s in
+let fill_rect ~view:_ ~color rect =
+  let x, y = V2.to_tuple (Box2.o rect) in
+  let w, h = V2.to_tuple (Box2.size rect) in
   set_color color;
   C.fill_rect (render ()) ~x ~y ~w ~h
 
-let draw_rect ~view:_ ~color p s =
-  let x, y = V2.to_tuple p in
-  let w, h = V2.to_tuple s in
+let draw_rect ~view:_ ~color rect =
+  let x, y = V2.to_tuple (Box2.o rect) in
+  let w, h = V2.to_tuple (Box2.size rect) in
   set_color color;
   C.stroke_rect (render ()) ~x ~y ~w ~h
 

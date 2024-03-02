@@ -51,12 +51,11 @@ let draw_line ~view ~color p p' =
   let& () = Sdl.render_draw_line (render ()) x0 y0 x1 y1 in
   ()
 
-let draw_rect ~view ~color p0 s =
-  let x = P2.x p0 and y = P2.y p0 in
-  let w = Size2.w s and h = Size2.h s in
-  let p1 = P2.v (x +. w) y in
-  let p2 = P2.v (x +. w) (y +. h) in
-  let p3 = P2.v x (y +. h) in
+let draw_rect ~view ~color rect =
+  let p0 = Box2.tl_pt rect
+  and p1 = Box2.tr_pt rect
+  and p2 = Box2.br_pt rect
+  and p3 = Box2.bl_pt rect in
   draw_line ~view ~color p0 p1;
   draw_line ~view ~color p1 p2;
   draw_line ~view ~color p2 p3;
@@ -76,12 +75,11 @@ let fill_poly ~view ~color arr =
   let& () = Gfx.filled_polygon_rgba (render ()) ~ps:arr ~r ~g ~b ~a in
   ()
 
-let fill_rect ~view ~color p0 s =
-  let x, y = V2.to_tuple p0 in
-  let w = Size2.w s and h = Size2.h s in
-  let p1 = P2.v (x +. w) y in
-  let p2 = P2.v (x +. w) (y +. h) in
-  let p3 = P2.v x (y +. h) in
+let fill_rect ~view ~color rect =
+  let p0 = Box2.tl_pt rect
+  and p1 = Box2.tr_pt rect
+  and p2 = Box2.br_pt rect
+  and p3 = Box2.bl_pt rect in
   let pts = [ p0; p1; p2; p3 ] in
   fill_poly ~view ~color pts
 
