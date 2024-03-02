@@ -8,4 +8,4 @@
  (action
   (with-stdout-to
    assets.ml
-   (chdir ../assets (run %{bin:gamelle} assets)))))
+   (chdir ../assets (run %{bin:gamelle} assets pack)))))

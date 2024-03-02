@@ -35,8 +35,6 @@ let run ?(on_exit = ignore) state ~update ~render =
         Window.of_el elt
   in
 
-  let w = Window.w canvas in
-  let h = Window.h canvas in
   global_canvas := Some canvas;
 
   Window.set_w canvas 640;
@@ -51,11 +49,10 @@ let run ?(on_exit = ignore) state ~update ~render =
   and loop state elapsed =
     prev_now := !now;
     now := elapsed /. 1000.0;
-
     let state = update !Event.current state in
-    C.set_fill_style ctx (C.color @@ Jstr.of_string "#000000");
-    C.fill_rect ctx ~x:0.0 ~y:0.0 ~w:(float w) ~h:(float h);
-    render ~view:Gamelle_common.View.default state;
+    let view = Gamelle_common.View.default in
+    fill_rect ~view ~color:Color.black (window_box ());
+    render ~view state;
     animate state
   in
   animate state

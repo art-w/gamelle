@@ -1,12 +1,14 @@
+open Gg
 open Gamelle
 
 type state = unit
 
-let update _event () = ()
+let update event () =
+  if Event.is_pressed event Escape then raise Exit
 
-let render () =
-  set_color 0x0000FFFF;
-  draw_rect (10.0, 10.0) (100.0, 100.0)
+let render ~view () =
+  let color = Color.v 1.0 1.0 0.0 1.0 in
+  draw_rect ~view ~color (Box2.v (P2.v 10.0 10.0) (P2.v 100.0 100.0))
 
 let () =
   run () ~update ~render

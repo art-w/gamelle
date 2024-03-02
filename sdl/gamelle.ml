@@ -77,13 +77,14 @@ let run () =
     done;
 
     (* Format.printf "playing: %b@." (Tsdl_mixer.Mixer.playing (Some 1)) ; *)
-    let& () = Sdl.render_clear renderer in
-
     (match !current_run with
     | No_run -> invalid_arg "No game currently running"
     | Run { state; update; render; on_exit } ->
         let state = update !events state in
-        render ~view:View.default state;
+        let& () = Sdl.render_clear renderer in
+        let view = View.default in
+        fill_rect ~view ~color:Color.black (window_box ());
+        render ~view state;
         current_run := Run { state; update; render; on_exit });
 
     Sdl.render_present renderer;
