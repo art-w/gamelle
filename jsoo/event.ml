@@ -1,7 +1,12 @@
 open Brr
 include Gamelle_common.Event
 
+let previous = ref default
 let current = ref default
+
+let new_frame () =
+  current := Gamelle_common.Event.update_updown !previous !current;
+  previous := !current
 
 let key_of_keycode kc =
   match Jstr.to_string kc with
@@ -24,34 +29,10 @@ let key_of_event e = key_of_keycode (Ev.Keyboard.code e)
 let update ~status t e =
   let key = key_of_event e in
   match status with
-  | `Up -> { t with keypressed = List.filter (( <> ) key) t.keypressed }
-  | `Down -> { t with keypressed = key :: t.keypressed }
-(*
-  let typ = Sdl.Event.get e Sdl.Event.typ in
-  match () with
-  | _ when typ = Sdl.Event.quit -> raise Exit
-  | _ when typ = Sdl.Event.key_down ->
-      let key = key_of_event e in
-      { t with keypressed = key :: t.keypressed }
-  | _ when typ = Sdl.Event.key_up ->
-      let key = key_of_event e in
-      { t with keypressed = List.filter (( <> ) key) t.keypressed }
-  | _ ->
-      Format.printf "unhandled event@." ;
-      t
-      *)
+  | `Up -> { t with keypressed = remove key t.keypressed }
+  | `Down -> { t with keypressed = insert key t.keypressed }
 
 let do_update ~status e = current := update ~status !current (Ev.as_type e)
-
-let rec insert v = function
-  | [] -> [ v ]
-  | x :: xs when x = v -> x :: xs
-  | x :: xs -> x :: insert v xs
-
-let rec remove v = function
-  | [] -> []
-  | x :: xs when x = v -> xs
-  | x :: xs -> x :: remove v xs
 
 let update_mouse t e =
   let x, y = (Ev.Mouse.offset_x e, Ev.Mouse.offset_y e) in
@@ -95,5 +76,3 @@ let attach ~target =
       do_update_mouse target
   in
   ()
-
-let is_pressed t key = List.mem key t.keypressed

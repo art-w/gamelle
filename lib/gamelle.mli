@@ -59,6 +59,8 @@ val draw_string :
 module Event : sig
   type t
 
+  val mouse_pos : t -> float * float
+
   type key =
     | Escape
     | Control_left
@@ -74,7 +76,8 @@ module Event : sig
     | Wheel_down
 
   val is_pressed : t -> key -> bool
-  val mouse_pos : t -> float * float
+  val is_up : t -> key -> bool
+  val is_down : t -> key -> bool
 end
 
 val window_size : unit -> size2

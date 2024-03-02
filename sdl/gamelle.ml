@@ -70,11 +70,13 @@ let run () =
     Common.now_prev := !Common.now;
     Common.now := t0;
     let e = Sdl.Event.create () in
+    let previous = !events in
     events := Event.reset !events;
     while Sdl.poll_event (Some e) do
       events := Event.update !events e;
       events := Event.update_mouse !events
     done;
+    events := Event.update_updown previous !events;
 
     (* Format.printf "playing: %b@." (Tsdl_mixer.Mixer.playing (Some 1)) ; *)
     (match !current_run with

@@ -37,13 +37,15 @@ let update e { x; y; vx; vy; _ } =
   let vx = if Event.is_pressed e Arrow_left then vx -. 100.0 else vx in
   let mx, my = Event.mouse_pos e in
 
+  if Event.is_down e Click_left then (
+    cursor := not !cursor;
+    show_cursor !cursor;
+    Sound.play Assets.stick);
+
   let vx, vy =
-    if Event.is_pressed e Click_left then (
-      cursor := not !cursor;
-      show_cursor !cursor;
-      Sound.play Assets.stick;
+    if Event.is_pressed e Click_left then
       let dx, dy = norm_max 100.0 (mx -. x, my -. y) in
-      (vx +. dx, vy +. dy))
+      (vx +. dx, vy +. dy)
     else (vx, vy)
   in
 

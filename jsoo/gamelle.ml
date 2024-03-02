@@ -49,6 +49,7 @@ let run ?(on_exit = ignore) state ~update ~render =
   and loop state elapsed =
     prev_now := !now;
     now := elapsed /. 1000.0;
+    Event.new_frame ();
     let state = update !Event.current state in
     let view = Gamelle_common.View.default in
     fill_rect ~view ~color:Color.black (window_box ());

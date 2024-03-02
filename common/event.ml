@@ -12,7 +12,38 @@ type key =
   | Wheel_up
   | Wheel_down
 
-type t = { keypressed : key list; mouse_x : float; mouse_y : float }
+module Keys = Set.Make (struct
+  type t = key
+
+  let compare = Stdlib.compare
+end)
+
+type t = {
+  keyup : Keys.t;
+  keydown : Keys.t;
+  keypressed : Keys.t;
+  mouse_x : float;
+  mouse_y : float;
+}
 
 let mouse_pos t = (t.mouse_x, t.mouse_y)
-let default = { keypressed = []; mouse_x = 0.0; mouse_y = 0.0 }
+
+let default =
+  {
+    keyup = Keys.empty;
+    keydown = Keys.empty;
+    keypressed = Keys.empty;
+    mouse_x = 0.0;
+    mouse_y = 0.0;
+  }
+
+let insert = Keys.add
+let remove = Keys.remove
+let is_pressed t key = Keys.mem key t.keypressed
+let is_up t key = Keys.mem key t.keyup
+let is_down t key = Keys.mem key t.keydown
+
+let update_updown previous t =
+  let keyup = Keys.diff previous.keypressed t.keypressed in
+  let keydown = Keys.diff t.keypressed previous.keypressed in
+  { t with keyup; keydown }
