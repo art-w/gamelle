@@ -7,4 +7,4 @@ run:
 
 html:
 	dune build
-	firefox _build/default/bin/index.html
+	xdg-open _build/default/bin/index.html
