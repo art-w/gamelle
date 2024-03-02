@@ -1,4 +1,5 @@
 open Gamelle
+open Gg
 
 let myfont = Assets.ubuntu_mono
 let img = Assets.camel
@@ -60,20 +61,20 @@ let update e { x; y; vx; vy; _ } =
 let black = Color.black
 
 let render ~view { x; y; mx; my; _ } =
-  fill_rect ~color:black ~view (0., 0.) (window_size ());
-  fill_rect ~color:black ~view (0., 0.) (100.0, 100.0);
+  fill_rect ~color:black ~view (P2.v 0. 0.) (window_size ());
+  fill_rect ~color:black ~view (P2.v 0. 0.) (Size2.v 100.0 100.0);
   View.(
-    translate (mx, my) (fill_circle ~color:black (0.0, 0.0) 10.0)
+    translate (mx, my) (fill_circle ~color:black (P2.v 0.0 0.0) 10.0)
     & translate (x, y)
         (scale 2.0
-           (draw_rect ~color:black (0.0, 0.0) (100.0, 100.0)
+           (draw_rect ~color:black (P2.v 0. 0.) (Size2.v 100.0 100.0)
            & translate (75. /. 2., 59. /. 2.)
              @@ rotate (1.0 *. clock ())
              @@ translate (-75. /. 2., -59. /. 2.)
              @@ (* & draw_circle (-75.0 /. 2., -59.0 /. 2.) 59. *)
-             (fill_rect ~color:black (0.0, 0.0) (75., 59.)
-             & draw img 0. 0.
-             & draw_circle ~color:black (75.0 /. 2., 59.0 /. 2.) 10.))))
+             (fill_rect ~color:black (P2.v 0. 0.) (Size2.v 75. 59.)
+             & draw img (P2.v 0. 0.)
+             & draw_circle ~color:black (P2.v (75.0 /. 2.) (59.0 /. 2.)) 10.))))
     ~view
 
 let () =

@@ -43,32 +43,18 @@ end
 
 val clock : unit -> float
 val dt : unit -> float
-val draw : view:View.t -> Bitmap.t -> float -> float -> unit
-
-val draw_line :
-  view:View.t -> color:Color.t -> float * float -> float * float -> unit
-
-val draw_rect :
-  view:View.t -> color:Color.t -> float * float -> float * float -> unit
-
-val fill_rect :
-  view:View.t -> color:Color.t -> float * float -> float * float -> unit
-
-val draw_poly : view:View.t -> color:Color.t -> (float * float) list -> unit
-val fill_poly : view:View.t -> color:Color.t -> (float * float) list -> unit
-val draw_circle : view:View.t -> color:Color.t -> float * float -> float -> unit
-val fill_circle : view:View.t -> color:Color.t -> float * float -> float -> unit
+val draw : view:View.t -> Bitmap.t -> p2 -> unit
+val draw_line : view:View.t -> color:Color.t -> p2 -> p2 -> unit
+val draw_rect : view:View.t -> color:Color.t -> p2 -> size2 -> unit
+val fill_rect : view:View.t -> color:Color.t -> p2 -> size2 -> unit
+val draw_poly : view:View.t -> color:Color.t -> p2 list -> unit
+val fill_poly : view:View.t -> color:Color.t -> p2 list -> unit
+val draw_circle : view:View.t -> color:Color.t -> p2 -> size1 -> unit
+val fill_circle : view:View.t -> color:Color.t -> p2 -> size1 -> unit
 val show_cursor : bool -> unit
 
 val draw_string :
-  view:View.t ->
-  color:Color.t ->
-  Font.t ->
-  size:int ->
-  string ->
-  float ->
-  float ->
-  unit
+  view:View.t -> color:Color.t -> Font.t -> size:int -> string -> p2 -> unit
 
 module Event : sig
   type t
@@ -91,7 +77,7 @@ module Event : sig
   val mouse_pos : t -> float * float
 end
 
-val window_size : unit -> float * float
+val window_size : unit -> size2
 
 val run :
   ?on_exit:('state -> unit) ->

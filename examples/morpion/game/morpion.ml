@@ -1,4 +1,5 @@
 open Gamelle
+open Gg
 
 type player = Circle | Cross
 
@@ -138,21 +139,25 @@ let size = cell_size *. 3.
 
 let draw_background ~view () =
   let color = Color.white in
-  fill_rect ~view ~color (0., 0.) (size, size)
+  fill_rect ~view ~color (P2.v 0. 0.) (Size2.v size size)
 
 let draw_grid ~view () =
   let color = Color.black in
-  draw_line ~view ~color (cell_size, 0.) (cell_size, size) ;
-  draw_line ~view ~color (cell_size *. 2., 0.) (cell_size *. 2., size) ;
-  draw_line ~view ~color (0., cell_size) (size, cell_size) ;
-  draw_line ~view ~color (0., cell_size *. 2.) (size, cell_size *. 2.)
+  draw_line ~view ~color (P2.v cell_size 0.) (P2.v cell_size size) ;
+  draw_line ~view ~color
+    (P2.v (cell_size *. 2.) 0.)
+    (P2.v (cell_size *. 2.) size) ;
+  draw_line ~view ~color (P2.v 0. cell_size) (P2.v size cell_size) ;
+  draw_line ~view ~color
+    (P2.v 0. (cell_size *. 2.))
+    (P2.v size (cell_size *. 2.))
 
-let draw_cell ~view cell x y =
+let draw_cell ~view cell p =
   match cell with
   | Some Circle ->
-      draw ~view Assets.circle x y
+      draw ~view Assets.circle p
   | Some Cross ->
-      draw ~view Assets.cross x y
+      draw ~view Assets.cross p
   | None ->
       ()
 
@@ -167,15 +172,15 @@ let draw_board ~view
      ; center_bottom
      ; right_bottom } :
       board ) =
-  draw_cell ~view left_top 0. 0. ;
-  draw_cell ~view center_top cell_size 0. ;
-  draw_cell ~view right_top (cell_size *. 2.) 0. ;
-  draw_cell ~view left_center 0. cell_size ;
-  draw_cell ~view center_center cell_size cell_size ;
-  draw_cell ~view right_center (cell_size *. 2.) cell_size ;
-  draw_cell ~view left_bottom 0. (cell_size *. 2.) ;
-  draw_cell ~view center_bottom cell_size (cell_size *. 2.) ;
-  draw_cell ~view right_bottom (cell_size *. 2.) (cell_size *. 2.)
+  draw_cell ~view left_top (P2.v 0. 0.) ;
+  draw_cell ~view center_top (P2.v cell_size 0.) ;
+  draw_cell ~view right_top (P2.v (cell_size *. 2.) 0.) ;
+  draw_cell ~view left_center (P2.v 0. cell_size) ;
+  draw_cell ~view center_center (P2.v cell_size cell_size) ;
+  draw_cell ~view right_center (P2.v (cell_size *. 2.) cell_size) ;
+  draw_cell ~view left_bottom (P2.v 0. (cell_size *. 2.)) ;
+  draw_cell ~view center_bottom (P2.v cell_size (cell_size *. 2.)) ;
+  draw_cell ~view right_bottom (P2.v (cell_size *. 2.) (cell_size *. 2.))
 
 let render ~view {board; player= _} =
   show_cursor true ;

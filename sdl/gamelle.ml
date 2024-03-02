@@ -17,7 +17,7 @@ let global_window = ref None
 
 let window_size () =
   let x, y = Sdl.get_window_size (Option.get !global_window) in
-  (float x, float y)
+  Size2.v (float x) (float y)
 
 type run =
   | No_run : run
