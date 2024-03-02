@@ -7,6 +7,7 @@ module Event = Event
 module Font = Font
 module Sound = Sound
 module View = Gamelle_common.View
+include Draw
 
 (* type ctx = C.t *)
 
@@ -22,59 +23,6 @@ let window_size () =
   Size2.v (float w) (float h)
 
 let window_box () = Box2.v V2.zero (window_size ())
-
-let set_color c =
-  let r, g, b, a = Color.to_srgbi c in
-  let a = int_of_float (a *. 255.) in
-  let color =
-    C.color (Jstr.of_string (Printf.sprintf "rgba(%i,%i,%i,%i)" r g b a))
-  in
-  C.set_fill_style (render ()) color;
-  C.set_stroke_style (render ()) color
-
-let draw ~view bmp p =
-  let x, y = V2.to_tuple p in
-  Bitmap.draw ~view ~ctx:(render ()) bmp ~x ~y
-
-let fill_rect ~view:_ ~color rect =
-  let x, y = V2.to_tuple (Box2.o rect) in
-  let w, h = V2.to_tuple (Box2.size rect) in
-  set_color color;
-  C.fill_rect (render ()) ~x ~y ~w ~h
-
-let draw_rect ~view:_ ~color rect =
-  let x, y = V2.to_tuple (Box2.o rect) in
-  let w, h = V2.to_tuple (Box2.size rect) in
-  set_color color;
-  C.stroke_rect (render ()) ~x ~y ~w ~h
-
-let draw_line ~view:_ ~color p0 p1 =
-  let x0, y0 = V2.to_tuple p0 in
-  let x1, y1 = V2.to_tuple p1 in
-  set_color color;
-  let path = C.Path.create () in
-  C.Path.move_to path ~x:x0 ~y:y0;
-  C.Path.line_to path ~x:x1 ~y:y1;
-  C.stroke (render ()) path
-
-(* TODO *)
-let draw_poly ~view:_ ~color:_ _ = ()
-let fill_poly ~view:_ ~color:_ _ = ()
-let show_cursor _ = ()
-let tau = 8.0 *. atan 1.0
-
-let draw_circle ~view:_ ~color center radius =
-  let x, y = V2.to_tuple center in
-  set_color color;
-  let path = C.Path.create () in
-  C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
-  C.stroke (render ()) path
-
-let fill_circle ~view:_ ~color:_ _ _ = ()
-
-let draw_string ~view:_ ~color:_ font ~size txt p =
-  let x, y = V2.to_tuple p in
-  Font.draw_at font ~size txt (x, y)
 
 let run ?(on_exit = ignore) state ~update ~render =
   let _ = on_exit in

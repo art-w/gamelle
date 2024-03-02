@@ -1,3 +1,5 @@
+open Gg
+
 type t = { scale : float; translate : float * float; rotate : float }
 
 let default = { scale = 1.0; translate = (0.0, 0.0); rotate = 0.0 }
@@ -21,3 +23,10 @@ let ( & ) f g ~view =
 let translate dxy fn ~view = fn ~view:(translated dxy view)
 let scale factor fn ~view = fn ~view:(scaled factor view)
 let rotate angle fn ~view = fn ~view:(rotated angle view)
+
+let project ~view p =
+  let x = P2.x p and y = P2.y p in
+  let { scale; translate = dx, dy; rotate = angle } = view in
+  let c, s = (scale *. cos angle, scale *. sin angle) in
+  let x, y = ((c *. x) -. (s *. y), (s *. x) +. (c *. y)) in
+  (x +. dx, y +. dy)

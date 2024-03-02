@@ -25,6 +25,8 @@ type state = {
   my : float;
 }
 
+let cursor = ref true
+
 let update e { x; y; vx; vy; _ } =
   if Event.is_pressed e Escape then raise Exit;
   let y = if Event.is_pressed e Wheel_down then y +. 10.0 else y in
@@ -37,6 +39,8 @@ let update e { x; y; vx; vy; _ } =
 
   let vx, vy =
     if Event.is_pressed e Click_left then (
+      cursor := not !cursor;
+      show_cursor !cursor;
       Sound.play Assets.stick;
       let dx, dy = norm_max 100.0 (mx -. x, my -. y) in
       (vx +. dx, vy +. dy))
@@ -59,22 +63,32 @@ let update e { x; y; vx; vy; _ } =
   { x; y; vx; vy; mx; my }
 
 let black = Color.black
+let red = Color.red
+let green = Color.green
+let blue = Color.blue
+let yellow = Color.v 1.0 1.0 0.0 1.0
 
 let render ~view { x; y; mx; my; _ } =
   fill_rect ~color:black ~view (window_box ());
-  fill_rect ~color:black ~view (Box2.v (P2.v 0. 0.) (Size2.v 100.0 100.0));
   View.(
-    translate (mx, my) (fill_circle ~color:black (P2.v 0.0 0.0) 10.0)
+    translate (mx, my) (fill_circle ~color:red (P2.v 0.0 0.0) 10.0)
     & translate (x, y)
-        (scale 2.0
-           (draw_rect ~color:black (Box2.v (P2.v 0. 0.) (Size2.v 100.0 100.0))
+        (scale 3.0
+           (draw_rect ~color:yellow (Box2.v (P2.v 0. 0.) (Size2.v 100.0 100.0))
            & translate (75. /. 2., 59. /. 2.)
              @@ rotate (1.0 *. clock ())
              @@ translate (-75. /. 2., -59. /. 2.)
-             @@ (* & draw_circle (-75.0 /. 2., -59.0 /. 2.) 59. *)
-             (fill_rect ~color:black (Box2.v (P2.v 0. 0.) (Size2.v 75. 59.))
-             & draw img (P2.v 0. 0.)
-             & draw_circle ~color:black (P2.v (75.0 /. 2.) (59.0 /. 2.)) 10.))))
+             @@ (fill_rect ~color:blue (Box2.v (P2.v 0. 0.) (Size2.v 75. 59.))
+                & draw_rect ~color:red (Box2.v (P2.v 0. 0.) (Size2.v 75. 59.))
+                & draw img (P2.v 0. 0.)
+                & draw_line ~color:red (P2.v 0. 0.) (P2.v 75. 59.)
+                & translate (5.0, 5.0)
+                    (fill_poly ~color:yellow
+                       [ P2.v 20. 0.; P2.v 30. 30.; P2.v 15. 40. ])
+                & draw_poly ~color:green
+                    [ P2.v 20. 0.; P2.v 30. 30.; P2.v 15. 40. ]
+                & draw_circle ~color:green (P2.v (75.0 /. 2.) (59.0 /. 2.)) 10.
+                ))))
     ~view
 
 let () =

@@ -14,13 +14,8 @@ let tau = 8.0 *. atan 1.0
 let point_zero = Sdl.Point.create ~x:0 ~y:0
 
 let project ~view p =
-  let x = P2.x p and y = P2.y p in
-  let { Gamelle_common.View.scale; translate = dx, dy; rotate = angle } =
-    view
-  in
-  let c, s = (scale *. cos angle, scale *. sin angle) in
-  let x, y = ((c *. x) -. (s *. y), (s *. x) +. (c *. y)) in
-  (int (x +. dx), int (y +. dy))
+  let x, y = Gamelle_common.View.project ~view p in
+  (int x, int y)
 
 let draw ~view (lazy bmp) p =
   let scale = view.V.scale in

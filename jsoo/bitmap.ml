@@ -44,6 +44,4 @@ let is_complete t = (not t.error) && Jv.to_bool (Jv.get t.backend "complete")
 let draw ~view:_ ~ctx t ~x ~y =
   if is_complete t then C.draw_image ctx t.image ~x ~y
 
-let rotate _ t = t
-let scale _ t = t
 let sub t _ _ _ _ = t
