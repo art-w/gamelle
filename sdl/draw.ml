@@ -71,6 +71,7 @@ let fill_poly ~view ~color arr =
   ()
 
 let fill_rect ~view ~color rect =
+  set_color color;
   let p0 = Box2.tl_pt rect
   and p1 = Box2.tr_pt rect
   and p2 = Box2.br_pt rect

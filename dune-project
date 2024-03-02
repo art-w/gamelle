@@ -16,11 +16,15 @@
     (ocaml (>= 4.0.8))
     (js_of_ocaml (>= 5.6.0))
     (brr (>= 0.0.6))
+    (gg (>= 1.0.0))
     (tsdl (>= 1.0.0))
     (tsdl-image (>= 0.6))
     (tsdl-mixer (>= 0.6))
     (tsdl-ttf (>= 0.6))
+    conf-sdl-gfx
     (ctypes (>= 0.21.1))
     (result (>= 1.5))
     (crunch (>= 3.3.1))
     (inotify (>= 2.1))))
+
+(package (name conf-sdl-gfx) (allow_empty))
