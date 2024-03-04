@@ -4,9 +4,8 @@ module V = Gamelle_common.View
 
 let set_color c =
   let r, g, b, a = Color.to_srgbi c in
-  let a = int_of_float (a *. 255.) in
   let color =
-    C.color (Jstr.of_string (Printf.sprintf "rgba(%i,%i,%i,%i)" r g b a))
+    C.color (Jstr.of_string (Printf.sprintf "rgba(%i,%i,%i,%f)" r g b a))
   in
   C.set_fill_style (render ()) color;
   C.set_stroke_style (render ()) color
