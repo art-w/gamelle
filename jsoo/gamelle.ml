@@ -16,13 +16,20 @@ let now = ref 0.0
 let clock () = !now
 let dt () = !now -. !prev_now
 
-let window_size () =
-  let canvas = Option.get !global_canvas in
-  let w = Window.w canvas in
-  let h = Window.h canvas in
-  Size2.v (float w) (float h)
+module Window = struct
+  let size () =
+    let canvas = Option.get !global_canvas in
+    let w = Canvas.w canvas in
+    let h = Canvas.h canvas in
+    Size2.v (float w) (float h)
 
-let window_box () = Box2.v V2.zero (window_size ())
+  let set_size (w, h) =
+    let canvas = Option.get !global_canvas in
+    Canvas.set_w canvas w;
+    Canvas.set_h canvas h
+
+  let box () = Box2.v V2.zero (size ())
+end
 
 let run ?(on_exit = ignore) state ~update ~render =
   let _ = on_exit in
@@ -32,13 +39,13 @@ let run ?(on_exit = ignore) state ~update ~render =
     | None -> failwith "missing 'target' canvas"
     | Some elt ->
         Event.attach ~target:(El.as_target elt);
-        Window.of_el elt
+        Canvas.of_el elt
   in
 
   global_canvas := Some canvas;
 
-  Window.set_w canvas 640;
-  Window.set_h canvas 480;
+  Canvas.set_w canvas 640;
+  Canvas.set_h canvas 480;
 
   let ctx = C.get_context canvas in
   global_ctx := Some ctx;
@@ -52,7 +59,7 @@ let run ?(on_exit = ignore) state ~update ~render =
     Event.new_frame ();
     let state = update !Event.current state in
     let view = Gamelle_common.View.default in
-    fill_rect ~view ~color:Color.black (window_box ());
+    fill_rect ~view ~color:Color.black (Window.box ());
     render ~view state;
     animate state
   in

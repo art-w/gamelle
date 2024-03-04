@@ -15,11 +15,15 @@ module Ttf = Tsdl_ttf
 
 let global_window = ref None
 
-let window_size () =
-  let x, y = Sdl.get_window_size (Option.get !global_window) in
-  Size2.v (float x) (float y)
+module Window = struct
+  let set_size (w, h) = Sdl.set_window_size (Option.get !global_window) ~w ~h
 
-let window_box () = Box2.v V2.zero (window_size ())
+  let size () =
+    let x, y = Sdl.get_window_size (Option.get !global_window) in
+    Size2.v (float x) (float y)
+
+  let box () = Box2.v V2.zero (size ())
+end
 
 type run =
   | No_run : run
@@ -85,7 +89,7 @@ let run () =
         let state = update !events state in
         let& () = Sdl.render_clear renderer in
         let view = View.default in
-        fill_rect ~view ~color:Color.black (window_box ());
+        fill_rect ~view ~color:Color.black (Window.box ());
         render ~view state;
         current_run := Run { state; update; render; on_exit });
 

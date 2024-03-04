@@ -80,8 +80,11 @@ module Event : sig
   val is_down : t -> key -> bool
 end
 
-val window_size : unit -> size2
-val window_box : unit -> box2
+module Window : sig
+  val set_size : int * int -> unit
+  val size : unit -> size2
+  val box : unit -> box2
+end
 
 val run :
   ?on_exit:('state -> unit) ->

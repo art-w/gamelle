@@ -94,8 +94,7 @@ let show_cursor status =
   match !Common.global_canvas with
   | None -> ()
   | Some t ->
-      let el = Brr_canvas.Canvas.to_el t in
-      if status then
-        Brr.El.remove_inline_style Brr.El.Style.cursor (Common.Window.to_el t)
+      let el = Common.Canvas.to_el t in
+      if status then Brr.El.remove_inline_style Brr.El.Style.cursor el
       else
         Brr.El.set_inline_style Brr.El.Style.cursor (Jstr.of_string "none") el

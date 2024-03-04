@@ -71,7 +71,8 @@ let blue = Color.blue
 let yellow = Color.v 1.0 1.0 0.0 1.0
 
 let render ~view { x; y; mx; my; _ } =
-  fill_rect ~color:black ~view (window_box ());
+  Window.set_size (800, 800);
+  fill_rect ~color:black ~view (Window.box ());
   View.(
     translate (mx, my) (fill_circle ~color:red (P2.v 0.0 0.0) 10.0)
     & translate (x, y)
