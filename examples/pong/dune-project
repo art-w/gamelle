@@ -1,0 +1,9 @@
+(lang dune 3.5)
+
+(name pong)
+
+(package
+  (name pong)
+  (synopsis "pong")
+  (depends
+    gamelle))
