@@ -7,6 +7,8 @@ let load binstring =
   let& buffer = Tsdl.Sdl.rw_from_const_mem binstring in
   { buffer; sizes = Hashtbl.create 16 }
 
+let default = load Gamelle_common.Font.default
+
 let get font size =
   match Hashtbl.find font.sizes size with
   | font -> font
@@ -16,11 +18,12 @@ let get font size =
       Hashtbl.replace font.sizes size ft;
       ft
 
-let draw font size text =
+let draw ~color font size text =
   lazy
     (let font = get font size in
+     let r, g, b, a = Gg.Color.to_srgbi color in
+     let a = int_of_float (a *. 255.) in
      let& bmp =
-       Ttf.render_text_solid font text
-         (Tsdl.Sdl.Color.create ~r:0xFF ~g:0xFF ~b:0xFF ~a:0xFF)
+       Ttf.render_text_solid font text (Tsdl.Sdl.Color.create ~r ~g ~b ~a)
      in
      Bitmap.of_texture bmp)

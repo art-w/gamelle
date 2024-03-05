@@ -25,6 +25,7 @@
     (ctypes (>= 0.21.1))
     (result (>= 1.5))
     (crunch (>= 3.3.1))
+    (ppx_blob (>= 0.7.2))
     (inotify (>= 2.1))))
 
 (package (name conf-sdl-gfx) (allow_empty))

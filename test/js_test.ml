@@ -1,7 +1,7 @@
 open Gamelle
 open Gg
 
-let myfont = Assets.ubuntu_mono
+let myfont = Font.default
 let img = Assets.camel
 let max_speed = 1000.045
 
@@ -70,6 +70,10 @@ let update ~view e { x; y; vx; vy; _ } =
 
   Window.set_size (800, 800);
   fill_rect ~color:black ~view (Window.box ());
+  draw_string ~view ~color:Color.white Font.default ~size:30 "Hello World!"
+    V2.zero;
+  draw_string ~view:(View.scaled 2.0 view) ~color:Color.white Font.default
+    ~size:30 "Hello World!" V2.zero;
   View.(
     translate (mx, my) (fill_circle ~color:red (P2.v 0.0 0.0) 10.0)
     & translate (x, y)

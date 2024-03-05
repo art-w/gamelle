@@ -36,8 +36,7 @@ let draw ~view (lazy bmp) p =
   ()
 
 let draw_string ~view ~color font ~size text p =
-  set_color color;
-  draw ~view (Font.draw font size text) p
+  draw ~view (Font.draw ~color font size text) p
 
 let draw_line ~view ~color p p' =
   set_color color;

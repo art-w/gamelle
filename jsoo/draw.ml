@@ -86,7 +86,9 @@ let fill_circle ~view ~color center radius =
   C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
   C.fill (render ()) path
 
-let draw_string ~view:_ ~color:_ font ~size txt p =
+let draw_string ~view ~color font ~size txt p =
+  transform ~view;
+  set_color color;
   let x, y = V2.to_tuple p in
   Font.draw_at font ~size txt (x, y)
 
