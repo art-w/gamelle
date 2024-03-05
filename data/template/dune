@@ -1,0 +1,42 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))
+
+(executable
+ (public_name mygame)
+ (name mygame_bin)
+ (modules mygame_bin)
+ (libraries mygame gamelle.sdl))
+
+(rule
+ (target mygame_bin.ml)
+ (action
+  (with-stdout-to
+   mygame_bin.ml
+   (run echo "include Mygame"))))
+
+(executable
+ (name mygame_js)
+ (modules mygame_js)
+ (modes js)
+ (libraries mygame gamelle.jsoo))
+
+(rule
+ (target mygame_js.ml)
+ (action
+  (with-stdout-to
+   mygame_js.ml
+   (run echo "include Mygame"))))
+
+(rule
+ (target mygame.html)
+ (deps mygame.template.html mygame_js.bc.js)
+ (action
+  (with-stdout-to
+   mygame.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=mygame.template.html
+    --script=mygame_js.bc.js))))

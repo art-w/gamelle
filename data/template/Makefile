@@ -2,9 +2,9 @@
 
 run:
 	dune build
-	gamelle hotreload _build/default/game/mygame.cmxs &
+	gamelle hotreload _build/default/src/mygame.cmxs &
 	dune build --watch
 
 html:
-	dune build
-	xdg-open _build/default/bin/index.html
+	dune build --profile=release
+	xdg-open _build/default/mygame.html
