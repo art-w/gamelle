@@ -26,8 +26,13 @@ type state = {
 }
 
 let cursor = ref true
+let black = Color.black
+let red = Color.red
+let green = Color.green
+let blue = Color.blue
+let yellow = Color.v 1.0 1.0 0.0 1.0
 
-let update e { x; y; vx; vy; _ } =
+let update ~view e { x; y; vx; vy; _ } =
   if Event.is_pressed e Escape then raise Exit;
   let y = if Event.is_pressed e Wheel_down then y +. 10.0 else y in
   let y = if Event.is_pressed e Wheel_up then y -. 10.0 else y in
@@ -62,15 +67,7 @@ let update e { x; y; vx; vy; _ } =
 
   let vx = vx *. 0.9 in
   let vy = vy *. 0.9 in
-  { x; y; vx; vy; mx; my }
 
-let black = Color.black
-let red = Color.red
-let green = Color.green
-let blue = Color.blue
-let yellow = Color.v 1.0 1.0 0.0 1.0
-
-let render ~view { x; y; mx; my; _ } =
   Window.set_size (800, 800);
   fill_rect ~color:black ~view (Window.box ());
   View.(
@@ -92,9 +89,7 @@ let render ~view { x; y; mx; my; _ } =
                     [ P2.v 20. 0.; P2.v 30. 30.; P2.v 15. 40. ]
                 & draw_circle ~color:green (P2.v (75.0 /. 2.) (59.0 /. 2.)) 10.
                 ))))
-    ~view
+    ~view;
+  { x; y; vx; vy; mx; my }
 
-let () =
-  run
-    { mx = 0.0; my = 0.0; x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 }
-    ~update ~render
+let () = run { mx = 0.0; my = 0.0; x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 } update

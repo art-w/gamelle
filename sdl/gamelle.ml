@@ -29,8 +29,7 @@ type run =
   | No_run : run
   | Run : {
       state : 'a;
-      update : Event.t -> 'a -> 'a;
-      render : view:View.t -> 'a -> unit;
+      update : view:View.t -> Event.t -> 'a -> 'a;
       on_exit : 'a -> unit;
     }
       -> run
@@ -85,13 +84,12 @@ let run () =
     (* Format.printf "playing: %b@." (Tsdl_mixer.Mixer.playing (Some 1)) ; *)
     (match !current_run with
     | No_run -> invalid_arg "No game currently running"
-    | Run { state; update; render; on_exit } ->
-        let state = update !events state in
+    | Run { state; update; on_exit } ->
         let& () = Sdl.render_clear renderer in
         let view = View.default in
         fill_rect ~view ~color:Color.black (Window.box ());
-        render ~view state;
-        current_run := Run { state; update; render; on_exit });
+        let state = update ~view !events state in
+        current_run := Run { state; update; on_exit });
 
     Sdl.render_present renderer;
     let now = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
@@ -117,12 +115,12 @@ let cleanup () =
   | No_run -> assert false
   | Run { state; on_exit; _ } -> on_exit state
 
-let run ?(on_exit = ignore) state ~update ~render =
+let run ?(on_exit = ignore) state update =
   match !current_run with
   | No_run ->
-      current_run := Run { state; update; render; on_exit };
+      current_run := Run { state; update; on_exit };
       run ();
       cleanup ()
   | Run _ ->
       Format.printf "set new run@.";
-      current_run := Run { state; update; render; on_exit }
+      current_run := Run { state; update; on_exit }

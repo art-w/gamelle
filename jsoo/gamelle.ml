@@ -31,7 +31,7 @@ module Window = struct
   let box () = Box2.v V2.zero (size ())
 end
 
-let run ?(on_exit = ignore) state ~update ~render =
+let run ?(on_exit = ignore) state update =
   let _ = on_exit in
   (* wow *)
   let canvas =
@@ -57,10 +57,9 @@ let run ?(on_exit = ignore) state ~update ~render =
     prev_now := !now;
     now := elapsed /. 1000.0;
     Event.new_frame ();
-    let state = update !Event.current state in
     let view = Gamelle_common.View.default in
     fill_rect ~view ~color:Color.black (Window.box ());
-    render ~view state;
+    let state = update ~view !Event.current state in
     animate state
   in
   animate state

@@ -20,28 +20,28 @@ let fresh_state file =
     rects = [];
   }
 
-let update ev st =
-  let x, y = Event.mouse_pos ev in
-  let mouse = (x /. st.scale, y /. st.scale) in
-  let st = { st with mouse } in
-  match (st.click, Event.is_pressed ev Click_left) with
-  | None, false ->
-      if Event.is_pressed ev Wheel_up then { st with scale = st.scale +. 1. }
-      else if Event.is_pressed ev Wheel_down then
-        { st with scale = st.scale -. 1. }
-      else st
-  | Some _, true -> st (* just keep dragging *)
-  | None, true -> { st with click = Some st.mouse }
-  | Some fst_pos, false ->
-      { st with click = None; rects = (fst_pos, st.mouse) :: st.rects }
-
 let compute_rect ((x1, y1), (x2, y2)) =
   (* some strong assumptions here *)
   let w = x2 -. x1 in
   let h = y2 -. y1 in
   Box2.v (P2.v x1 y1) (Size2.v w h)
 
-let render ~view st =
+let main ~view ev st =
+  let x, y = Event.mouse_pos ev in
+  let mouse = (x /. st.scale, y /. st.scale) in
+  let st = { st with mouse } in
+  let st =
+    match (st.click, Event.is_pressed ev Click_left) with
+    | None, false ->
+        if Event.is_pressed ev Wheel_up then { st with scale = st.scale +. 1. }
+        else if Event.is_pressed ev Wheel_down then
+          { st with scale = st.scale -. 1. }
+        else st
+    | Some _, true -> st (* just keep dragging *)
+    | None, true -> { st with click = Some st.mouse }
+    | Some fst_pos, false ->
+        { st with click = None; rects = (fst_pos, st.mouse) :: st.rects }
+  in
   fill_rect ~view ~color:Color.black (Box2.v (P2.v 0. 0.) (P2.v 500. 500.));
   show_cursor true;
   let view = View.scaled st.scale view in
@@ -56,7 +56,8 @@ let render ~view st =
     (fun poss ->
       let rect = compute_rect poss in
       fill_rect ~view ~color:pale_green rect)
-    st.rects
+    st.rects;
+  st
 
 let print_rects ~file { rects; _ } =
   let oc = open_out file in
@@ -72,4 +73,4 @@ let print_rects ~file { rects; _ } =
 let do_the_thing out file =
   let st = fresh_state file in
   let on_exit = print_rects ~file:out in
-  run st ~update ~render ~on_exit
+  run st ~on_exit main

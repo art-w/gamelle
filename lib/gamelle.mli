@@ -89,6 +89,5 @@ end
 val run :
   ?on_exit:('state -> unit) ->
   'state ->
-  update:(Event.t -> 'state -> 'state) ->
-  render:(view:View.t -> 'state -> unit) ->
+  (view:View.t -> Event.t -> 'state -> 'state) ->
   unit

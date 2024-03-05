@@ -114,27 +114,6 @@ let other_player player = match player with Circle -> Cross | Cross -> Circle
 
 let cell_size = 64.
 
-let update event state =
-  let {board; player} = state in
-  match victory board with
-  | Some Circle ->
-      print_endline "Circle won" ; exit 0
-  | Some Cross ->
-      print_endline "Cross won" ; exit 0
-  | None ->
-      if Event.(is_pressed event Click_left) then
-        let x, y = Event.mouse_pos event in
-        (* first column *)
-        let cell_x = Int.of_float (floor x /. 64.)
-        and cell_y = Int.of_float (floor (y /. 64.)) in
-        if cell_x < 0 || cell_x >= 3 || cell_y < 0 || cell_y >= 3 then state
-        else if Option.is_some (cell_of_coord board cell_x cell_y) then state
-        else
-          let board = update_cell_of_coord board (Some player) cell_x cell_y in
-          let player = other_player player in
-          {player; board}
-      else state
-
 let size = cell_size *. 3.
 
 let draw_background ~view () =
@@ -182,10 +161,34 @@ let draw_board ~view
   draw_cell ~view center_bottom (P2.v cell_size (cell_size *. 2.)) ;
   draw_cell ~view right_bottom (P2.v (cell_size *. 2.) (cell_size *. 2.))
 
-let render ~view {board; player= _} =
+let () =
+  run state
+  @@ fun ~view event state ->
+  let {board; player} = state in
+  let state =
+    match victory board with
+    | Some Circle ->
+        print_endline "Circle won" ; exit 0
+    | Some Cross ->
+        print_endline "Cross won" ; exit 0
+    | None ->
+        if Event.(is_up event Click_left) then
+          let x, y = Event.mouse_pos event in
+          (* first column *)
+          let cell_x = Int.of_float (floor x /. 64.)
+          and cell_y = Int.of_float (floor (y /. 64.)) in
+          if cell_x < 0 || cell_x >= 3 || cell_y < 0 || cell_y >= 3 then state
+          else if Option.is_some (cell_of_coord board cell_x cell_y) then state
+          else
+            let board =
+              update_cell_of_coord board (Some player) cell_x cell_y
+            in
+            let player = other_player player in
+            {player; board}
+        else state
+  in
   show_cursor true ;
   draw_background ~view () ;
-  draw_board ~view board ;
-  draw_grid ~view ()
-
-let () = run state ~update ~render
+  draw_board ~view state.board ;
+  draw_grid ~view () ;
+  state
