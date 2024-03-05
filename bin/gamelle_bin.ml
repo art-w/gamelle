@@ -13,12 +13,35 @@ let mkdir_for ~root name =
   in
   go root parts
 
+let str_game_name = Str.regexp "[mM]ygame"
+
+let replace_name ~lowercase ~uppercase str =
+  Str.global_substitute str_game_name
+    (fun str ->
+      match Str.matched_group 0 str with
+      | "mygame" -> lowercase
+      | "Mygame" -> uppercase
+      | s -> failwith (Printf.sprintf "unexpected %S" s))
+    str
+
+let normalize_name name =
+  String.map
+    (function ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9') as c -> c | _ -> '_')
+    name
+
 let init_directory root =
+  let name = normalize_name (Filename.basename root) in
+  let lowercase = String.uncapitalize_ascii name in
+  let uppercase = String.capitalize_ascii name in
+  let replace = replace_name ~lowercase ~uppercase in
   Sys.mkdir root 0o777;
   List.iter
-    (fun filename ->
+    (fun template_filename ->
+      let filename = replace template_filename in
       mkdir_for ~root filename;
-      let contents = Option.get @@ Gamelle_template.read filename in
+      let contents =
+        replace @@ Option.get @@ Gamelle_template.read template_filename
+      in
       let h = open_out (Filename.concat root filename) in
       output_string h contents;
       close_out h)
@@ -41,11 +64,6 @@ let inline_js_in_html html js =
   let js = game_template (file_contents js) in
   let html = Str.substitute_first re_target (fun _ -> js) html in
   print_endline html
-
-let normalize_name name =
-  String.map
-    (function ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9') as c -> c | _ -> '_')
-    name
 
 type loader = Raw of string | Parts of string * string * string list
 
