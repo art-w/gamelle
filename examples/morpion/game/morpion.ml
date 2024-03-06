@@ -1,5 +1,5 @@
 open Gamelle
-open Gg
+open Geometry
 
 type player = Circle | Cross
 
@@ -122,14 +122,12 @@ let draw_background ~view () =
 
 let draw_grid ~view () =
   let color = Color.black in
-  draw_line ~view ~color (P2.v cell_size 0.) (P2.v cell_size size) ;
+  draw_line ~view ~color (Segment.v (P2.v cell_size 0.) (P2.v cell_size size)) ;
   draw_line ~view ~color
-    (P2.v (cell_size *. 2.) 0.)
-    (P2.v (cell_size *. 2.) size) ;
-  draw_line ~view ~color (P2.v 0. cell_size) (P2.v size cell_size) ;
+    (Segment.v (P2.v (cell_size *. 2.) 0.) (P2.v (cell_size *. 2.) size)) ;
+  draw_line ~view ~color (Segment.v (P2.v 0. cell_size) (P2.v size cell_size)) ;
   draw_line ~view ~color
-    (P2.v 0. (cell_size *. 2.))
-    (P2.v size (cell_size *. 2.))
+    (Segment.v (P2.v 0. (cell_size *. 2.)) (P2.v size (cell_size *. 2.)))
 
 let draw_cell ~view cell p =
   match cell with

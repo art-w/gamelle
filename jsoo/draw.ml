@@ -1,4 +1,4 @@
-open Gg
+open Gamelle_geometry
 open Common
 module V = Gamelle_common.View
 
@@ -36,7 +36,8 @@ let draw_rect ~view ~color rect =
   set_color color;
   C.stroke_rect (render ()) ~x ~y ~w ~h
 
-let draw_line ~view ~color p0 p1 =
+let draw_line ~view ~color segment =
+  let p0, p1 = Segment.to_tuple segment in
   transform ~view;
   let x0, y0 = V2.to_tuple p0 in
   let x1, y1 = V2.to_tuple p1 in
@@ -70,7 +71,9 @@ let fill_poly ~view ~color pts =
 
 let tau = 8.0 *. atan 1.0
 
-let draw_circle ~view ~color center radius =
+let draw_circle ~view ~color circle =
+  let center = Circle.center circle in
+  let radius = Circle.radius circle in
   transform ~view;
   set_color color;
   let x, y = V2.to_tuple center in
@@ -78,7 +81,9 @@ let draw_circle ~view ~color center radius =
   C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
   C.stroke (render ()) path
 
-let fill_circle ~view ~color center radius =
+let fill_circle ~view ~color circle =
+  let center = Circle.center circle in
+  let radius = Circle.radius circle in
   transform ~view;
   set_color color;
   let x, y = V2.to_tuple center in

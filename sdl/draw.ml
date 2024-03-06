@@ -1,5 +1,5 @@
 open Common
-open Gg
+open Gamelle_geometry
 module Gfx = Tsdl_gfx.Gfx
 module V = Gamelle_common.View
 
@@ -38,7 +38,8 @@ let draw ~view (lazy bmp) p =
 let draw_string ~view ~color font ~size text p =
   draw ~view (Font.draw ~color font size text) p
 
-let draw_line ~view ~color p p' =
+let draw_line ~view ~color segment =
+  let p, p' = Segment.to_tuple segment in
   set_color color;
   let x0, y0 = project ~view p in
   let x1, y1 = project ~view p' in
@@ -46,14 +47,10 @@ let draw_line ~view ~color p p' =
   ()
 
 let draw_rect ~view ~color rect =
-  let p0 = Box2.tl_pt rect
-  and p1 = Box2.tr_pt rect
-  and p2 = Box2.br_pt rect
-  and p3 = Box2.bl_pt rect in
-  draw_line ~view ~color p0 p1;
-  draw_line ~view ~color p1 p2;
-  draw_line ~view ~color p2 p3;
-  draw_line ~view ~color p3 p0
+  draw_line ~view ~color (Box.top rect);
+  draw_line ~view ~color (Box.bottom rect);
+  draw_line ~view ~color (Box.left rect);
+  draw_line ~view ~color (Box.right rect)
 
 let draw_poly ~view ~color arr =
   set_color color;
@@ -78,7 +75,9 @@ let fill_rect ~view ~color rect =
   let pts = [ p0; p1; p2; p3 ] in
   fill_poly ~view ~color pts
 
-let draw_circle ~view ~color center radius =
+let draw_circle ~view ~color circle =
+  let center = Circle.center circle in
+  let radius = Circle.radius circle in
   set_color color;
   let x, y = project ~view center in
   let radius = int (view.V.scale *. radius) in
@@ -86,7 +85,9 @@ let draw_circle ~view ~color center radius =
   let& () = Gfx.circle_rgba (render ()) ~x ~y ~rad:radius ~r ~g ~b ~a in
   ()
 
-let fill_circle ~view ~color center radius =
+let fill_circle ~view ~color circle =
+  let center = Circle.center circle in
+  let radius = Circle.radius circle in
   set_color color;
   let x, y = project ~view center in
   let radius = int (view.V.scale *. radius) in

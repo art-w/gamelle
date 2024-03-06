@@ -1,5 +1,6 @@
 open Common
-open Gg
+open Gamelle_geometry
+module Geometry = Gamelle_geometry
 module Color = Color
 module Bitmap = Bitmap
 module Font = Font

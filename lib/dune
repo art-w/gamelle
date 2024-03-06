@@ -1,5 +1,5 @@
 (library
  (public_name gamelle)
  (name gamelle)
- (libraries gg)
+ (libraries gamelle_geometry)
  (virtual_modules gamelle))

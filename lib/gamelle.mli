@@ -1,4 +1,5 @@
-open Gg
+open Gamelle_geometry
+module Geometry : module type of Gamelle_geometry
 module Color : module type of Color
 
 module Bitmap : sig
@@ -45,13 +46,13 @@ end
 val clock : unit -> float
 val dt : unit -> float
 val draw : view:View.t -> Bitmap.t -> p2 -> unit
-val draw_line : view:View.t -> color:Color.t -> p2 -> p2 -> unit
+val draw_line : view:View.t -> color:Color.t -> Segment.t -> unit
 val draw_rect : view:View.t -> color:Color.t -> box2 -> unit
 val fill_rect : view:View.t -> color:Color.t -> box2 -> unit
 val draw_poly : view:View.t -> color:Color.t -> p2 list -> unit
 val fill_poly : view:View.t -> color:Color.t -> p2 list -> unit
-val draw_circle : view:View.t -> color:Color.t -> p2 -> size1 -> unit
-val fill_circle : view:View.t -> color:Color.t -> p2 -> size1 -> unit
+val draw_circle : view:View.t -> color:Color.t -> Circle.t -> unit
+val fill_circle : view:View.t -> color:Color.t -> Circle.t -> unit
 val show_cursor : bool -> unit
 
 val draw_string :

@@ -1,0 +1,4 @@
+(library
+ (name gamelle_geometry)
+ (public_name gamelle.geometry)
+ (libraries gg))

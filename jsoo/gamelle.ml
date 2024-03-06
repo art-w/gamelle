@@ -1,6 +1,7 @@
 open Brr
 open Common
 open Gg
+module Geometry = Gamelle_geometry
 module Color = Color
 module Bitmap = Bitmap
 module Event = Event

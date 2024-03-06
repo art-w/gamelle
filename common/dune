@@ -2,5 +2,6 @@
  (public_name gamelle.common)
  (name gamelle_common)
  (libraries gg)
- (preprocess (pps ppx_blob))
+ (preprocess
+  (pps ppx_blob))
  (preprocessor_deps ../data/FreeMono.ttf))
