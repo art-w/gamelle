@@ -46,11 +46,6 @@ let reflexion ray edge =
   let normal = V2.unit (normal edge) in
   V2.(ray - (2. * (dot ray normal * normal)))
 
-let random_box_mem box =
-  let x = Random.float (Box2.w box) +. Box2.ox box
-  and y = Random.float (Box2.h box) +. Box2.oy box in
-  P2.v x y
-
 let incr_score player = {player with score= player.score + 1}
 
 let new_point_ball_speed ball_speed =
@@ -79,7 +74,7 @@ let collision state ~player_left_speed ~player_right_speed new_ball_pos =
       V2.(
         reflexion ball_speed (Segment.vector segment_player_left)
         + v ball_x_boost (player_grip *. player_left_speed)
-        + random_box_mem ball_noise )
+        + Box.random_mem ball_noise )
     in
     {state with ball_speed}
   else if Segment.intersect ball_segment segment_player_right then
@@ -87,7 +82,7 @@ let collision state ~player_left_speed ~player_right_speed new_ball_pos =
       V2.(
         reflexion ball_speed (Segment.vector segment_player_right)
         + v (-.ball_x_boost) (player_grip *. player_right_speed)
-        + random_box_mem ball_noise )
+        + Box.random_mem ball_noise )
     in
     {state with ball_speed}
   else
@@ -99,7 +94,7 @@ let collision state ~player_left_speed ~player_right_speed new_ball_pos =
                     let ball_speed =
                       V2.(
                         reflexion ball_speed (Segment.vector wall)
-                        + random_box_mem ball_noise )
+                        + Box.random_mem ball_noise )
                     in
                     {state with ball_speed} ) )
       |> Option.value ~default:{state with ball_pos= new_ball_pos}
