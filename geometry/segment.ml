@@ -2,7 +2,11 @@ open Gg
 
 type t = { start : p2; end_ : p2 }
 
-let v start end_ = { start; end_ }
+let v start end_ =
+  (* This way, polymorphic equality works on segments *)
+  let start = min start end_ and end_ = max start end_ in
+  { start; end_ }
+
 let start { start; _ } = start
 let end_ { end_; _ } = end_
 let to_tuple { start; end_ } = (start, end_)
@@ -26,3 +30,4 @@ let intersection { start = p1; end_ = p2 } { start = q1; end_ = q2 } =
     else None
 
 let intersect s s' = Option.is_some (intersection s s')
+let equal s s' = V2.equal s.start s.end_ && V2.equal s'.start s'.end_

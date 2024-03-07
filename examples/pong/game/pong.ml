@@ -6,6 +6,18 @@ type player = {pos: float; score: int}
 type state =
   {player_left: player; player_right: player; ball_speed: v2; ball_pos: p2}
 
+type side = Left | Right
+
+let player ~side state =
+  match side with Left -> state.player_left | Right -> state.player_right
+
+let set_player ~side state player =
+  match side with
+  | Left ->
+      {state with player_left= player}
+  | Right ->
+      {state with player_right= player}
+
 let init =
   { player_left= {pos= 120.; score= 0}
   ; player_right= {pos= 120.; score= 0}
@@ -30,15 +42,27 @@ let ball_x_boost = 0.2
 
 let player_speed {ball_speed; _} = 2. *. V2.norm ball_speed
 
-let player_positions x player =
+let player_segment_x x player =
   Segment.v
     (V2.v x (player.pos -. (player_height /. 2.)))
     (V2.v x (player.pos +. (player_height /. 2.)))
 
+let player_left_segment state = player_segment_x player_left_x state.player_left
+
+let player_right_segment state =
+  player_segment_x player_right_x state.player_right
+
+let player_segment ~side state =
+  match side with
+  | Left ->
+      player_left_segment state
+  | Right ->
+      player_right_segment state
+
 let update_player ~x ~player ~delta_y =
   let pos = player.pos +. delta_y in
   let new_player = {player with pos} in
-  let start, end_ = Segment.to_tuple (player_positions x new_player) in
+  let start, end_ = Segment.to_tuple (player_segment_x x new_player) in
   if Box2.mem start court && Box2.mem end_ court then new_player else player
 
 let reflexion ray edge =
@@ -52,59 +76,51 @@ let new_point_ball_speed ball_speed =
   let length = V2.((norm init.ball_speed +. norm ball_speed) /. 2.) in
   V2.(-.length * unit ball_speed)
 
-let collision state ~player_left_speed ~player_right_speed new_ball_pos =
-  let {player_left; player_right; ball_pos; ball_speed} = state in
-  if P2.x ball_pos > 400. then raise Exit ;
+let goal ~side state =
+  let ball_speed = state.ball_speed in
+  let ball_speed = new_point_ball_speed ball_speed in
+  let ball_pos = init.ball_pos in
+  let player = incr_score (player ~side state) in
+  set_player ~side {state with ball_pos; ball_speed} player
+
+let player_collision ~side ~player_speed state =
+  let player_vector = Segment.vector (player_segment ~side state) in
+  let ball_speed =
+    V2.(
+      reflexion state.ball_speed player_vector
+      + v ball_x_boost (player_grip *. player_speed)
+      + Box.random_mem ball_noise )
+  in
+  {state with ball_speed}
+
+let wall_collision state wall =
+  let ball_speed =
+    V2.(
+      reflexion state.ball_speed (Segment.vector wall)
+      + Box.random_mem ball_noise )
+  in
+  {state with ball_speed}
+
+let tick state ~player_left_speed ~player_right_speed =
+  let {ball_pos; ball_speed; _} = state in
+  let new_ball_pos = V2.(ball_pos + ball_speed) in
+  let ball_pos = state.ball_pos in
   let top, right, bottom, left = Box.sides court in
-  let segment_player_left = player_positions player_left_x player_left in
-  let segment_player_right = player_positions player_right_x player_right in
   let ball_segment = Segment.v ball_pos new_ball_pos in
-  if Segment.intersect ball_segment right then
-    let player_left = incr_score player_left in
-    let ball_speed = new_point_ball_speed ball_speed in
-    let ball_pos = init.ball_pos in
-    {state with player_left; ball_pos; ball_speed}
-  else if Segment.intersect ball_segment left then
-    let player_right = incr_score player_right in
-    let ball_speed = new_point_ball_speed ball_speed in
-    let ball_pos = init.ball_pos in
-    {state with player_right; ball_pos; ball_speed}
-  else if Segment.intersect ball_segment segment_player_left then
-    let ball_speed =
-      V2.(
-        reflexion ball_speed (Segment.vector segment_player_left)
-        + v ball_x_boost (player_grip *. player_left_speed)
-        + Box.random_mem ball_noise )
-    in
-    {state with ball_speed}
-  else if Segment.intersect ball_segment segment_player_right then
-    let ball_speed =
-      V2.(
-        reflexion ball_speed (Segment.vector segment_player_right)
-        + v (-.ball_x_boost) (player_grip *. player_right_speed)
-        + Box.random_mem ball_noise )
-    in
-    {state with ball_speed}
+  if Segment.intersect ball_segment right then goal ~side:Left state
+  else if Segment.intersect ball_segment left then goal ~side:Right state
+  else if Segment.intersect ball_segment (player_segment ~side:Left state) then
+    player_collision ~side:Left ~player_speed:player_left_speed state
+  else if Segment.intersect ball_segment (player_segment ~side:Right state) then
+    player_collision ~side:Right ~player_speed:player_right_speed state
   else
     let state =
       [top; bottom]
-      |> List.find_map (fun wall ->
-             Segment.intersection ball_segment wall
-             |> Option.map (fun _ ->
-                    let ball_speed =
-                      V2.(
-                        reflexion ball_speed (Segment.vector wall)
-                        + Box.random_mem ball_noise )
-                    in
-                    {state with ball_speed} ) )
+      |> List.find_opt (Segment.intersect ball_segment)
+      |> Option.map (wall_collision state)
       |> Option.value ~default:{state with ball_pos= new_ball_pos}
     in
     state
-
-let tick state =
-  let {ball_pos; ball_speed; _} = state in
-  let new_ball_pos = V2.(ball_pos + ball_speed) in
-  collision state new_ball_pos
 
 let color = Color.white
 
@@ -132,9 +148,9 @@ let draw_score ~io ~state =
 
 let draw_ball ~io {ball_pos; _} = fill_circle ~io ~color (Circle.v ball_pos 4.)
 
-let draw_players ~io {player_left; player_right; _} =
-  let player_left = player_positions player_left_x player_left in
-  let player_right = player_positions player_right_x player_right in
+let draw_players ~io state =
+  let player_left = player_segment ~side:Left state
+  and player_right = player_segment ~side:Right state in
   draw_line ~io ~color player_left ;
   draw_line ~io ~color player_right
 
@@ -174,9 +190,9 @@ let update ~io state =
   let state = tick ~player_left_speed ~player_right_speed state in
   draw_background ~io ;
   draw_court ~io ;
-  draw_score ~io ~state ;
   draw_ball ~io state ;
   draw_players ~io state ;
+  draw_score ~io ~state ;
   state
 
 let () = run init update
