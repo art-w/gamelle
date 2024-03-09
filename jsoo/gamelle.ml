@@ -9,6 +9,7 @@ module Font = Font
 module Sound = Sound
 module View = Gamelle_common.View
 include Draw
+include Gamelle_geometry.Make (Draw)
 
 (* type ctx = C.t *)
 

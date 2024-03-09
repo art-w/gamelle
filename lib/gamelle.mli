@@ -93,3 +93,43 @@ val run :
   'state ->
   (view:View.t -> Event.t -> 'state -> 'state) ->
   unit
+
+(* *)
+module Shape : sig
+  type t
+
+  val circle : P2.t -> float -> t
+  val segment : P2.t -> P2.t -> t
+  val rect : Box2.t -> t
+  val polygon : P2.t list -> t
+  val draw : view:View.t -> color:Color.t -> t -> unit
+  val fill : view:View.t -> color:Color.t -> t -> unit
+  val translate : V2.t -> t -> t
+  val rotate : ?center:P2.t -> angle:float -> t -> t
+  val center : t -> P2.t
+  val distance2 : P2.t -> t -> float
+  val mem : P2.t -> t -> bool
+  val intersects : t -> t -> bool
+  val intersections : t -> t -> P2.t list
+  val nearest_points : P2.t -> t -> (P2.t * V2.t) list
+end
+
+module Physics : sig
+  type t
+  type kind = Movable | Immovable
+
+  val make :
+    ?mass:float ->
+    ?inertia:float ->
+    ?restitution:float ->
+    ?kind:kind ->
+    Shape.t ->
+    t
+
+  val center : t -> P2.t
+  val add_velocity : V2.t -> t -> t
+  val add_rot_velocity : float -> t -> t
+  val update : dt:float -> t -> t
+  val fix_collisions : t list -> t list
+  val draw : view:View.t -> t -> unit
+end

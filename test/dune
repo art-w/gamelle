@@ -36,3 +36,8 @@
     html
     --template=index.html.template
     --script=js_test_js.bc.js))))
+
+(executable
+ (name test_physics)
+ (modules test_physics)
+ (libraries gamelle.sdl))

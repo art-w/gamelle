@@ -2,6 +2,8 @@ open Gamelle_geometry
 open Common
 module V = Gamelle_common.View
 
+type view = V.t
+
 let set_color c =
   let r, g, b, a = Color.to_srgbi c in
   let color =

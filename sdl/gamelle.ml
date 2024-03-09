@@ -8,6 +8,7 @@ module Sound = Sound
 module Event = Event
 module View = Gamelle_common.View
 include Draw
+include Gamelle_geometry.Make (Draw)
 
 let clock = Common.clock
 let dt = Common.dt

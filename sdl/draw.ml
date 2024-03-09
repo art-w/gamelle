@@ -3,6 +3,8 @@ open Gamelle_geometry
 module Gfx = Tsdl_gfx.Gfx
 module V = Gamelle_common.View
 
+type view = V.t
+
 let set_color c =
   let r, g, b, a = Color.to_srgbi c in
   let a = int_of_float (a *. 255.) in
