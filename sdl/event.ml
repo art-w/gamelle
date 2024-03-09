@@ -11,7 +11,7 @@ let key_of_keycode kc =
   | _ when kc = Sdl.K.up -> Some Arrow_up
   | _ when kc = Sdl.K.down -> Some Arrow_down
   | _ when kc = Sdl.K.rctrl -> Some Control_right
-  | _ when kc >= Sdl.K.a && kc < Sdl.K.z ->
+  | _ when kc >= Sdl.K.a && kc <= Sdl.K.z ->
       Some (Char (Char.chr (Char.code 'a' + kc - Sdl.K.a)))
   | _ -> None
 
