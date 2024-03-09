@@ -22,6 +22,9 @@ let load_file filename =
 
 let load binstring =
   lazy
-    (let& buf = Tsdl.Sdl.rw_from_const_mem binstring in
-     let& bmp = Tsdl_image.load_rw buf true in
+    (let rw = Sdl_buffer.load binstring in
+     let& bmp = Tsdl_image.load_rw (Sdl_buffer.get rw) true in
+     let _ = Sys.opaque_identity rw in
      of_texture bmp)
+
+let free (lazy t) = Sdl.destroy_texture t.bmp

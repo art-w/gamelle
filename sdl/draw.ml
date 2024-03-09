@@ -38,7 +38,9 @@ let draw ~view (lazy bmp) p =
   ()
 
 let draw_string ~view ~color font ~size text p =
-  draw ~view (Font.draw ~color font size text) p
+  let bitmap = Font.draw ~color font size text in
+  draw ~view bitmap p;
+  Bitmap.free bitmap
 
 let draw_line ~view ~color segment =
   let p, p' = Segment.to_tuple segment in

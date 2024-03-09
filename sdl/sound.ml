@@ -10,8 +10,9 @@ let load_file filename =
 
 let load binstring =
   lazy
-    (let& rw = Tsdl.Sdl.rw_from_const_mem binstring in
-     let& sound = Tsdl_mixer.Mixer.load_wav_rw rw 1 in
+    (let rw = Sdl_buffer.load binstring in
+     let& sound = Tsdl_mixer.Mixer.load_wav_rw (Sdl_buffer.get rw) 1 in
+     let _ = Sys.opaque_identity rw in
      sound)
 
 let play (lazy sound) =
