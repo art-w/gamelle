@@ -1,34 +1,80 @@
-let watch cmxs_file =
+let to_string = function
+  | Inotify.Access -> "Access"
+  | Attrib -> "Attrib"
+  | Close_write -> "Close_write"
+  | Close_nowrite -> "Close_nowrite"
+  | Create -> "Create"
+  | Delete -> "Delete"
+  | Delete_self -> "Delete_self"
+  | Modify -> "Modify"
+  | Move_self -> "Move_self"
+  | Moved_from -> "Moved_from"
+  | Moved_to -> "Moved_to"
+  | Open -> "Open"
+  | Ignored -> "Ignored"
+  | Isdir -> "Isdir"
+  | Q_overflow -> "Q_overflow"
+  | Unmount -> "Unmount"
+
+let wait () = Unix.sleepf 0.01
+
+let watch ~lock cmxs_file =
   let th =
     Thread.create @@ fun () ->
     let target_file = Filename.concat (Sys.getcwd ()) cmxs_file in
     let count = ref 0 in
     while true do
+      Mutex.protect lock @@ fun () ->
       try
         incr count;
-        let new_file =
-          Filename.concat
-            (Filename.dirname target_file)
-            ("g" ^ string_of_int !count ^ "_" ^ Filename.basename target_file)
+        let rec reload () =
+          if Sys.file_exists target_file then
+            let new_file =
+              Filename.concat
+                (Filename.dirname target_file)
+                ("g" ^ string_of_int !count ^ "_"
+                ^ Filename.basename target_file)
+            in
+            let copy_ok =
+              Sys.command (Printf.sprintf "cp %s %s" target_file new_file)
+            in
+            if copy_ok = 0 then (
+              try Dynlink.loadfile_private new_file
+              with _ ->
+                wait ();
+                reload ())
+            else (
+              wait ();
+              reload ())
         in
-        let copy_ok =
-          Sys.command (Printf.sprintf "cp %s %s" target_file new_file)
-        in
-        if copy_ok = 0 then Dynlink.loadfile_private new_file;
+        reload ();
         let fd_watcher = Inotify.create () in
         let watch = Inotify.add_watch fd_watcher target_file [ S_All ] in
         let _evs = Inotify.read fd_watcher in
-        (* Unix.sleepf 0.1; *)
+        Format.printf "Events: @.";
+        List.iter
+          (fun (_, kinds, _, _) ->
+            Format.printf "- ";
+            List.iter (fun e -> Format.printf "%s " (to_string e)) kinds;
+            Format.printf "@.")
+          _evs;
+        Format.printf "@.";
         Inotify.rm_watch fd_watcher watch;
         Unix.close fd_watcher
       with err ->
         Format.printf "ERROR: %s@." (Printexc.to_string err);
-        Unix.sleepf 0.01
+        wait ()
     done
   in
   let _th = th () in
   ()
 
 let run cmxs_file =
-  watch cmxs_file;
-  Gamelle.run () (fun ~io:_ () -> ())
+  let lock = Mutex.create () in
+  Mutex.lock lock;
+  let init = ref true in
+  watch ~lock cmxs_file;
+  Gamelle.run () (fun ~io:_ () ->
+      if !init then (
+        init := false;
+        Mutex.unlock lock))
