@@ -1,4 +1,5 @@
 open Common
+module Delayed = Gamelle_common.Delayed
 module Ttf = Tsdl_ttf
 
 type t = { buffer : Sdl_buffer.t; sizes : (int, Ttf.font) Hashtbl.t }
@@ -17,11 +18,11 @@ let get font size =
       ft
 
 let draw ~color font size text =
-  lazy
-    (let font = get font size in
-     let r, g, b, a = Gg.Color.to_srgbi color in
-     let a = int_of_float (a *. 255.) in
-     let& bmp =
-       Ttf.render_text_solid font text (Tsdl.Sdl.Color.create ~r ~g ~b ~a)
-     in
-     Bitmap.of_texture bmp)
+  Delayed.make @@ fun ~io:_ ->
+  let font = get font size in
+  let r, g, b, a = Gg.Color.to_srgbi color in
+  let a = int_of_float (a *. 255.) in
+  let& bmp =
+    Ttf.render_text_solid font text (Tsdl.Sdl.Color.create ~r ~g ~b ~a)
+  in
+  Bitmap.of_texture bmp

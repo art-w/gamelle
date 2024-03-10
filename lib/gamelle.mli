@@ -25,12 +25,12 @@ module Sound : sig
   type sound
 
   val load : string -> sound
-  val play : sound -> unit
+  val play : io:io -> sound -> unit
 
   type music
 
   val load_music : string -> music
-  val play_music : music -> unit
+  val play_music : io:io -> music -> unit
 end
 
 module Transform : sig

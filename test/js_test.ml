@@ -45,7 +45,7 @@ let update ~io { x; y; vx; vy; _ } =
   if Event.is_down ~io `click_left then (
     cursor := not !cursor;
     show_cursor !cursor;
-    Sound.play Assets.stick);
+    Sound.play ~io Assets.stick);
 
   let vx, vy =
     if Event.is_pressed ~io `click_left then

@@ -2,6 +2,7 @@ open Common
 open Gamelle_geometry
 module Gfx = Tsdl_gfx.Gfx
 module Io = Gamelle_common.Io
+module Delayed = Gamelle_common.Delayed
 
 type io = Io.t
 
@@ -19,7 +20,8 @@ let project ~io p =
   let x, y = V2.to_tuple (Io.project ~io p) in
   (int x, int y)
 
-let draw ~io (lazy bmp) p =
+let draw ~io bmp p =
+  let bmp = Delayed.force ~io bmp in
   let scale = io.Io.view.scale in
   let x, y = project ~io p in
   let w, h = Bitmap.size bmp in
@@ -40,7 +42,7 @@ let draw ~io (lazy bmp) p =
 let draw_string ~io ~color font ~size text p =
   let bitmap = Font.draw ~color font size text in
   draw ~io bitmap p;
-  Bitmap.free bitmap
+  Bitmap.free ~io bitmap
 
 let draw_line ~io ~color segment =
   let p, p' = Segment.to_tuple segment in

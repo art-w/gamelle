@@ -20,11 +20,11 @@ let load binstring =
   Jv.set audio "src" (Jv.of_jstr (blob_url binstring));
   audio
 
-let play t =
+let play ~io:_ t =
   let _ = Jv.call t "play" [||] in
   ()
 
 type music = unit
 
 let load_music _ = ()
-let play_music _ = ()
+let play_music ~io:_ _ = ()
