@@ -26,8 +26,8 @@ let watch ~lock cmxs_file =
     while true do
       Mutex.protect lock @@ fun () ->
       try
-        incr count;
         let rec reload () =
+          incr count;
           if Sys.file_exists target_file then
             let new_file =
               Filename.concat
@@ -35,35 +35,44 @@ let watch ~lock cmxs_file =
                 ("g" ^ string_of_int !count ^ "_"
                 ^ Filename.basename target_file)
             in
-            let copy_ok =
-              Sys.command (Printf.sprintf "cp %s %s" target_file new_file)
-            in
-            if copy_ok = 0 then (
-              try Dynlink.loadfile_private new_file
-              with _ ->
+            if Sys.file_exists new_file then reload ()
+            else
+              let copy_ok =
+                Sys.command (Printf.sprintf "cp %S %S" target_file new_file)
+              in
+              if copy_ok = 0 then (
+                try Dynlink.loadfile_private new_file
+                with _err ->
+                  (* Format.printf "dynlink failed: %s@." (Printexc.to_string _err); *)
+                  (* Printexc.print_backtrace stdout; *)
+                  wait ();
+                  reload ())
+              else (
                 wait ();
                 reload ())
-            else (
-              wait ();
-              reload ())
         in
         reload ();
         let fd_watcher = Inotify.create () in
+        Fun.protect ~finally:(fun () -> Unix.close fd_watcher) @@ fun () ->
         let watch = Inotify.add_watch fd_watcher target_file [ S_All ] in
+        Fun.protect ~finally:(fun () -> Inotify.rm_watch fd_watcher watch)
+        @@ fun () ->
         let _evs = Inotify.read fd_watcher in
-        Format.printf "Events: @.";
-        List.iter
-          (fun (_, kinds, _, _) ->
-            Format.printf "- ";
-            List.iter (fun e -> Format.printf "%s " (to_string e)) kinds;
-            Format.printf "@.")
-          _evs;
-        Format.printf "@.";
-        Inotify.rm_watch fd_watcher watch;
-        Unix.close fd_watcher
-      with err ->
-        Format.printf "ERROR: %s@." (Printexc.to_string err);
-        wait ()
+        (* Format.printf "Events: @."; *)
+        (* List.iter *)
+        (*   (fun (_, kinds, _, _) -> *)
+        (*     Format.printf "- "; *)
+        (*     List.iter (fun e -> Format.printf "%s " (to_string e)) kinds; *)
+        (*     Format.printf "@.") *)
+        (*   _evs; *)
+        (* Format.printf "@."; *)
+        (* Inotify.rm_watch fd_watcher watch *)
+        ()
+      with
+      | Unix.Unix_error (Unix.ENOENT, _, _) -> wait ()
+      | err ->
+          Format.printf "ERROR: %s@." (Printexc.to_string err);
+          wait ()
     done
   in
   let _th = th () in

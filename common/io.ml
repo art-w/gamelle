@@ -1,4 +1,15 @@
-type t = { view : Transform.t; event : Event.t }
+type t = {
+  view : Transform.t;
+  event : Event.t;
+  clean : (unit -> unit) list ref;
+}
+
+let make () =
+  { view = Transform.default; event = Event.default; clean = ref [] }
+
+let clean ~io fn = io.clean := fn :: !(io.clean)
+
+(* *)
 
 let translated dxy io = { io with view = Transform.translate dxy io.view }
 let scaled factor io = { io with view = Transform.scale factor io.view }

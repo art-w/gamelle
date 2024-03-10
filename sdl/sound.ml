@@ -10,8 +10,8 @@ let load_file filename =
   sound
 
 let load binstring =
-  Delayed.make @@ fun ~io:_ ->
-  let rw = Sdl_buffer.load binstring in
+  Delayed.make @@ fun ~io ->
+  let rw = Sdl_buffer.load ~io binstring in
   let& sound = Tsdl_mixer.Mixer.load_wav_rw (Sdl_buffer.get rw) 1 in
   let _ = Sys.opaque_identity rw in
   sound

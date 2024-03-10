@@ -29,7 +29,12 @@ end
 
 type run =
   | No_run : run
-  | Run : { state : 'a; update : io:io -> 'a -> 'a } -> run
+  | Run : {
+      state : 'a;
+      update : io:io -> 'a -> 'a;
+      clean : (unit -> unit) list;
+    }
+      -> run
 
 let lock = Mutex.create ()
 let current_run = ref No_run
@@ -79,16 +84,16 @@ let run () =
     done;
     events := Event.update_updown previous !events;
 
-    (* Format.printf "playing: %b@." (Tsdl_mixer.Mixer.playing (Some 1)) ; *)
     Mutex.protect lock (fun () ->
         match !current_run with
         | No_run -> invalid_arg "No game currently running"
-        | Run { state; update } ->
+        | Run { state; update; clean } ->
             let& () = Sdl.render_clear renderer in
-            let io = { Io.view = Transform.default; event = !events } in
+            let io = { (Io.make ()) with event = !events } in
             fill_rect ~io ~color:Color.black (Window.box ());
             let state = update ~io state in
-            current_run := Run { state; update });
+            let clean = List.rev_append !(io.clean) clean in
+            current_run := Run { state; update; clean });
     Sdl.render_present renderer;
 
     if Gamelle_common.Event.is_pressed !events `quit then raise Exit;
@@ -104,7 +109,11 @@ let run () =
     loop ()
   in
   (try loop () with Exit -> ());
-
+  (match !current_run with
+  | No_run -> assert false
+  | Run { clean; _ } ->
+      List.iter (fun fn -> fn ()) clean;
+      current_run := No_run);
   Tsdl_mixer.Mixer.close_audio ();
   Tsdl_mixer.Mixer.quit ();
   Tsdl_image.quit ();
@@ -114,8 +123,13 @@ let run () =
 let run state update =
   Mutex.lock lock;
   let prev = !current_run in
-  current_run := Run { state; update };
-  Mutex.unlock lock;
-  match prev with No_run -> run () | Run _ -> ()
+  current_run := Run { state; update; clean = [] };
+  match prev with
+  | No_run ->
+      Mutex.unlock lock;
+      run ()
+  | Run { clean; _ } ->
+      List.iter (fun fn -> fn ()) clean;
+      Mutex.unlock lock
 
 module Event = Gamelle_common.Io
