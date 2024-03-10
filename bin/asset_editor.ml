@@ -73,5 +73,6 @@ let print_rects ~file { rects; _ } =
 
 let do_the_thing out file =
   let st = fresh_state file in
-  let on_exit = print_rects ~file:out in
-  run st ~on_exit main
+  run st @@ fun ~io st ->
+  if Event.is_pressed ~io `quit then print_rects ~file:out st;
+  main ~io st

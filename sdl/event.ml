@@ -19,7 +19,8 @@ let key_of_event e = key_of_keycode (Sdl.Event.get e Sdl.Event.keyboard_keycode)
 let update t e =
   let typ = Sdl.Event.get e Sdl.Event.typ in
   match () with
-  | _ when typ = Sdl.Event.quit -> raise Exit
+  | _ when typ = Sdl.Event.quit ->
+      { t with keypressed = insert `quit t.keypressed }
   | _ when typ = Sdl.Event.key_down -> (
       let key = key_of_event e in
       match key with

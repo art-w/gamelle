@@ -1,7 +1,6 @@
 type io
 
-val run :
-  ?on_exit:('state -> unit) -> 'state -> (io:io -> 'state -> 'state) -> unit
+val run : 'state -> (io:io -> 'state -> 'state) -> unit
 
 open Gamelle_geometry
 module Geometry : module type of Gamelle_geometry
@@ -65,7 +64,8 @@ module Event : sig
   val mouse_pos : io:io -> float * float
 
   type key =
-    [ `escape
+    [ `quit
+    | `escape
     | `control_left
     | `control_right
     | `arrow_left

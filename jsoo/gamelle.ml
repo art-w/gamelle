@@ -34,9 +34,7 @@ module Window = struct
   let box () = Box2.v V2.zero (size ())
 end
 
-let run ?(on_exit = ignore) state update =
-  let _ = on_exit in
-  (* wow *)
+let run state update =
   let canvas =
     match Document.find_el_by_id G.document (Jstr.of_string "target") with
     | None -> failwith "missing 'target' canvas"

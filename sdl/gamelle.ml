@@ -28,12 +28,7 @@ end
 
 type run =
   | No_run : run
-  | Run : {
-      state : 'a;
-      update : io:io -> 'a -> 'a;
-      on_exit : 'a -> unit;
-    }
-      -> run
+  | Run : { state : 'a; update : io:io -> 'a -> 'a } -> run
 
 let current_run = ref No_run
 
@@ -85,14 +80,16 @@ let run () =
     (* Format.printf "playing: %b@." (Tsdl_mixer.Mixer.playing (Some 1)) ; *)
     (match !current_run with
     | No_run -> invalid_arg "No game currently running"
-    | Run { state; update; on_exit } ->
+    | Run { state; update } ->
         let& () = Sdl.render_clear renderer in
         let io = { Io.view = View.default; event = !events } in
         fill_rect ~io ~color:Color.black (Window.box ());
         let state = update ~io state in
-        current_run := Run { state; update; on_exit });
-
+        current_run := Run { state; update });
     Sdl.render_present renderer;
+
+    if Gamelle_common.Event.is_pressed !events `quit then raise Exit;
+
     let now = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
     let frame_elapsed = now -. t0 in
     let desired_time = 1.0 /. 60.0 in
@@ -111,19 +108,9 @@ let run () =
   Sdl.destroy_renderer renderer;
   Sdl.destroy_window window
 
-let cleanup () =
-  match !current_run with
-  | No_run -> assert false
-  | Run { state; on_exit; _ } -> on_exit state
-
-let run ?(on_exit = ignore) state update =
-  match !current_run with
-  | No_run ->
-      current_run := Run { state; update; on_exit };
-      run ();
-      cleanup ()
-  | Run _ ->
-      Format.printf "set new run@.";
-      current_run := Run { state; update; on_exit }
+let run state update =
+  let prev = !current_run in
+  current_run := Run { state; update };
+  match prev with No_run -> run () | Run _ -> ()
 
 module Event = Gamelle_common.Io

@@ -1,5 +1,6 @@
 type key =
-  [ `escape
+  [ `quit
+  | `escape
   | `control_left
   | `control_right
   | `arrow_left
