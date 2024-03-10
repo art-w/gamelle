@@ -33,14 +33,24 @@ module Sound : sig
   val play_music : music -> unit
 end
 
+module Transform : sig
+  type t
+
+  val default : t
+  val translate : V2.t -> t -> t
+  val scale : float -> t -> t
+  val rotate : float -> t -> t
+  val project : t -> P2.t -> P2.t
+end
+
 module View : sig
   type 'a scene = io:io -> 'a
 
   val ( & ) : unit scene -> unit scene -> unit scene
-  val translate : float * float -> 'a scene -> 'a scene
+  val translate : V2.t -> 'a scene -> 'a scene
   val scale : float -> 'a scene -> 'a scene
   val rotate : float -> 'a scene -> 'a scene
-  val translated : float * float -> io -> io
+  val translated : V2.t -> io -> io
   val scaled : float -> io -> io
   val rotated : float -> io -> io
 end

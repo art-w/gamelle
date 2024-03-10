@@ -5,6 +5,7 @@ module Color = Color
 module Bitmap = Bitmap
 module Font = Font
 module Sound = Sound
+module Transform = Gamelle_common.Transform
 module View = Gamelle_common.Io
 include Draw
 include Gamelle_geometry.Make (Draw)
@@ -82,7 +83,7 @@ let run () =
     | No_run -> invalid_arg "No game currently running"
     | Run { state; update } ->
         let& () = Sdl.render_clear renderer in
-        let io = { Io.view = View.default; event = !events } in
+        let io = { Io.view = Transform.default; event = !events } in
         fill_rect ~io ~color:Color.black (Window.box ());
         let state = update ~io state in
         current_run := Run { state; update });

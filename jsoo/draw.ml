@@ -14,7 +14,7 @@ let set_color c =
 
 let transform ~io:{ Io.view; _ } =
   C.reset_transform (render ());
-  let dx, dy = view.translate in
+  let dx, dy = V2.to_tuple view.translate in
   C.translate (render ()) ~x:dx ~y:dy;
   C.rotate (render ()) view.rotate;
   C.scale (render ()) ~sx:view.scale ~sy:view.scale

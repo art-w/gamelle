@@ -16,7 +16,7 @@ let tau = 8.0 *. atan 1.0
 let point_zero = Sdl.Point.create ~x:0 ~y:0
 
 let project ~io p =
-  let x, y = Io.project ~io p in
+  let x, y = V2.to_tuple (Io.project ~io p) in
   (int x, int y)
 
 let draw ~io (lazy bmp) p =

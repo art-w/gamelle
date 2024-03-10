@@ -6,6 +6,7 @@ module Color = Color
 module Bitmap = Bitmap
 module Font = Font
 module Sound = Sound
+module Transform = Gamelle_common.Transform
 module View = Gamelle_common.Io
 include Draw
 include Gamelle_geometry.Make (Draw)
@@ -58,7 +59,9 @@ let run state update =
     prev_now := !now;
     now := elapsed /. 1000.0;
     Event.new_frame ();
-    let io = { Io.view = Gamelle_common.Io.default; event = !Event.current } in
+    let io =
+      { Io.view = Gamelle_common.Transform.default; event = !Event.current }
+    in
     fill_rect ~io ~color:Color.black (Window.box ());
     let state = update ~io state in
     animate state

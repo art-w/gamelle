@@ -75,18 +75,19 @@ let update ~io { x; y; vx; vy; _ } =
   draw_string ~io:(View.scaled 2.0 io) ~color:Color.white Font.default ~size:30
     "Hello World!" V2.zero;
   View.(
-    translate (mx, my) (fill_circle ~color:red (Circle.v (P2.v 0.0 0.0) 10.0))
-    & translate (x, y)
+    translate (V2.v mx my)
+      (fill_circle ~color:red (Circle.v (P2.v 0.0 0.0) 10.0))
+    & translate (V2.v x y)
         (scale 3.0
            (draw_rect ~color:yellow (Box2.v (P2.v 0. 0.) (Size2.v 100.0 100.0))
-           & translate (75. /. 2., 59. /. 2.)
+           & translate (V2.v (75. /. 2.) (59. /. 2.))
              @@ rotate (1.0 *. clock ())
-             @@ translate (-75. /. 2., -59. /. 2.)
+             @@ translate (V2.v (-75. /. 2.) (-59. /. 2.))
              @@ (fill_rect ~color:blue (Box2.v (P2.v 0. 0.) (Size2.v 75. 59.))
                 & draw_rect ~color:red (Box2.v (P2.v 0. 0.) (Size2.v 75. 59.))
                 & draw img (P2.v 0. 0.)
                 & draw_line ~color:red (Segment.v (P2.v 0. 0.) (P2.v 75. 59.))
-                & translate (5.0, 5.0)
+                & translate (V2.v 5. 5.)
                     (fill_poly ~color:yellow
                        [ P2.v 20. 0.; P2.v 30. 30.; P2.v 15. 40. ])
                 & draw_poly ~color:green
