@@ -3,16 +3,15 @@ include Gamelle_common.Event
 
 let key_of_keycode kc =
   match () with
-  | _ when kc = Sdl.K.escape -> Some Escape
-  | _ when kc = Sdl.K.lctrl -> Some Control_left
-  | _ when kc = Sdl.K.rctrl -> Some Control_right
-  | _ when kc = Sdl.K.left -> Some Arrow_left
-  | _ when kc = Sdl.K.right -> Some Arrow_right
-  | _ when kc = Sdl.K.up -> Some Arrow_up
-  | _ when kc = Sdl.K.down -> Some Arrow_down
-  | _ when kc = Sdl.K.rctrl -> Some Control_right
+  | _ when kc = Sdl.K.escape -> Some `escape
+  | _ when kc = Sdl.K.lctrl -> Some `control_left
+  | _ when kc = Sdl.K.rctrl -> Some `control_right
+  | _ when kc = Sdl.K.left -> Some `arrow_left
+  | _ when kc = Sdl.K.right -> Some `arrow_right
+  | _ when kc = Sdl.K.up -> Some `arrow_up
+  | _ when kc = Sdl.K.down -> Some `arrow_down
   | _ when kc >= Sdl.K.a && kc <= Sdl.K.z ->
-      Some (Char (Char.chr (Char.code 'a' + kc - Sdl.K.a)))
+      Some (`char (Char.chr (Char.code 'a' + kc - Sdl.K.a)))
   | _ -> None
 
 let key_of_event e = key_of_keycode (Sdl.Event.get e Sdl.Event.keyboard_keycode)
@@ -36,17 +35,17 @@ let update t e =
       | d when d > 0 ->
           {
             t with
-            keypressed = insert Wheel_up @@ remove Wheel_down t.keypressed;
+            keypressed = insert `wheel_up @@ remove `wheel_down t.keypressed;
           }
       | d when d < 0 ->
           {
             t with
-            keypressed = insert Wheel_down @@ remove Wheel_up t.keypressed;
+            keypressed = insert `wheel_down @@ remove `wheel_up t.keypressed;
           }
       | _ ->
           {
             t with
-            keypressed = remove Wheel_down @@ remove Wheel_up t.keypressed;
+            keypressed = remove `wheel_down @@ remove `wheel_up t.keypressed;
           })
   | _ ->
       (* Format.printf "unhandled event@." ; *)
@@ -55,18 +54,18 @@ let update t e =
 let update t e = try update t e with Exit as exn -> raise exn | _ -> t
 
 let reset t =
-  { t with keypressed = remove Wheel_down @@ remove Wheel_up t.keypressed }
+  { t with keypressed = remove `wheel_down @@ remove `wheel_up t.keypressed }
 
 let update_mouse t =
   let state, (x, y) = Sdl.get_mouse_state () in
   let t =
     if Int32.logand state Sdl.Button.lmask <> Int32.zero then
-      { t with keypressed = insert Click_left t.keypressed }
-    else { t with keypressed = remove Click_left t.keypressed }
+      { t with keypressed = insert `click_left t.keypressed }
+    else { t with keypressed = remove `click_left t.keypressed }
   in
   let t =
     if Int32.logand state Sdl.Button.rmask <> Int32.zero then
-      { t with keypressed = insert Click_right t.keypressed }
-    else { t with keypressed = remove Click_right t.keypressed }
+      { t with keypressed = insert `click_right t.keypressed }
+    else { t with keypressed = remove `click_right t.keypressed }
   in
   { t with mouse_x = float x; mouse_y = float y }

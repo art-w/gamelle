@@ -116,29 +116,29 @@ let cell_size = 64.
 
 let size = cell_size *. 3.
 
-let draw_background ~view () =
+let draw_background ~io () =
   let color = Color.white in
-  fill_rect ~view ~color (Box2.v (P2.v 0. 0.) (Size2.v size size))
+  fill_rect ~io ~color (Box2.v (P2.v 0. 0.) (Size2.v size size))
 
-let draw_grid ~view () =
+let draw_grid ~io () =
   let color = Color.black in
-  draw_line ~view ~color (Segment.v (P2.v cell_size 0.) (P2.v cell_size size)) ;
-  draw_line ~view ~color
+  draw_line ~io ~color (Segment.v (P2.v cell_size 0.) (P2.v cell_size size)) ;
+  draw_line ~io ~color
     (Segment.v (P2.v (cell_size *. 2.) 0.) (P2.v (cell_size *. 2.) size)) ;
-  draw_line ~view ~color (Segment.v (P2.v 0. cell_size) (P2.v size cell_size)) ;
-  draw_line ~view ~color
+  draw_line ~io ~color (Segment.v (P2.v 0. cell_size) (P2.v size cell_size)) ;
+  draw_line ~io ~color
     (Segment.v (P2.v 0. (cell_size *. 2.)) (P2.v size (cell_size *. 2.)))
 
-let draw_cell ~view cell p =
+let draw_cell ~io cell p =
   match cell with
   | Some Circle ->
-      draw ~view Assets.circle p
+      draw ~io Assets.circle p
   | Some Cross ->
-      draw ~view Assets.cross p
+      draw ~io Assets.cross p
   | None ->
       ()
 
-let draw_board ~view
+let draw_board ~io
     ({ left_top
      ; center_top
      ; right_top
@@ -149,19 +149,19 @@ let draw_board ~view
      ; center_bottom
      ; right_bottom } :
       board ) =
-  draw_cell ~view left_top (P2.v 0. 0.) ;
-  draw_cell ~view center_top (P2.v cell_size 0.) ;
-  draw_cell ~view right_top (P2.v (cell_size *. 2.) 0.) ;
-  draw_cell ~view left_center (P2.v 0. cell_size) ;
-  draw_cell ~view center_center (P2.v cell_size cell_size) ;
-  draw_cell ~view right_center (P2.v (cell_size *. 2.) cell_size) ;
-  draw_cell ~view left_bottom (P2.v 0. (cell_size *. 2.)) ;
-  draw_cell ~view center_bottom (P2.v cell_size (cell_size *. 2.)) ;
-  draw_cell ~view right_bottom (P2.v (cell_size *. 2.) (cell_size *. 2.))
+  draw_cell ~io left_top (P2.v 0. 0.) ;
+  draw_cell ~io center_top (P2.v cell_size 0.) ;
+  draw_cell ~io right_top (P2.v (cell_size *. 2.) 0.) ;
+  draw_cell ~io left_center (P2.v 0. cell_size) ;
+  draw_cell ~io center_center (P2.v cell_size cell_size) ;
+  draw_cell ~io right_center (P2.v (cell_size *. 2.) cell_size) ;
+  draw_cell ~io left_bottom (P2.v 0. (cell_size *. 2.)) ;
+  draw_cell ~io center_bottom (P2.v cell_size (cell_size *. 2.)) ;
+  draw_cell ~io right_bottom (P2.v (cell_size *. 2.) (cell_size *. 2.))
 
 let () =
   run state
-  @@ fun ~view event state ->
+  @@ fun ~io state ->
   let {board; player} = state in
   let state =
     match victory board with
@@ -170,8 +170,8 @@ let () =
     | Some Cross ->
         print_endline "Cross won" ; exit 0
     | None ->
-        if Event.(is_up event Click_left) then
-          let x, y = Event.mouse_pos event in
+        if Event.is_up ~io `click_left then
+          let x, y = Event.mouse_pos ~io in
           (* first column *)
           let cell_x = Int.of_float (floor x /. 64.)
           and cell_y = Int.of_float (floor (y /. 64.)) in
@@ -186,7 +186,7 @@ let () =
         else state
   in
   show_cursor true ;
-  draw_background ~view () ;
-  draw_board ~view state.board ;
-  draw_grid ~view () ;
+  draw_background ~io () ;
+  draw_board ~io state.board ;
+  draw_grid ~io () ;
   state

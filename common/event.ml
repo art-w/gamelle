@@ -1,16 +1,16 @@
 type key =
-  | Escape
-  | Control_left
-  | Control_right
-  | Arrow_left
-  | Arrow_right
-  | Arrow_up
-  | Arrow_down
-  | Char of char
-  | Click_left
-  | Click_right
-  | Wheel_up
-  | Wheel_down
+  [ `escape
+  | `control_left
+  | `control_right
+  | `arrow_left
+  | `arrow_right
+  | `arrow_up
+  | `arrow_down
+  | `char of char
+  | `click_left
+  | `click_right
+  | `wheel_up
+  | `wheel_down ]
 
 module Keys = Set.Make (struct
   type t = key

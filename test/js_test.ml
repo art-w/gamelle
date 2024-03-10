@@ -32,23 +32,23 @@ let green = Color.green
 let blue = Color.blue
 let yellow = Color.v 1.0 1.0 0.0 1.0
 
-let update ~view e { x; y; vx; vy; _ } =
-  if Event.is_pressed e Escape then raise Exit;
-  let y = if Event.is_pressed e Wheel_down then y +. 10.0 else y in
-  let y = if Event.is_pressed e Wheel_up then y -. 10.0 else y in
-  let vy = if Event.is_pressed e Arrow_down then vy +. 100.0 else vy in
-  let vy = if Event.is_pressed e Arrow_up then vy -. 100.0 else vy in
-  let vx = if Event.is_pressed e Arrow_right then vx +. 100.0 else vx in
-  let vx = if Event.is_pressed e Arrow_left then vx -. 100.0 else vx in
-  let mx, my = Event.mouse_pos e in
+let update ~io { x; y; vx; vy; _ } =
+  if Event.is_pressed ~io `escape then raise Exit;
+  let y = if Event.is_pressed ~io `wheel_down then y +. 10.0 else y in
+  let y = if Event.is_pressed ~io `wheel_up then y -. 10.0 else y in
+  let vy = if Event.is_pressed ~io `arrow_down then vy +. 100.0 else vy in
+  let vy = if Event.is_pressed ~io `arrow_up then vy -. 100.0 else vy in
+  let vx = if Event.is_pressed ~io `arrow_right then vx +. 100.0 else vx in
+  let vx = if Event.is_pressed ~io `arrow_left then vx -. 100.0 else vx in
+  let mx, my = Event.mouse_pos ~io in
 
-  if Event.is_down e Click_left then (
+  if Event.is_down ~io `click_left then (
     cursor := not !cursor;
     show_cursor !cursor;
     Sound.play Assets.stick);
 
   let vx, vy =
-    if Event.is_pressed e Click_left then
+    if Event.is_pressed ~io `click_left then
       let dx, dy = norm_max 100.0 (mx -. x, my -. y) in
       (vx +. dx, vy +. dy)
     else (vx, vy)
@@ -69,11 +69,11 @@ let update ~view e { x; y; vx; vy; _ } =
   let vy = vy *. 0.9 in
 
   Window.set_size (800, 800);
-  fill_rect ~color:black ~view (Window.box ());
-  draw_string ~view ~color:Color.white Font.default ~size:30 "Hello World!"
+  fill_rect ~io ~color:black (Window.box ());
+  draw_string ~io ~color:Color.white Font.default ~size:30 "Hello World!"
     V2.zero;
-  draw_string ~view:(View.scaled 2.0 view) ~color:Color.white Font.default
-    ~size:30 "Hello World!" V2.zero;
+  draw_string ~io:(View.scaled 2.0 io) ~color:Color.white Font.default ~size:30
+    "Hello World!" V2.zero;
   View.(
     translate (mx, my) (fill_circle ~color:red (Circle.v (P2.v 0.0 0.0) 10.0))
     & translate (x, y)
@@ -93,7 +93,7 @@ let update ~view e { x; y; vx; vy; _ } =
                     [ P2.v 20. 0.; P2.v 30. 30.; P2.v 15. 40. ]
                 & draw_circle ~color:green
                     (Circle.v (P2.v (75.0 /. 2.) (59.0 /. 2.)) 10.)))))
-    ~view;
+    ~io;
   { x; y; vx; vy; mx; my }
 
 let () = run { mx = 0.0; my = 0.0; x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 } update

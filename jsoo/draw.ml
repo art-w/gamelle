@@ -1,8 +1,8 @@
 open Gamelle_geometry
 open Common
-module V = Gamelle_common.View
+module Io = Gamelle_common.Io
 
-type view = V.t
+type io = Io.t
 
 let set_color c =
   let r, g, b, a = Color.to_srgbi c in
@@ -12,35 +12,35 @@ let set_color c =
   C.set_fill_style (render ()) color;
   C.set_stroke_style (render ()) color
 
-let transform ~view =
+let transform ~io:{ Io.view; _ } =
   C.reset_transform (render ());
-  let dx, dy = view.V.translate in
+  let dx, dy = view.translate in
   C.translate (render ()) ~x:dx ~y:dy;
-  C.rotate (render ()) view.V.rotate;
-  C.scale (render ()) ~sx:view.V.scale ~sy:view.V.scale
+  C.rotate (render ()) view.rotate;
+  C.scale (render ()) ~sx:view.scale ~sy:view.scale
 
-let draw ~view bmp p =
-  transform ~view;
+let draw ~io bmp p =
+  transform ~io;
   let x, y = V2.to_tuple p in
-  Bitmap.draw ~view ~ctx:(render ()) bmp ~x ~y
+  Bitmap.draw ~io ~ctx:(render ()) bmp ~x ~y
 
-let fill_rect ~view ~color rect =
-  transform ~view;
+let fill_rect ~io ~color rect =
+  transform ~io;
   let x, y = V2.to_tuple (Box2.o rect) in
   let w, h = V2.to_tuple (Box2.size rect) in
   set_color color;
   C.fill_rect (render ()) ~x ~y ~w ~h
 
-let draw_rect ~view ~color rect =
-  transform ~view;
+let draw_rect ~io ~color rect =
+  transform ~io;
   let x, y = V2.to_tuple (Box2.o rect) in
   let w, h = V2.to_tuple (Box2.size rect) in
   set_color color;
   C.stroke_rect (render ()) ~x ~y ~w ~h
 
-let draw_line ~view ~color segment =
+let draw_line ~io ~color segment =
   let p0, p1 = Segment.to_tuple segment in
-  transform ~view;
+  transform ~io;
   let x0, y0 = V2.to_tuple p0 in
   let x1, y1 = V2.to_tuple p1 in
   set_color color;
@@ -59,42 +59,42 @@ let path_poly pts =
   C.Path.close path;
   path
 
-let draw_poly ~view ~color pts =
-  transform ~view;
+let draw_poly ~io ~color pts =
+  transform ~io;
   set_color color;
   let path = path_poly pts in
   C.stroke (render ()) path
 
-let fill_poly ~view ~color pts =
-  transform ~view;
+let fill_poly ~io ~color pts =
+  transform ~io;
   set_color color;
   let path = path_poly pts in
   C.fill (render ()) path
 
 let tau = 8.0 *. atan 1.0
 
-let draw_circle ~view ~color circle =
+let draw_circle ~io ~color circle =
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  transform ~view;
+  transform ~io;
   set_color color;
   let x, y = V2.to_tuple center in
   let path = C.Path.create () in
   C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
   C.stroke (render ()) path
 
-let fill_circle ~view ~color circle =
+let fill_circle ~io ~color circle =
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  transform ~view;
+  transform ~io;
   set_color color;
   let x, y = V2.to_tuple center in
   let path = C.Path.create () in
   C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
   C.fill (render ()) path
 
-let draw_string ~view ~color font ~size txt p =
-  transform ~view;
+let draw_string ~io ~color font ~size txt p =
+  transform ~io;
   set_color color;
   let x, y = V2.to_tuple p in
   Font.draw_at font ~size txt (x, y)

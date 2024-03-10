@@ -108,11 +108,11 @@ let tick state =
 
 let color = Color.white
 
-let draw_background ~view = fill_rect ~view ~color:Color.black box_game
+let draw_background ~io = fill_rect ~io ~color:Color.black box_game
 
-let draw_court ~view = draw_rect ~view ~color court
+let draw_court ~io = draw_rect ~io ~color court
 
-let draw_score ~view ~state =
+let draw_score ~io ~state =
   (* Todo : use font*)
   let { player_left= {score= score_left; _}
       ; player_right= {score= score_right; _}
@@ -123,33 +123,32 @@ let draw_score ~view ~state =
   let y_end = Box2.oy court -. 2. in
   for i = 1 to score_left do
     let x = Box2.ox box_game +. float_of_int (i * 4) in
-    draw_line ~view ~color (Segment.v (P2.v x y_start) (P2.v x y_end))
+    draw_line ~io ~color (Segment.v (P2.v x y_start) (P2.v x y_end))
   done ;
   for i = 1 to score_right do
     let x = Box2.maxx box_game -. float_of_int (i * 4) in
-    draw_line ~view ~color (Segment.v (P2.v x y_start) (P2.v x y_end))
+    draw_line ~io ~color (Segment.v (P2.v x y_start) (P2.v x y_end))
   done
 
-let draw_ball ~view {ball_pos; _} =
-  fill_circle ~view ~color (Circle.v ball_pos 4.)
+let draw_ball ~io {ball_pos; _} = fill_circle ~io ~color (Circle.v ball_pos 4.)
 
-let draw_players ~view {player_left; player_right; _} =
+let draw_players ~io {player_left; player_right; _} =
   let player_left = player_positions player_left_x player_left in
   let player_right = player_positions player_right_x player_right in
-  draw_line ~view ~color player_left ;
-  draw_line ~view ~color player_right
+  draw_line ~io ~color player_left ;
+  draw_line ~io ~color player_right
 
-let update ~view event state =
+let update ~io state =
   let player_speed = player_speed state in
-  if Event.is_pressed event Escape then raise Exit ;
+  if Event.is_pressed ~io `escape then raise Exit ;
   let player_left_speed, state =
-    if Event.is_pressed event (Char 'w') then
+    if Event.is_pressed ~io (`char 'w') then
       let delta_y = -.player_speed in
       let player_left =
         update_player ~x:player_left_x ~player:state.player_left ~delta_y
       in
       (delta_y, {state with player_left})
-    else if Event.is_pressed event (Char 's') then
+    else if Event.is_pressed ~io (`char 's') then
       let delta_y = player_speed in
       let player_left =
         update_player ~x:player_left_x ~player:state.player_left ~delta_y
@@ -158,13 +157,13 @@ let update ~view event state =
     else (0., state)
   in
   let player_right_speed, state =
-    if Event.is_pressed event Arrow_up then
+    if Event.is_pressed ~io `arrow_up then
       let delta_y = -.player_speed in
       let player_right =
         update_player ~x:player_right_x ~player:state.player_right ~delta_y
       in
       (delta_y, {state with player_right})
-    else if Event.is_pressed event Arrow_down then
+    else if Event.is_pressed ~io `arrow_down then
       let delta_y = player_speed in
       let player_right =
         update_player ~x:player_right_x ~player:state.player_right ~delta_y
@@ -173,11 +172,11 @@ let update ~view event state =
     else (0., state)
   in
   let state = tick ~player_left_speed ~player_right_speed state in
-  draw_background ~view ;
-  draw_court ~view ;
-  draw_score ~view ~state ;
-  draw_ball ~view state ;
-  draw_players ~view state ;
+  draw_background ~io ;
+  draw_court ~io ;
+  draw_score ~io ~state ;
+  draw_ball ~io state ;
+  draw_players ~io state ;
   state
 
 let () = run init update

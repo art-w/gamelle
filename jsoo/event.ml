@@ -10,19 +10,19 @@ let new_frame () =
 
 let key_of_keycode kc =
   match Jstr.to_string kc with
-  | "ArrowLeft" -> Arrow_left
-  | "ArrowRight" -> Arrow_right
-  | "ArrowUp" -> Arrow_up
-  | "ArrowDown" -> Arrow_down
-  | "Escape" -> Escape
-  | "ControlLeft" -> Control_left
-  | "ControlRight" -> Control_right
+  | "ArrowLeft" -> `arrow_left
+  | "ArrowRight" -> `arrow_right
+  | "ArrowUp" -> `arrow_up
+  | "ArrowDown" -> `arrow_down
+  | "Escape" -> `escape
+  | "ControlLeft" -> `control_left
+  | "ControlRight" -> `control_right
   | key when String.length key = 4 && String.starts_with ~prefix:"Key" key ->
       let lt = key.[3] in
-      Char (Char.lowercase_ascii lt)
+      `char (Char.lowercase_ascii lt)
   | kc ->
       Console.(log [ "TODO key:"; kc ]);
-      Escape
+      `escape
 
 let key_of_event e = key_of_keycode (Ev.Keyboard.code e)
 
@@ -39,13 +39,13 @@ let update_mouse t e =
   let buttons = Ev.Mouse.buttons e in
   let t =
     if buttons land 0x01 <> 0 then
-      { t with keypressed = insert Click_left t.keypressed }
-    else { t with keypressed = remove Click_left t.keypressed }
+      { t with keypressed = insert `click_left t.keypressed }
+    else { t with keypressed = remove `click_left t.keypressed }
   in
   let t =
     if buttons land 0x10 <> 0 then
-      { t with keypressed = insert Click_right t.keypressed }
-    else { t with keypressed = remove Click_right t.keypressed }
+      { t with keypressed = insert `click_right t.keypressed }
+    else { t with keypressed = remove `click_right t.keypressed }
   in
   { t with mouse_x = x; mouse_y = y }
 

@@ -4,14 +4,15 @@ open Gg
 module Geometry = Gamelle_geometry
 module Color = Color
 module Bitmap = Bitmap
-module Event = Event
 module Font = Font
 module Sound = Sound
-module View = Gamelle_common.View
+module View = Gamelle_common.Io
 include Draw
 include Gamelle_geometry.Make (Draw)
 
 (* type ctx = C.t *)
+
+type io = Gamelle_common.Io.t
 
 let prev_now = ref 0.0
 let now = ref 0.0
@@ -59,9 +60,11 @@ let run ?(on_exit = ignore) state update =
     prev_now := !now;
     now := elapsed /. 1000.0;
     Event.new_frame ();
-    let view = Gamelle_common.View.default in
-    fill_rect ~view ~color:Color.black (Window.box ());
-    let state = update ~view !Event.current state in
+    let io = { Io.view = Gamelle_common.Io.default; event = !Event.current } in
+    fill_rect ~io ~color:Color.black (Window.box ());
+    let state = update ~io state in
     animate state
   in
   animate state
+
+module Event = Gamelle_common.Io

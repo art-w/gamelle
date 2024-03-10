@@ -12,17 +12,15 @@ let rect box =
 module Make (Draw : Draw.S) = struct
   open Draw
 
-  let draw ~view ~color = function
-    | Segment (p0, p1) -> draw_line ~view ~color (Segment.v p0 p1)
-    | Circle (center, radius) ->
-        draw_circle ~view ~color (Circle.v center radius)
-    | Polygon pts -> draw_poly ~view ~color pts
+  let draw ~io ~color = function
+    | Segment (p0, p1) -> draw_line ~io ~color (Segment.v p0 p1)
+    | Circle (center, radius) -> draw_circle ~io ~color (Circle.v center radius)
+    | Polygon pts -> draw_poly ~io ~color pts
 
-  let fill ~view ~color = function
-    | Segment (p0, p1) -> draw_line ~view ~color (Segment.v p0 p1)
-    | Circle (center, radius) ->
-        fill_circle ~view ~color (Circle.v center radius)
-    | Polygon pts -> fill_poly ~view ~color pts
+  let fill ~io ~color = function
+    | Segment (p0, p1) -> draw_line ~io ~color (Segment.v p0 p1)
+    | Circle (center, radius) -> fill_circle ~io ~color (Circle.v center radius)
+    | Polygon pts -> fill_poly ~io ~color pts
 end
 
 let translate dxy = function

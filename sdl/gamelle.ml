@@ -5,8 +5,7 @@ module Color = Color
 module Bitmap = Bitmap
 module Font = Font
 module Sound = Sound
-module Event = Event
-module View = Gamelle_common.View
+module View = Gamelle_common.Io
 include Draw
 include Gamelle_geometry.Make (Draw)
 
@@ -31,7 +30,7 @@ type run =
   | No_run : run
   | Run : {
       state : 'a;
-      update : view:View.t -> Event.t -> 'a -> 'a;
+      update : io:io -> 'a -> 'a;
       on_exit : 'a -> unit;
     }
       -> run
@@ -88,9 +87,9 @@ let run () =
     | No_run -> invalid_arg "No game currently running"
     | Run { state; update; on_exit } ->
         let& () = Sdl.render_clear renderer in
-        let view = View.default in
-        fill_rect ~view ~color:Color.black (Window.box ());
-        let state = update ~view !events state in
+        let io = { Io.view = View.default; event = !events } in
+        fill_rect ~io ~color:Color.black (Window.box ());
+        let state = update ~io state in
         current_run := Run { state; update; on_exit });
 
     Sdl.render_present renderer;
@@ -126,3 +125,5 @@ let run ?(on_exit = ignore) state update =
   | Run _ ->
       Format.printf "set new run@.";
       current_run := Run { state; update; on_exit }
+
+module Event = Gamelle_common.Io
