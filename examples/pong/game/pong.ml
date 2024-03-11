@@ -129,22 +129,19 @@ let draw_background ~io = fill_rect ~io ~color:Color.black box_game
 let draw_court ~io = draw_rect ~io ~color court
 
 let draw_score ~io ~state =
-  (* Todo : use font*)
   let { player_left= {score= score_left; _}
       ; player_right= {score= score_right; _}
       ; _ } =
     state
   in
-  let y_start = Box2.oy box_game in
-  let y_end = Box2.oy court -. 2. in
-  for i = 1 to score_left do
-    let x = Box2.ox box_game +. float_of_int (i * 4) in
-    draw_line ~io ~color (Segment.v (P2.v x y_start) (P2.v x y_end))
-  done ;
-  for i = 1 to score_right do
-    let x = Box2.maxx box_game -. float_of_int (i * 4) in
-    draw_line ~io ~color (Segment.v (P2.v x y_start) (P2.v x y_end))
-  done
+  let score_left = string_of_int score_left in
+  let score_right = string_of_int score_right in
+  print_endline score_left; prerr_endline score_right;
+  draw_string ~io ~color Font.default ~size:18 ( score_left)
+    (V2.v (Box.ox box_game +. 10.) (Box.oy court -. 22.)) ;
+  draw_string ~io ~color Font.default ~size:18
+    (score_right)
+    (V2.v (Box.midx box_game +. 10.) (Box.oy court -. 22.))
 
 let draw_ball ~io {ball_pos; _} = fill_circle ~io ~color (Circle.v ball_pos 4.)
 
