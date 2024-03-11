@@ -136,7 +136,6 @@ let draw_score ~io ~state =
   in
   let score_left = string_of_int score_left in
   let score_right = string_of_int score_right in
-  print_endline score_left; prerr_endline score_right;
   draw_string ~io ~color Font.default ~size:18 ( score_left)
     (V2.v (Box.ox box_game +. 10.) (Box.oy court -. 22.)) ;
   draw_string ~io ~color Font.default ~size:18
