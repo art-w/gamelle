@@ -30,6 +30,6 @@ let draw ~color font size text =
   let r, g, b, a = Gg.Color.to_srgbi color in
   let a = int_of_float (a *. 255.) in
   let& bmp =
-    Ttf.render_text_solid font text (Tsdl.Sdl.Color.create ~r ~g ~b ~a)
+    Ttf.render_utf8_solid font text (Tsdl.Sdl.Color.create ~r ~g ~b ~a)
   in
   Bitmap.of_texture bmp
