@@ -1,0 +1,42 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))
+
+(executable
+ (public_name ui)
+ (name ui_bin)
+ (modules ui_bin)
+ (libraries ui gamelle.sdl))
+
+(rule
+ (target ui_bin.ml)
+ (action
+  (with-stdout-to
+   ui_bin.ml
+   (run echo "include Ui"))))
+
+(executable
+ (name ui_js)
+ (modules ui_js)
+ (modes js)
+ (libraries ui gamelle.jsoo))
+
+(rule
+ (target ui_js.ml)
+ (action
+  (with-stdout-to
+   ui_js.ml
+   (run echo "include Ui"))))
+
+(rule
+ (target ui.html)
+ (deps ui.template.html ui_js.bc.js)
+ (action
+  (with-stdout-to
+   ui.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=ui.template.html
+    --script=ui_js.bc.js))))
