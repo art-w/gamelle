@@ -41,4 +41,13 @@ let draw_at (lazy font_name) ~size text (x, y) =
   C.fill_text (render ()) text ~x
     ~y:(y +. C.Text_metrics.font_bounding_box_ascent metrics)
 
+let text_size (lazy font_name) ~size text =
+  C.set_font (render ())
+    (Jstr.of_string (string_of_int size ^ "px " ^ font_name));
+  let text = Jstr.of_string text in
+  let metrics = C.measure_text (render ()) text in
+  let w = C.Text_metrics.width metrics in
+  let h = C.Text_metrics.actual_bounding_box_ascent metrics in
+  Gamelle_geometry.Size2.v w h
+
 let draw ~color:_ _ _ _ = failwith "Font.draw"

@@ -44,6 +44,9 @@ let draw_string ~io ~color font ~size text p =
   draw ~io bitmap p;
   Bitmap.free ~io bitmap
 
+let text_size ~io font ~size text =
+  Delayed.force ~io @@ Font.text_size font size text
+
 let draw_line ~io ~color segment =
   let p, p' = Segment.to_tuple segment in
   set_color color;

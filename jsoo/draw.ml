@@ -99,6 +99,9 @@ let draw_string ~io ~color font ~size txt p =
   let x, y = V2.to_tuple p in
   Font.draw_at font ~size txt (x, y)
 
+  let text_size ~io:_ font ~size txt =
+    Font.text_size font ~size txt
+
 let show_cursor status =
   match !Common.global_canvas with
   | None -> ()

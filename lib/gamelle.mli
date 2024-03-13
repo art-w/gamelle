@@ -71,8 +71,11 @@ val show_cursor : bool -> unit
 val draw_string :
   io:io -> color:Color.t -> Font.t -> size:int -> string -> p2 -> unit
 
+val text_size :
+  io:io -> Font.t -> size:int -> string -> size2
+
 module Event : sig
-  val mouse_pos : io:io -> float * float
+  val mouse_pos : io:io -> p2
 
   type key =
     [ `quit

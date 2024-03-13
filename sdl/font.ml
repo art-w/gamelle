@@ -30,6 +30,14 @@ let draw ~color font size text =
   let r, g, b, a = Gg.Color.to_srgbi color in
   let a = int_of_float (a *. 255.) in
   let& bmp =
-    Ttf.render_utf8_solid font text (Tsdl.Sdl.Color.create ~r ~g ~b ~a)
+    Ttf.render_utf8_blended font text (Tsdl.Sdl.Color.create ~r ~g ~b ~a)
   in
   Bitmap.of_texture bmp
+
+let text_size font size text =
+  Delayed.make @@ fun ~io ->
+    let font = get ~io font size in
+    let& w,h =
+      Ttf.size_utf8 font text
+    in
+    Gamelle_geometry.(Size2.v (float w) (float h))
