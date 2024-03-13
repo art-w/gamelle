@@ -11,7 +11,10 @@ module View = struct
   include Gamelle_common.Io
 
   let drawing_box box io =
-    let tr = Box.(o (centered box (Window.box ()))) in
+    let tr =
+      V2.(Box.(o (centered box (Window.box ()))) - io.centering_translation)
+    in
+    let io = { io with centering_translation = tr } in
     translated tr io
 end
 

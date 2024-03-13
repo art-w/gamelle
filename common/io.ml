@@ -1,11 +1,19 @@
+open Gamelle_geometry
+
 type t = {
   view : Transform.t;
   event : Event.t;
   clean : (unit -> unit) list ref;
+  centering_translation : v2;
 }
 
 let make () =
-  { view = Transform.default; event = Event.default; clean = ref [] }
+  {
+    view = Transform.default;
+    event = Event.default;
+    clean = ref [];
+    centering_translation = V2.zero;
+  }
 
 let clean ~io fn = io.clean := fn :: !(io.clean)
 
