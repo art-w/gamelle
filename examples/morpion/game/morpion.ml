@@ -171,7 +171,7 @@ let () =
         print_endline "Cross won" ; exit 0
     | None ->
         if Event.is_up ~io `click_left then
-          let x, y = Event.mouse_pos ~io in
+          let x, y = V2.to_tuple @@ Event.mouse_pos ~io in
           (* first column *)
           let cell_x = Int.of_float (floor x /. 64.)
           and cell_y = Int.of_float (floor (y /. 64.)) in

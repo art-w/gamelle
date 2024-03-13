@@ -27,7 +27,7 @@ let compute_rect ((x1, y1), (x2, y2)) =
   Box2.v (P2.v x1 y1) (Size2.v w h)
 
 let main ~io st =
-  let x, y = Event.mouse_pos ~io in
+  let x, y = V2.to_tuple @@ Event.mouse_pos ~io in
   let mouse = (x /. st.scale, y /. st.scale) in
   let st = { st with mouse } in
   let st =

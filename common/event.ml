@@ -27,7 +27,7 @@ type t = {
   mouse_y : float;
 }
 
-let mouse_pos t = (t.mouse_x, t.mouse_y)
+let mouse_pos t = Gamelle_geometry.P2.v t.mouse_x t.mouse_y
 
 let default =
   {
