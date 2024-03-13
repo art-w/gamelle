@@ -136,10 +136,9 @@ let draw_score ~io ~state =
   in
   let score_left = string_of_int score_left in
   let score_right = string_of_int score_right in
-  draw_string ~io ~color Font.default ~size:18 ( score_left)
+  draw_string ~io ~color Font.default ~size:18 score_left
     (V2.v (Box.ox box_game +. 10.) (Box.oy court -. 22.)) ;
-  draw_string ~io ~color Font.default ~size:18
-    (score_right)
+  draw_string ~io ~color Font.default ~size:18 score_right
     (V2.v (Box.midx box_game +. 10.) (Box.oy court -. 22.))
 
 let draw_ball ~io {ball_pos; _} = fill_circle ~io ~color (Circle.v ball_pos 4.)
@@ -151,6 +150,7 @@ let draw_players ~io state =
   draw_line ~io ~color player_right
 
 let update ~io state =
+  let io = View.drawing_box box_game io in
   let player_speed = player_speed state in
   if Event.is_pressed ~io `escape then raise Exit ;
   let player_left_speed, state =

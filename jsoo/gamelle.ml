@@ -7,7 +7,6 @@ module Bitmap = Bitmap
 module Font = Font
 module Sound = Sound
 module Transform = Gamelle_common.Transform
-module View = Gamelle_common.Io
 include Draw
 include Gamelle_geometry.Make (Draw)
 
@@ -33,6 +32,14 @@ module Window = struct
     Canvas.set_h canvas h
 
   let box () = Box2.v V2.zero (size ())
+end
+
+module View = struct
+  include Gamelle_common.Io
+
+  let drawing_box box io =
+    let tr = Geometry.Box.(o (centered box (Window.box ()))) in
+    translated tr io
 end
 
 let run state update =

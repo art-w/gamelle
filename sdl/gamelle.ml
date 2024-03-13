@@ -6,7 +6,15 @@ module Bitmap = Bitmap
 module Font = Font
 module Sound = Sound
 module Transform = Gamelle_common.Transform
-module View = Gamelle_common.Io
+
+module View = struct
+  include Gamelle_common.Io
+
+  let drawing_box box io =
+    let tr = Box.(o (centered box (Window.box ()))) in
+    translated tr io
+end
+
 include Draw
 include Gamelle_geometry.Make (Draw)
 
@@ -14,18 +22,7 @@ let clock = Common.clock
 let dt = Common.dt
 
 module Ttf = Tsdl_ttf
-
-let global_window = ref None
-
-module Window = struct
-  let set_size (w, h) = Sdl.set_window_size (Option.get !global_window) ~w ~h
-
-  let size () =
-    let x, y = Sdl.get_window_size (Option.get !global_window) in
-    Size2.v (float x) (float y)
-
-  let box () = Box2.v V2.zero (size ())
-end
+module Window = Window
 
 type run =
   | No_run : run
@@ -57,7 +54,7 @@ let run () =
   let& window =
     Sdl.create_window "Test" ~w:640 ~h:480 Sdl.Window.(windowed + resizable)
   in
-  global_window := Some window;
+  Global.window := Some window;
   let& renderer =
     Sdl.create_renderer ~flags:Sdl.Renderer.(accelerated + presentvsync) window
   in

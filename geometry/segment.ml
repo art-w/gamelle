@@ -1,4 +1,5 @@
 open Gg
+module P2 = P2_
 
 type t = { start : p2; end_ : p2 }
 
@@ -31,3 +32,6 @@ let intersection { start = p1; end_ = p2 } { start = q1; end_ = q2 } =
 
 let intersect s s' = Option.is_some (intersection s s')
 let equal s s' = V2.equal s.start s.end_ && V2.equal s'.start s'.end_
+
+let translate { start; end_ } vec =
+  { start = P2.translate start vec; end_ = P2.translate end_ vec }
