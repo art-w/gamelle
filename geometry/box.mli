@@ -11,3 +11,5 @@ val translate : t -> v2 -> t
 
 val centered : t -> t -> t
 (** [centered b1 b2] is [b1] centered inside [b2]. *)
+
+val v_corners : p2 -> p2 -> t
