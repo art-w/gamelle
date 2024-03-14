@@ -11,7 +11,8 @@ type key =
   | `click_left
   | `click_right
   | `wheel_up
-  | `wheel_down ]
+  | `wheel_down
+  | `unknown_key]
 
 module Keys = Set.Make (struct
   type t = key

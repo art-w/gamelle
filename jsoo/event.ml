@@ -22,7 +22,7 @@ let key_of_keycode kc =
       `char (Char.lowercase_ascii lt)
   | kc ->
       Console.(log [ "TODO key:"; kc ]);
-      `escape
+      `unknown_key
 
 let key_of_event e = key_of_keycode (Ev.Keyboard.code e)
 

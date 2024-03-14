@@ -90,7 +90,8 @@ module Event : sig
     | `click_left
     | `click_right
     | `wheel_up
-    | `wheel_down ]
+    | `wheel_down
+    | `unknown_key ]
 
   val is_pressed : io:io -> key -> bool
   val is_up : io:io -> key -> bool
