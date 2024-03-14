@@ -35,8 +35,4 @@
  (action
   (with-stdout-to
    ui.html
-   (run
-    %{bin:gamelle}
-    html
-    --template=ui.template.html
-    --script=ui_js.bc.js))))
+   (run %{bin:gamelle} html --template=ui.template.html --script=ui_js.bc.js))))
