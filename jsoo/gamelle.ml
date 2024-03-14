@@ -1,7 +1,7 @@
 open Brr
 open Common
-open Gg
 module Geometry = Gamelle_geometry
+open Geometry
 module Color = Color
 module Bitmap = Bitmap
 module Font = Font
