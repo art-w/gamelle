@@ -47,7 +47,7 @@ let text_size (lazy font_name) ~size text =
   let text = Jstr.of_string text in
   let metrics = C.measure_text (render ()) text in
   let w = C.Text_metrics.width metrics in
-  let h = C.Text_metrics.actual_bounding_box_ascent metrics in
+  let h = C.Text_metrics.font_bounding_box_ascent metrics in
   Gamelle_geometry.Size2.v w h
 
 let draw ~color:_ _ _ _ = failwith "Font.draw"
