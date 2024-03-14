@@ -91,5 +91,5 @@ let () =
       (fun ui ->
         label ~ui "This is a label";
         if button ~ui "This is a button" then print_endline "button pressed";
-        if checkbox ~ui ~id:1 "This is a checkbox" then
-          print_endline "checkbox checked"))
+        ignore @@ checkbox ~ui ~id:1 "This is a checkbox"
+          ))
