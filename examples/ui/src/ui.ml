@@ -17,8 +17,9 @@ let () =
           label ~ui "This is a label";
           horizontal ~ui (fun () ->
               if button ~ui "button 1" then print_endline "button 1 pressed";
-              if button ~ui "button 2" then print_endline "button 2 pressed";
-              if button ~ui "button 3" then print_endline "button 3 pressed";
+              vertical ~ui (fun () ->
+                  if button ~ui "button 2" then print_endline "button 2 pressed";
+                  if button ~ui "button 3" then print_endline "button 3 pressed");
               if button ~ui "button 4" then print_endline "button 4 pressed");
           ignore @@ checkbox ~ui ~id:1 "This is a checkbox 🤓";
           let number = slider ~ui ~id:2 ~w:200. ~min:10. ~max:20. in

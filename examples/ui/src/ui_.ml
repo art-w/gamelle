@@ -76,6 +76,7 @@ let horizontal ~ui f =
   | Horizontal _ -> failwith "Call to horizontal when already horizontal !"
   | Vertical { max_width } ->
       let old_pos = ui.pos in
+      ui.pos <- V2.(ui.pos + padding_y - padding_x);
       ui.direction <- Horizontal { max_height = 0. };
       let r = f () in
       let max_height =
@@ -84,7 +85,7 @@ let horizontal ~ui f =
         | Vertical _ -> failwith "inconsistent directions"
       in
       let width = P2.(x ui.pos -. x old_pos) in
-      ui.pos <- V2.(old_pos + v 0. max_height);
+      ui.pos <- V2.(old_pos + v 0. max_height + padding_y);
       debug_box ~ui ~color:Color.green
         (Box.v_corners old_pos V2.(ui.pos + v width 0.));
       let max_width = Float.max max_width width in
@@ -96,6 +97,7 @@ let vertical ~ui f =
   | Vertical _ -> failwith "Call to vertical when already vertical !"
   | Horizontal { max_height } ->
       let old_pos = ui.pos in
+      ui.pos <- V2.(ui.pos + padding_x - padding_y);
       ui.direction <- Vertical { max_width = 0. };
       let r = f () in
       let max_width =
@@ -104,7 +106,7 @@ let vertical ~ui f =
         | Horizontal _ -> failwith "inconsistent directions"
       in
       let height = P2.(y ui.pos -. y old_pos) in
-      ui.pos <- V2.(old_pos + v max_width 0.);
+      ui.pos <- V2.(old_pos + v max_width 0. + padding_x);
       let max_height = Float.max max_height height in
       ui.direction <- Horizontal { max_height };
       r
