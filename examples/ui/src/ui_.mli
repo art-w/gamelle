@@ -9,3 +9,5 @@ val button : ui:t -> string -> bool
 val checkbox : ui:t -> id:id -> string -> bool
 val label : ui:t -> string -> unit
 val slider : ui:t -> id:id -> w:size1 -> min:float -> max:float -> float
+
+(* val vbox : ui:t -> (unit -> 'a) -> 'a *)

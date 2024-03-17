@@ -28,15 +28,25 @@ let bg' = Color.Gruvbox.Light.bg1
 let highlight = Color.Gruvbox.Light.blue
 let lowlight = Color.Gruvbox.Light.gray
 
+let update_max_width ~ui candidate =
+  ui.max_width <- Float.max ui.max_width candidate
+
+let text_size ~ui = text_size ~io:ui.io
+
 let render ~ui f =
   let prev_f = ui.render in
   ui.render <-
     (fun () ->
       prev_f ();
-      f ())
+      f ui.io)
 
-let update_max_width ~ui candidate =
-  ui.max_width <- Float.max ui.max_width candidate
+let allocate_area ~ui size =
+  let pos = ui.pos in
+  let box = Box.v V2.(pos + padding_y) size in
+  update_max_width ~ui (Box.w box);
+  let pos = P2.(v (x pos) (Box.maxy box)) in
+  ui.pos <- pos;
+  box
 
 let ui ~io ~id pos f =
   let ctx =
@@ -53,29 +63,28 @@ let ui ~io ~id pos f =
   ctx.render ();
   (r, box)
 
-let is_clicked ~io box =
+let is_clicked ~ui box =
+  let io = ui.io in
   Event.is_down ~io `click_left && Box.mem (Event.mouse_pos ~io) box
 
 let button ~ui text =
-  let { io; pos; _ } = ui in
   let size = 20 in
-  let text_size = text_size ~io Font.default ~size text in
+  let text_size = text_size ~ui Font.default ~size text in
+  let box = allocate_area ~ui V2.(text_size + (2. * (padding_x + padding_y))) in
+  let pos = Box.o box in
   let pos = V2.(pos + padding_y) in
-  let box = Box.v pos V2.(text_size + (2. * (padding_x + padding_y))) in
-  let pos = V2.(pos + padding_y) in
-  update_max_width ~ui (Box.w box);
-  render ~ui (fun () ->
+  render ~ui (fun io ->
       fill_rect ~io ~color:bg' box;
       draw_rect ~io ~color:fg box;
       draw_string ~io ~color:fg Font.default ~size text V2.(pos + padding_x));
   let pos = P2.(v (x pos) (Box.maxy box)) in
   ui.pos <- pos;
-  is_clicked ~io box
+  is_clicked ~ui box
 
 let is_checked ~ui ~id box =
-  let { id = id_ui; io; _ } = ui in
+  let { id = id_ui; _ } = ui in
   let ui_state = Hashtbl.find state id_ui in
-  let is_clicked = is_clicked ~io box in
+  let is_clicked = is_clicked ~ui box in
   let state_b =
     match Hashtbl.find_opt ui_state.checkboxes id with
     | None ->
@@ -88,19 +97,17 @@ let is_checked ~ui ~id box =
   r
 
 let checkbox ~ui ~id text =
-  let { io; pos; _ } = ui in
   let size = 20 in
-  let text_size = text_size ~io Font.default ~size text in
+  let text_size = text_size ~ui Font.default ~size text in
   let check'box'_size = Size2.h text_size in
-
-  let pos = V2.(pos + padding_y) in
   let box =
-    Box.v pos
+    allocate_area ~ui
       V2.(
         text_size
         + (2. * (padding_x + padding_y))
         + Size2.v (check'box'_size +. padding) 0.)
   in
+  let pos = Box.o box in
   let pos = V2.(pos + padding_y) in
   let check'box' =
     Box.(
@@ -109,7 +116,7 @@ let checkbox ~ui ~id text =
         Size2.(v check'box'_size check'box'_size))
   in
   let is_checked = is_checked ~ui ~id box in
-  render ~ui (fun () ->
+  render ~ui (fun io ->
       fill_rect ~io ~color:bg' box;
       draw_rect ~io ~color:fg box;
       fill_rect ~io ~color:bg check'box';
@@ -124,9 +131,6 @@ let checkbox ~ui ~id text =
          fill_rect ~io ~color:highlight ticked'box');
       draw_string ~io ~color:fg Font.default ~size text
         V2.(pos + padding_x + v check'box'_size 0. + padding_x));
-  update_max_width ~ui (Box.w box);
-  let pos = P2.(v (x pos) (Box.maxy box)) in
-  ui.pos <- pos;
   is_checked
 
 let slider_val ~ui ~id ~box ~min ~max =
@@ -148,18 +152,15 @@ let slider_val ~ui ~id ~box ~min ~max =
   r
 
 let slider ~ui ~id ~w ~min ~max =
-  let { io; pos; _ } = ui in
-  let pos = V2.(pos + padding_y) in
   let height = 20. in
-  let box = Box.v pos (Size2.v (w +. (2. *. padding)) height) in
+  let box = allocate_area ~ui (Size2.v (w +. (2. *. padding)) height) in
   let line = Box.v_mid (Box.mid box) (Size2.v w 4.) in
-
   let slider_val =
     slider_val ~ui ~id
       ~box:(Box.v_mid (Box.mid line) (Size2.v w height))
       ~min ~max
   in
-  render ~ui (fun () ->
+  render ~ui (fun io ->
       fill_rect ~io ~color:lowlight line;
       let slider_pos = (slider_val -. min) *. Box.w box /. (max -. min) in
       fill_rect ~io ~color:highlight
@@ -167,15 +168,10 @@ let slider ~ui ~id ~w ~min ~max =
       fill_circle ~io ~color:highlight
         (Circle.v (P2.v (Box.minx line +. slider_pos) (Box.midy line)) 8.));
   update_max_width ~ui (Box.w box);
-  let pos = P2.(v (x pos) (Box.maxy box)) in
-  ui.pos <- pos;
   slider_val
 
 let label ~ui text =
-  let { io; pos; _ } = ui in
   let size = 20 in
-  let text_size = text_size ~io Font.default ~size text in
-  update_max_width ~ui (Size2.w text_size);
-  render ~ui (fun () -> draw_string ~io ~color:fg Font.default ~size text pos);
-  let pos = P2.(v (x pos) (y pos +. y text_size)) in
-  ui.pos <- pos
+  let text_size = text_size ~ui Font.default ~size text in
+  let pos = Box.o (allocate_area ~ui text_size) in
+  render ~ui (fun io -> draw_string ~io ~color:fg Font.default ~size text pos)
