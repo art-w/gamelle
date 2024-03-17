@@ -124,7 +124,8 @@ end = struct
     render ~ui (fun () ->
         fill_rect ~io ~color:bg' box;
         draw_rect ~io ~color:fg box;
-        fill_rect ~io ~color:fg check'box';
+        fill_rect ~io ~color:bg check'box';
+        draw_rect ~io ~color:fg check'box';
         (if is_checked then
            let ticked'box' =
              Box.(
@@ -143,7 +144,9 @@ end = struct
   let slider_val ~ui ~id ~box ~min ~max =
     let { id = id_ui; io; _ } = ui in
     let ui_state = Hashtbl.find state id_ui in
-    let is_clicked = is_clicked ~io box in
+    let is_clicked =
+      Event.is_pressed ~io `click_left && Box.mem (Event.mouse_pos ~io) box
+    in
     let state_n =
       match Hashtbl.find_opt ui_state.sliders id with
       | None -> max
