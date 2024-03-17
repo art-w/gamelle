@@ -1,7 +1,7 @@
 open Gamelle
 open Geometry
-
 module Ui = Ui_
+
 type state = unit
 
 let () =
@@ -15,7 +15,11 @@ let () =
         P2.(v 0. 0.)
         (fun ui ->
           label ~ui "This is a label";
-          if button ~ui "This is a button" then print_endline "button pressed";
+          horizontal ~ui (fun () ->
+              if button ~ui "button 1" then print_endline "button 1 pressed";
+              if button ~ui "button 2" then print_endline "button 2 pressed";
+              if button ~ui "button 3" then print_endline "button 3 pressed";
+              if button ~ui "button 4" then print_endline "button 4 pressed");
           ignore @@ checkbox ~ui ~id:1 "This is a checkbox 🤓";
           let number = slider ~ui ~id:2 ~w:200. ~min:10. ~max:20. in
           label ~ui (Printf.sprintf "The slider value is %f" number)))

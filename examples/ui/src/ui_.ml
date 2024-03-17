@@ -3,12 +3,17 @@ open Geometry
 
 type id = int
 
+type direction =
+  | Vertical of { max_width : size1 }
+  | Horizontal of { max_height : size1 }
+
 type t = {
   io : io;
   id : id;
   mutable pos : p2;
-  mutable max_width : size1;
+  mutable direction : direction;
   mutable render : unit -> unit;
+  mutable debug_render : unit -> unit;
 }
 
 type 'a tbl = (id, 'a) Hashtbl.t
@@ -27,11 +32,14 @@ let bg = Color.Gruvbox.Light.bg
 let bg' = Color.Gruvbox.Light.bg1
 let highlight = Color.Gruvbox.Light.blue
 let lowlight = Color.Gruvbox.Light.gray
-
-let update_max_width ~ui candidate =
-  ui.max_width <- Float.max ui.max_width candidate
-
 let text_size ~ui = text_size ~io:ui.io
+
+let debug_render ~ui f =
+  let prev_f = ui.debug_render in
+  ui.debug_render <-
+    (fun () ->
+      prev_f ();
+      f ui.io)
 
 let render ~ui f =
   let prev_f = ui.render in
@@ -40,27 +48,94 @@ let render ~ui f =
       prev_f ();
       f ui.io)
 
+let debug_box ~ui ~color box =
+  debug_render ~ui (fun io -> draw_rect ~io ~color box)
+
 let allocate_area ~ui size =
   let pos = ui.pos in
-  let box = Box.v V2.(pos + padding_y) size in
-  update_max_width ~ui (Box.w box);
-  let pos = P2.(v (x pos) (Box.maxy box)) in
-  ui.pos <- pos;
-  box
+  match ui.direction with
+  | Vertical { max_width } ->
+      let box = Box.v V2.(pos + padding_y) size in
+      debug_box ~ui ~color:Color.red box;
+      let max_width = Float.max max_width (Box.w box) in
+      let pos = P2.(v (x pos) (Box.maxy box)) in
+      ui.pos <- pos;
+      ui.direction <- Vertical { max_width };
+      box
+  | Horizontal { max_height } ->
+      let box = Box.v V2.(pos + padding_x) size in
+      debug_box ~ui ~color:Color.blue box;
+      let max_height = Float.max max_height (Box.h box) in
+      let pos = P2.(v (Box.maxx box) (y pos)) in
+      ui.pos <- pos;
+      ui.direction <- Horizontal { max_height };
+      box
 
-let ui ~io ~id pos f =
+let horizontal ~ui f =
+  match ui.direction with
+  | Horizontal _ -> failwith "Call to horizontal when already horizontal !"
+  | Vertical { max_width } ->
+      let old_pos = ui.pos in
+      ui.direction <- Horizontal { max_height = 0. };
+      let r = f () in
+      let max_height =
+        match ui.direction with
+        | Horizontal { max_height } -> max_height
+        | Vertical _ -> failwith "inconsistent directions"
+      in
+      let width = P2.(x ui.pos -. x old_pos) in
+      ui.pos <- V2.(old_pos + v 0. max_height);
+      debug_box ~ui ~color:Color.green
+        (Box.v_corners old_pos V2.(ui.pos + v width 0.));
+      let max_width = Float.max max_width width in
+      ui.direction <- Vertical { max_width };
+      r
+
+let vertical ~ui f =
+  match ui.direction with
+  | Vertical _ -> failwith "Call to vertical when already vertical !"
+  | Horizontal { max_height } ->
+      let old_pos = ui.pos in
+      ui.direction <- Vertical { max_width = 0. };
+      let r = f () in
+      let max_width =
+        match ui.direction with
+        | Vertical { max_width } -> max_width
+        | Horizontal _ -> failwith "inconsistent directions"
+      in
+      let height = P2.(y ui.pos -. y old_pos) in
+      ui.pos <- V2.(old_pos + v max_width 0.);
+      let max_height = Float.max max_height height in
+      ui.direction <- Horizontal { max_height };
+      r
+
+let ui ?(debug = false) ~io ~id pos f =
   let ctx =
-    { io; id; pos = V2.(pos + padding_x); max_width = 0.; render = Fun.id }
+    {
+      io;
+      id;
+      pos = V2.(pos + padding_x);
+      direction = Vertical { max_width = 0. };
+      render = Fun.id;
+      debug_render = Fun.id;
+    }
   in
   if not (Hashtbl.mem state id) then Hashtbl.add state id (new_state ());
   let r = f ctx in
   let end_corner =
-    P2.(v (ctx.max_width +. (2. *. padding)) (y ctx.pos +. padding))
+    match ctx.direction with
+    | Vertical { max_width } ->
+        P2.(v (max_width +. (2. *. padding)) (y ctx.pos +. padding))
+    | Horizontal { max_height = _ } ->
+        (*P2.(v  (x ctx.pos +. padding) (max_height +. (2. *. padding)))*)
+        failwith "Inconsistent directions at ui level"
   in
+
   let box = Box.v_corners pos end_corner in
   fill_rect ~io ~color:bg box;
   draw_rect ~io ~color:fg box;
   ctx.render ();
+  if debug then ctx.debug_render ();
   (r, box)
 
 let is_clicked ~ui box =
@@ -77,8 +152,6 @@ let button ~ui text =
       fill_rect ~io ~color:bg' box;
       draw_rect ~io ~color:fg box;
       draw_string ~io ~color:fg Font.default ~size text V2.(pos + padding_x));
-  let pos = P2.(v (x pos) (Box.maxy box)) in
-  ui.pos <- pos;
   is_clicked ~ui box
 
 let is_checked ~ui ~id box =
@@ -167,7 +240,6 @@ let slider ~ui ~id ~w ~min ~max =
         (Box.v (Box.o line) (Size2.v slider_pos 4.));
       fill_circle ~io ~color:highlight
         (Circle.v (P2.v (Box.minx line +. slider_pos) (Box.midy line)) 8.));
-  update_max_width ~ui (Box.w box);
   slider_val
 
 let label ~ui text =
