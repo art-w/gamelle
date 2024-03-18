@@ -18,5 +18,4 @@ let centered b1 b2 =
   let diff = V2.(mid b2 - mid b1) in
   v V2.(o b1 + diff) (size b1)
 
-let v_corners p1 p2 =
-  v p1 V2.(p2 - p1)
+let v_corners p1 p2 = v p1 V2.(p2 - p1)
