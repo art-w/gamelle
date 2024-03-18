@@ -22,21 +22,24 @@ let transform ~io:{ Io.view; _ } =
 let draw ~io bmp p =
   transform ~io;
   let x, y = V2.to_tuple p in
-  Bitmap.draw ~io ~ctx:(render ()) bmp ~x ~y
+  let ctx = render () in
+  Clip.draw_clip ~io ctx (fun () -> Bitmap.draw ~io ~ctx bmp ~x ~y)
 
 let fill_rect ~io ~color rect =
   transform ~io;
   let x, y = V2.to_tuple (Box2.o rect) in
   let w, h = V2.to_tuple (Box2.size rect) in
   set_color color;
-  C.fill_rect (render ()) ~x ~y ~w ~h
+  let ctx = render () in
+  Clip.draw_clip ~io ctx (fun () -> C.fill_rect ctx ~x ~y ~w ~h)
 
 let draw_rect ~io ~color rect =
   transform ~io;
   let x, y = V2.to_tuple (Box2.o rect) in
   let w, h = V2.to_tuple (Box2.size rect) in
   set_color color;
-  C.stroke_rect (render ()) ~x ~y ~w ~h
+  let ctx = render () in
+  Clip.draw_clip ~io ctx (fun () -> C.stroke_rect ctx ~x ~y ~w ~h)
 
 let draw_line ~io ~color segment =
   let p0, p1 = Segment.to_tuple segment in
@@ -44,10 +47,12 @@ let draw_line ~io ~color segment =
   let x0, y0 = V2.to_tuple p0 in
   let x1, y1 = V2.to_tuple p1 in
   set_color color;
-  let path = C.Path.create () in
-  C.Path.move_to path ~x:x0 ~y:y0;
-  C.Path.line_to path ~x:x1 ~y:y1;
-  C.stroke (render ()) path
+  let ctx = render () in
+  Clip.draw_clip ~io ctx (fun () ->
+      let path = C.Path.create () in
+      C.Path.move_to path ~x:x0 ~y:y0;
+      C.Path.line_to path ~x:x1 ~y:y1;
+      C.stroke (render ()) path)
 
 let path_poly pts =
   let path = C.Path.create () in
@@ -62,14 +67,18 @@ let path_poly pts =
 let draw_poly ~io ~color pts =
   transform ~io;
   set_color color;
-  let path = path_poly pts in
-  C.stroke (render ()) path
+  let ctx = render () in
+  Clip.draw_clip ~io ctx (fun () ->
+      let path = path_poly pts in
+      C.stroke ctx path)
 
 let fill_poly ~io ~color pts =
   transform ~io;
   set_color color;
-  let path = path_poly pts in
-  C.fill (render ()) path
+  let ctx = render () in
+  Clip.draw_clip ~io ctx (fun () ->
+      let path = path_poly pts in
+      C.fill ctx path)
 
 let tau = 8.0 *. atan 1.0
 
@@ -80,8 +89,10 @@ let draw_circle ~io ~color circle =
   set_color color;
   let x, y = V2.to_tuple center in
   let path = C.Path.create () in
-  C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
-  C.stroke (render ()) path
+  let ctx = render () in
+  Clip.draw_clip ~io ctx (fun () ->
+      C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
+      C.stroke ctx path)
 
 let fill_circle ~io ~color circle =
   let center = Circle.center circle in
@@ -90,17 +101,18 @@ let fill_circle ~io ~color circle =
   set_color color;
   let x, y = V2.to_tuple center in
   let path = C.Path.create () in
-  C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
-  C.fill (render ()) path
+  let ctx = render () in
+  Clip.draw_clip ~io ctx (fun () ->
+      C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
+      C.fill ctx path)
 
 let draw_string ~io ~color font ~size txt p =
   transform ~io;
   set_color color;
   let x, y = V2.to_tuple p in
-  Font.draw_at font ~size txt (x, y)
+  Font.draw_at ~io font ~size txt (x, y)
 
-  let text_size ~io:_ font ~size txt =
-    Font.text_size font ~size txt
+let text_size ~io:_ font ~size txt = Font.text_size font ~size txt
 
 let show_cursor status =
   match !Common.global_canvas with

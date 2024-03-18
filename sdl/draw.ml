@@ -20,22 +20,61 @@ let project ~io p =
   let x, y = V2.to_tuple (Io.project ~io p) in
   (int x, int y)
 
+let draw_clip ~io renderer f =
+  let clip = io.Io.clip in
+  let* () =
+    Option.map
+      (fun clip ->
+        let clip = Box.translate clip io.Io.centering_translation in
+        let clip_rect =
+          Sdl.Rect.create
+            ~x:(int @@ Box.minx clip)
+            ~y:(int @@ Box.miny clip)
+            ~w:(int @@ Box.w clip)
+            ~h:(int @@ Box.h clip)
+        in
+        Sdl.render_set_clip_rect renderer (Some clip_rect))
+      clip
+    |> function
+    | None -> Ok ()
+    | Some v -> v
+  in
+  let r = f () in
+  let* () =
+    if Option.is_some clip then
+      let win = Window.box () in
+      let clip_rect =
+        Sdl.Rect.create
+          ~x:(int @@ Box.minx win)
+          ~y:(int @@ Box.miny win)
+          ~w:(int @@ Box.w win)
+          ~h:(int @@ Box.h win)
+      in
+      Sdl.render_set_clip_rect renderer (Some clip_rect)
+    else Ok ()
+  in
+  r
+
 let draw ~io bmp p =
   let bmp = Delayed.force ~io bmp in
   let scale = io.Io.view.scale in
   let x, y = project ~io p in
   let w, h = Bitmap.size bmp in
   let src = Sdl.Rect.create ~x:0 ~y:0 ~w ~h in
+
   let dst =
     Sdl.Rect.create ~x ~y
       ~w:(int (scale *. float w))
       ~h:(int (scale *. float h))
   in
+
   let open Bitmap in
   let angle = io.Io.view.rotate *. 360.0 /. tau in
   let& () =
-    Sdl.render_copy_ex ~src ~dst (render ()) bmp.bmp angle (Some point_zero)
-      Sdl.Flip.none
+    let renderer = render () in
+    draw_clip ~io renderer (fun () ->
+        Sdl.render_copy_ex ~src ~dst renderer bmp.bmp angle (Some point_zero)
+          Sdl.Flip.none)
   in
   ()
 
@@ -52,7 +91,11 @@ let draw_line ~io ~color segment =
   set_color color;
   let x0, y0 = project ~io p in
   let x1, y1 = project ~io p' in
-  let& () = Sdl.render_draw_line (render ()) x0 y0 x1 y1 in
+
+  let& () =
+    let renderer = render () in
+    draw_clip ~io renderer (fun () -> Sdl.render_draw_line renderer x0 y0 x1 y1)
+  in
   ()
 
 let draw_rect ~io ~color rect =
@@ -65,14 +108,22 @@ let draw_poly ~io ~color arr =
   set_color color;
   let arr = List.map (project ~io) arr in
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
-  let& () = Gfx.polygon_rgba (render ()) ~ps:arr ~r ~g ~b ~a in
+  let& () =
+    let renderer = render () in
+    draw_clip ~io renderer (fun () ->
+        Gfx.polygon_rgba renderer ~ps:arr ~r ~g ~b ~a)
+  in
   ()
 
 let fill_poly ~io ~color arr =
   set_color color;
   let arr = List.map (project ~io) arr in
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
-  let& () = Gfx.filled_polygon_rgba (render ()) ~ps:arr ~r ~g ~b ~a in
+  let& () =
+    let renderer = render () in
+    draw_clip ~io renderer (fun () ->
+        Gfx.filled_polygon_rgba renderer ~ps:arr ~r ~g ~b ~a)
+  in
   ()
 
 let fill_rect ~io ~color rect =
@@ -91,7 +142,11 @@ let draw_circle ~io ~color circle =
   let x, y = project ~io center in
   let radius = int (io.Io.view.scale *. radius) in
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
-  let& () = Gfx.circle_rgba (render ()) ~x ~y ~rad:radius ~r ~g ~b ~a in
+  let& () =
+    let renderer = render () in
+    draw_clip ~io renderer (fun () ->
+        Gfx.circle_rgba renderer ~x ~y ~rad:radius ~r ~g ~b ~a)
+  in
   ()
 
 let fill_circle ~io ~color circle =
@@ -101,7 +156,11 @@ let fill_circle ~io ~color circle =
   let x, y = project ~io center in
   let radius = int (io.Io.view.scale *. radius) in
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
-  let& () = Gfx.filled_circle_rgba (render ()) ~x ~y ~rad:radius ~r ~g ~b ~a in
+  let& () =
+    let renderer = render () in
+    draw_clip ~io renderer (fun () ->
+        Gfx.filled_circle_rgba (render ()) ~x ~y ~rad:radius ~r ~g ~b ~a)
+  in
   ()
 
 let show_cursor b =

@@ -33,13 +33,15 @@ let load binstring =
 
 let default = load Gamelle_common.Font.default
 
-let draw_at (lazy font_name) ~size text (x, y) =
+let draw_at ~io (lazy font_name) ~size text (x, y) =
   C.set_font (render ())
     (Jstr.of_string (string_of_int size ^ "px " ^ font_name));
   let text = Jstr.of_string text in
   let metrics = C.measure_text (render ()) text in
-  C.fill_text (render ()) text ~x
-    ~y:(y +. C.Text_metrics.font_bounding_box_ascent metrics)
+  let ctx = render () in
+  Clip.draw_clip ~io ctx (fun () ->
+      C.fill_text ctx text ~x
+        ~y:(y +. C.Text_metrics.font_bounding_box_ascent metrics))
 
 let text_size (lazy font_name) ~size text =
   C.set_font (render ())

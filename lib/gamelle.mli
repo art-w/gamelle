@@ -51,9 +51,13 @@ module View : sig
   val translate : V2.t -> 'a scene -> 'a scene
   val scale : float -> 'a scene -> 'a scene
   val rotate : float -> 'a scene -> 'a scene
+  val clip : box2 -> 'a scene -> 'a scene
+  val unclip : 'a scene -> 'a scene
   val translated : V2.t -> io -> io
   val scaled : float -> io -> io
   val rotated : float -> io -> io
+  val clipped : box2 -> io -> io
+  val unclipped : io -> io
 end
 
 val clock : unit -> float
@@ -71,8 +75,7 @@ val show_cursor : bool -> unit
 val draw_string :
   io:io -> color:Color.t -> Font.t -> size:int -> string -> p2 -> unit
 
-val text_size :
-  io:io -> Font.t -> size:int -> string -> size2
+val text_size : io:io -> Font.t -> size:int -> string -> size2
 
 module Event : sig
   val mouse_pos : io:io -> p2
