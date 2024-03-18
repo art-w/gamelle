@@ -40,7 +40,7 @@ let update ~io { x; y; vx; vy; _ } =
   let vy = if Event.is_pressed ~io `arrow_up then vy -. 100.0 else vy in
   let vx = if Event.is_pressed ~io `arrow_right then vx +. 100.0 else vx in
   let vx = if Event.is_pressed ~io `arrow_left then vx -. 100.0 else vx in
-  let mx, my = Event.mouse_pos ~io in
+  let mx, my = V2.to_tuple @@ Event.mouse_pos ~io in
 
   if Event.is_down ~io `click_left then (
     cursor := not !cursor;
