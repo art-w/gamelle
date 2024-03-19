@@ -33,7 +33,7 @@ let update t e =
       | None -> t)
   | _ when typ = Sdl.Event.mouse_wheel -> (
       let wheel_delta = Sdl.Event.(get e mouse_wheel_y) in
-      let wheel_delta = t.wheel_delta +. float (wheel_delta * 4)  in
+      let wheel_delta = t.wheel_delta +. float (wheel_delta * 4) in
       let t = { t with wheel_delta } in
       match wheel_delta with
       | d when d <> 0. ->
@@ -44,8 +44,9 @@ let update t e =
       t
 
 let update t e = try update t e with Exit as exn -> raise exn | _ -> t
+
 let reset t =
-  { t with keypressed = remove `wheel t.keypressed ; wheel_delta=0.}
+  { t with keypressed = remove `wheel t.keypressed; wheel_delta = 0. }
 
 let update_mouse t =
   let state, (x, y) = Sdl.get_mouse_state () in

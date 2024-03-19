@@ -7,6 +7,7 @@ let current = ref default
 let new_frame () =
   current := Gamelle_common.Event.update_updown !previous !current;
   previous := !current
+
 let key_of_keycode kc =
   match Jstr.to_string kc with
   | "ArrowLeft" -> `arrow_left
