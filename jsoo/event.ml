@@ -7,7 +7,6 @@ let current = ref default
 let new_frame () =
   current := Gamelle_common.Event.update_updown !previous !current;
   previous := !current
-
 let key_of_keycode kc =
   match Jstr.to_string kc with
   | "ArrowLeft" -> `arrow_left
@@ -51,6 +50,12 @@ let update_mouse t e =
 
 let do_update_mouse e = current := update_mouse !current (Ev.as_type e)
 
+let update_wheel t e =
+  let delta = Ev.Wheel.delta_y e /. 4. in
+  { t with keypressed = insert `wheel t.keypressed; wheel_delta = delta }
+
+let do_update_wheel e = current := update_wheel !current (Ev.as_type e)
+
 let attach ~target =
   let _ =
     Ev.listen
@@ -74,5 +79,8 @@ let attach ~target =
     Ev.listen
       (Ev.Type.create (Jstr.of_string "mousedown"))
       do_update_mouse target
+  in
+  let _ =
+    Ev.listen (Ev.Type.create (Jstr.of_string "wheel")) do_update_wheel target
   in
   ()

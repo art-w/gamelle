@@ -4,9 +4,9 @@ module C = C2d
 
 let draw_clip ~io ctx f =
   let clip = io.Io.clip in
-  C.save ctx;
   Option.iter
     (fun clip ->
+      C.save ctx;
       ignore @@ Jv.call (C.to_jv ctx) "beginPath" [||];
       ignore
       @@ Jv.call (C.to_jv ctx) "rect"

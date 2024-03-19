@@ -34,8 +34,10 @@ let yellow = Color.v 1.0 1.0 0.0 1.0
 
 let update ~io { x; y; vx; vy; _ } =
   if Event.is_pressed ~io `escape then raise Exit;
-  let y = if Event.is_pressed ~io `wheel_down then y +. 10.0 else y in
-  let y = if Event.is_pressed ~io `wheel_up then y -. 10.0 else y in
+  let y =
+    if Event.is_pressed ~io `wheel then y +. (10.0 *. Event.wheel_delta ~io)
+    else y
+  in
   let vy = if Event.is_pressed ~io `arrow_down then vy +. 100.0 else vy in
   let vy = if Event.is_pressed ~io `arrow_up then vy -. 100.0 else vy in
   let vx = if Event.is_pressed ~io `arrow_right then vx +. 100.0 else vx in

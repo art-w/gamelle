@@ -73,6 +73,7 @@ let run state update =
     let io = { (Io.make ()) with event = !Event.current } in
     fill_rect ~io ~color:Color.black (Window.box ());
     let state = update ~io state in
+    Event.current := Gamelle_common.Event.reset_wheel !Event.current;
     animate state
   in
   animate state

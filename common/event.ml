@@ -10,14 +10,13 @@ type key =
   | `char of char
   | `click_left
   | `click_right
-  | `wheel_up
-  | `wheel_down
+  | `wheel
   | `unknown_key ]
 
 module Keys = Set.Make (struct
   type t = key
 
-  let compare = Stdlib.compare
+  let compare a b = Stdlib.compare a b
 end)
 
 type t = {
@@ -26,6 +25,7 @@ type t = {
   keypressed : Keys.t;
   mouse_x : float;
   mouse_y : float;
+  wheel_delta : float;
 }
 
 let mouse_pos t = Gamelle_geometry.P2.v t.mouse_x t.mouse_y
@@ -37,6 +37,7 @@ let default =
     keypressed = Keys.empty;
     mouse_x = 0.0;
     mouse_y = 0.0;
+    wheel_delta = 0.;
   }
 
 let insert = Keys.add
@@ -49,3 +50,8 @@ let update_updown previous t =
   let keyup = Keys.diff previous.keypressed t.keypressed in
   let keydown = Keys.diff t.keypressed previous.keypressed in
   { t with keyup; keydown }
+
+let wheel_delta t = t.wheel_delta
+
+let reset_wheel t =
+  { t with keypressed = remove `wheel t.keypressed; wheel_delta = 0. }

@@ -46,3 +46,5 @@ let mouse_pos ~io = V2.(Event.mouse_pos io.event - io.centering_translation)
 let is_pressed ~io k = Event.is_pressed io.event k
 let is_up ~io k = Event.is_up io.event k
 let is_down ~io k = Event.is_down io.event k
+
+let wheel_delta ~io = Event.wheel_delta io.event

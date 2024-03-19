@@ -28,10 +28,10 @@ let draw_clip ~io renderer f =
         let clip = Box.translate clip io.Io.centering_translation in
         let clip_rect =
           Sdl.Rect.create
-            ~x:(int @@ Box.minx clip)
-            ~y:(int @@ Box.miny clip)
-            ~w:(int @@ Box.w clip)
-            ~h:(int @@ Box.h clip)
+            ~x:((int @@ Box.minx clip) + 1)
+            ~y:((int @@ Box.miny clip) + 1)
+            ~w:((int @@ Box.w clip) - 1)
+            ~h:((int @@ Box.h clip) - 1)
         in
         Sdl.render_set_clip_rect renderer (Some clip_rect))
       clip

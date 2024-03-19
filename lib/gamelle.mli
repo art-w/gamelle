@@ -80,6 +80,8 @@ val text_size : io:io -> Font.t -> size:int -> string -> size2
 module Event : sig
   val mouse_pos : io:io -> p2
 
+  val wheel_delta : io:io -> float
+
   type key =
     [ `quit
     | `escape
@@ -92,8 +94,7 @@ module Event : sig
     | `char of char
     | `click_left
     | `click_right
-    | `wheel_up
-    | `wheel_down
+    | `wheel
     | `unknown_key ]
 
   val is_pressed : io:io -> key -> bool

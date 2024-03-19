@@ -33,10 +33,9 @@ let main ~io st =
   let st =
     match (st.click, Event.is_pressed ~io `click_left) with
     | None, false ->
-        if Event.is_pressed ~io `wheel_up then
-          { st with scale = st.scale +. 1. }
-        else if Event.is_pressed ~io `wheel_down then
-          { st with scale = st.scale -. 1. }
+        if Event.is_pressed ~io `wheel then
+          let amount = Event.wheel_delta ~io in
+          { st with scale = st.scale +. amount }
         else st
     | Some _, true -> st (* just keep dragging *)
     | None, true -> { st with click = Some st.mouse }
