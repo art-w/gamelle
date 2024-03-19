@@ -11,3 +11,4 @@ val label : ui:t -> string -> unit
 val slider : ui:t -> id:id -> w:size1 -> min:float -> max:float -> float
 val vertical : ui:t -> (unit -> 'a) -> 'a
 val horizontal : ui:t -> (unit -> 'a) -> 'a
+val scroll_box : ui:t -> id:id -> size:size1 -> (unit -> 'a) -> 'a

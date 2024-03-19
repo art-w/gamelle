@@ -8,7 +8,7 @@ type direction =
   | Horizontal of { max_height : size1 }
 
 type t = {
-  io : io;
+  mutable io : io;
   id : id;
   mutable pos : p2;
   mutable direction : direction;
@@ -17,12 +17,31 @@ type t = {
 }
 
 type 'a tbl = (id, 'a) Hashtbl.t
-type state = { checkboxes : bool tbl; sliders : float tbl }
+
+let new_tbl () = Hashtbl.create 16
+
+type scroll_box = { size : size1; offset : float }
+(** size is the width or height depending on a vertical on horizontal layout. *)
+
+type state = {
+  checkboxes : bool tbl;
+  sliders : float tbl;
+  scroll_boxes : scroll_box tbl;
+}
 
 let new_state () =
-  { checkboxes = Hashtbl.create 16; sliders = Hashtbl.create 16 }
+  { checkboxes = new_tbl (); sliders = new_tbl (); scroll_boxes = new_tbl () }
 
 let state : state tbl = Hashtbl.create 256
+let ui_state ~ui = Hashtbl.find state ui.id
+
+let find ~default tbl key =
+  match Hashtbl.find_opt tbl key with
+  | None ->
+      Hashtbl.add tbl key default;
+      default
+  | Some v -> v
+
 let padding = 6.
 let padding_x = V2.v padding 0.
 let padding_y = V2.v 0. padding
@@ -43,15 +62,16 @@ let debug_render ~ui f =
 
 let render ~ui f =
   let prev_f = ui.render in
+  let io = ui.io in
   ui.render <-
     (fun () ->
       prev_f ();
-      f ui.io)
+      f ~io)
 
 let debug_box ~ui ~color box =
   debug_render ~ui (fun io -> draw_rect ~io ~color box)
 
-let allocate_area ~ui size =
+let allocate_area ~ui (size : size2) =
   let pos = ui.pos in
   match ui.direction with
   | Vertical { max_width } ->
@@ -150,23 +170,16 @@ let button ~ui text =
   let box = allocate_area ~ui V2.(text_size + (2. * (padding_x + padding_y))) in
   let pos = Box.o box in
   let pos = V2.(pos + padding_y) in
-  render ~ui (fun io ->
+  render ~ui (fun ~io ->
       fill_rect ~io ~color:bg' box;
       draw_rect ~io ~color:fg box;
       draw_string ~io ~color:fg Font.default ~size text V2.(pos + padding_x));
   is_clicked ~ui box
 
 let is_checked ~ui ~id box =
-  let { id = id_ui; _ } = ui in
-  let ui_state = Hashtbl.find state id_ui in
+  let ui_state = ui_state ~ui in
   let is_clicked = is_clicked ~ui box in
-  let state_b =
-    match Hashtbl.find_opt ui_state.checkboxes id with
-    | None ->
-        Hashtbl.add ui_state.checkboxes id false;
-        false
-    | Some b -> b
-  in
+  let state_b = find ~default:false ui_state.checkboxes id in
   let r = if is_clicked then not state_b else state_b in
   Hashtbl.replace ui_state.checkboxes id r;
   r
@@ -191,7 +204,7 @@ let checkbox ~ui ~id text =
         Size2.(v check'box'_size check'box'_size))
   in
   let is_checked = is_checked ~ui ~id box in
-  render ~ui (fun io ->
+  render ~ui (fun ~io ->
       fill_rect ~io ~color:bg' box;
       draw_rect ~io ~color:fg box;
       fill_rect ~io ~color:bg check'box';
@@ -209,14 +222,12 @@ let checkbox ~ui ~id text =
   is_checked
 
 let slider_val ~ui ~id ~box ~min ~max =
-  let { id = id_ui; io; _ } = ui in
-  let ui_state = Hashtbl.find state id_ui in
+  let { io; _ } = ui in
+  let ui_state = ui_state ~ui in
   let is_clicked =
     Event.is_pressed ~io `click_left && Box.mem (Event.mouse_pos ~io) box
   in
-  let state_n =
-    match Hashtbl.find_opt ui_state.sliders id with None -> max | Some n -> n
-  in
+  let state_n = find ~default:max ui_state.sliders id in
   let r =
     if is_clicked then
       ((V2.x (Event.mouse_pos ~io) -. Box.minx box) *. (max -. min) /. Box.w box)
@@ -235,7 +246,7 @@ let slider ~ui ~id ~w ~min ~max =
       ~box:(Box.v_mid (Box.mid line) (Size2.v w height))
       ~min ~max
   in
-  render ~ui (fun io ->
+  render ~ui (fun ~io ->
       fill_rect ~io ~color:lowlight line;
       let slider_pos = (slider_val -. min) *. Box.w box /. (max -. min) in
       fill_rect ~io ~color:highlight
@@ -248,4 +259,38 @@ let label ~ui text =
   let size = 20 in
   let text_size = text_size ~ui Font.default ~size text in
   let pos = Box.o (allocate_area ~ui text_size) in
-  render ~ui (fun io -> draw_string ~io ~color:fg Font.default ~size text pos)
+  render ~ui (fun ~io -> draw_string ~io ~color:fg Font.default ~size text pos)
+
+let scroll_box_state ~ui ~id =
+  find ~default:{ size = 0.; offset = 0. } (ui_state ~ui).scroll_boxes id
+
+let set_scroll_box_state ~ui ~id s =
+  Hashtbl.replace (ui_state ~ui).scroll_boxes id s
+
+let width ~ui =
+  match ui.direction with
+  | Vertical { max_width } -> max_width
+  | _ -> assert false
+
+let scroll_box ~ui ~id ~size f =
+  let { size = previous_size; offset } = scroll_box_state ~ui ~id in
+  let box =
+    allocate_area ~ui
+      (Size2.v previous_size size (*for now we assume vertical*))
+  in
+  ui.pos <- V2.(Box.o box - v 0. offset + padding_x);
+  let previous_io = ui.io in
+  render ~ui (fun ~io -> draw_rect ~io ~color:fg box);
+  ui.io <- View.clipped box previous_io;
+  let r = f () in
+  ui.io <- previous_io;
+  ui.pos <- P2.v (Box.minx box) (Box.maxy box);
+  let size = width ~ui in
+  let offset =
+    if Event.is_pressed ~io:ui.io `wheel then
+      let amount = Event.wheel_delta ~io:ui.io in
+      offset +. amount
+    else offset
+  in
+  set_scroll_box_state ~ui ~id { size; offset };
+  r

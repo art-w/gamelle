@@ -9,7 +9,7 @@ let () =
   if Event.is_pressed ~io `escape then raise Exit;
   show_cursor true;
   let io = View.drawing_box box io in
-  let io = View.clipped Box.(v_corners (o box) (mid box)) io in
+  (* let io = View.clipped Box.(v_corners (o box) (mid box)) io in *)
   let box =
     snd
       Ui.(
@@ -17,6 +17,12 @@ let () =
           P2.(v 0. 0.)
           (fun ui ->
             label ~ui "This is a label";
+            scroll_box ~ui ~id:4 ~size:100. (fun () ->
+                if button ~ui "button" then print_endline "button pressed";
+                if button ~ui "button" then print_endline "button pressed";
+                if button ~ui "button" then print_endline "button pressed";
+                if button ~ui "button" then print_endline "button pressed";
+                if button ~ui "button" then print_endline "button pressed");
             horizontal ~ui (fun () ->
                 if button ~ui "button 1" then print_endline "button 1 pressed";
                 vertical ~ui (fun () ->
