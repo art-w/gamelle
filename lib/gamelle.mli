@@ -53,11 +53,13 @@ module View : sig
   val rotate : float -> 'a scene -> 'a scene
   val clip : box2 -> 'a scene -> 'a scene
   val unclip : 'a scene -> 'a scene
+  val clip_events : bool -> 'a scene -> 'a scene
   val translated : V2.t -> io -> io
   val scaled : float -> io -> io
   val rotated : float -> io -> io
   val clipped : box2 -> io -> io
   val unclipped : io -> io
+  val clipped_events : bool -> io -> io
 end
 
 val clock : unit -> float
@@ -79,7 +81,6 @@ val text_size : io:io -> Font.t -> size:int -> string -> size2
 
 module Event : sig
   val mouse_pos : io:io -> p2
-
   val wheel_delta : io:io -> float
 
   type key =

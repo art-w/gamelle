@@ -42,6 +42,7 @@ let default =
 
 let insert = Keys.add
 let remove = Keys.remove
+
 let is_pressed t key = Keys.mem key t.keypressed
 let is_up t key = Keys.mem key t.keyup
 let is_down t key = Keys.mem key t.keydown
