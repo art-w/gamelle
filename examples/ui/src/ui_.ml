@@ -20,7 +20,7 @@ type 'a tbl = (id, 'a) Hashtbl.t
 
 let new_tbl () = Hashtbl.create 16
 
-type scroll_box = { size : size1; offset : float }
+type scroll_box = { size : size2; offset : float }
 (** size is the width or height depending on a vertical on horizontal layout. *)
 
 type state = {
@@ -262,7 +262,9 @@ let label ~ui text =
   render ~ui (fun ~io -> draw_string ~io ~color:fg Font.default ~size text pos)
 
 let scroll_box_state ~ui ~id =
-  find ~default:{ size = 0.; offset = 0. } (ui_state ~ui).scroll_boxes id
+  find
+    ~default:{ size = Size2.zero; offset = 0. }
+    (ui_state ~ui).scroll_boxes id
 
 let set_scroll_box_state ~ui ~id s =
   Hashtbl.replace (ui_state ~ui).scroll_boxes id s
@@ -270,28 +272,62 @@ let set_scroll_box_state ~ui ~id s =
 let width ~ui =
   match ui.direction with
   | Vertical { max_width } -> max_width
-  | _ -> assert false
+  | _ -> failwith "TODO : implement horizontal scrollbars"
 
 let scroll_box ~ui ~id ~size f =
   let { size = previous_size; offset } = scroll_box_state ~ui ~id in
+  let scroll_bar_width = 10. in
   let box =
     allocate_area ~ui
-      (Size2.v previous_size size (*for now we assume vertical*))
+      (Size2.v
+         (Size2.w previous_size +. scroll_bar_width)
+         size (*for now we assume vertical*))
   in
-  ui.pos <- V2.(Box.o box - v 0. offset + padding_x);
+  let real_height = Size2.h previous_size in
+  let start_pos = V2.(Box.o box - v 0. offset + padding_x) in
+  ui.pos <- start_pos;
   let previous_io = ui.io in
   render ~ui (fun ~io -> draw_rect ~io ~color:fg box);
   ui.io <- previous_io |> View.clipped box |> View.clipped_events true;
   let r = f () in
+  let scroll_bar_height = size *. size /. real_height in
+  let scroll_rail_box =
+    Box.v
+      (P2.v (Box.maxx box -. scroll_bar_width) (Box.miny box))
+      (Size2.v scroll_bar_width size)
+  in
+  let mouse_pos = Event.mouse_pos ~io:ui.io in
+  let max_offset = real_height -. size in
   let offset =
-    if Event.is_pressed ~io:ui.io `wheel then
+    max 0. @@ min max_offset
+    @@
+    if
+      Event.is_pressed ~io:ui.io `click_left
+      && Box.mem mouse_pos scroll_rail_box
+    then
+      max_offset
+      *. (size /. (size -. scroll_bar_height))
+      *. (P2.y mouse_pos -. Box.miny scroll_rail_box)
+      /. size
+      -. (size /. 2.)
+    else if Event.is_pressed ~io:ui.io `wheel then
       let amount = Event.wheel_delta ~io:ui.io in
       offset +. amount
     else offset
   in
   ui.io <- previous_io;
-  ui.pos <- P2.v (Box.minx box) (Box.maxy box);
-  let size = width ~ui in
+  let new_real_height = P2.y ui.pos -. P2.y start_pos +. padding in
 
+  let scroll_bar_box =
+    Box.v
+      (P2.v
+         (Box.maxx box -. scroll_bar_width)
+         ((offset *. size /. real_height) +. Box.miny box))
+      (Size2.v scroll_bar_width scroll_bar_height)
+  in
+  render ~ui (fill_rect ~color:lowlight scroll_rail_box);
+  render ~ui (fill_rect ~color:highlight scroll_bar_box);
+  ui.pos <- P2.v (Box.minx box) (Box.maxy box);
+  let size = Size2.v (width ~ui -. scroll_bar_width) new_real_height in
   set_scroll_box_state ~ui ~id { size; offset };
   r
