@@ -281,16 +281,17 @@ let scroll_box ~ui ~id ~size f =
   ui.pos <- V2.(Box.o box - v 0. offset + padding_x);
   let previous_io = ui.io in
   render ~ui (fun ~io -> draw_rect ~io ~color:fg box);
-  ui.io <- View.clipped box previous_io;
+  ui.io <- previous_io |> View.clipped box |> View.clipped_events true;
   let r = f () in
-  ui.io <- previous_io;
-  ui.pos <- P2.v (Box.minx box) (Box.maxy box);
-  let size = width ~ui in
   let offset =
     if Event.is_pressed ~io:ui.io `wheel then
       let amount = Event.wheel_delta ~io:ui.io in
       offset +. amount
     else offset
   in
+  ui.io <- previous_io;
+  ui.pos <- P2.v (Box.minx box) (Box.maxy box);
+  let size = width ~ui in
+
   set_scroll_box_state ~ui ~id { size; offset };
   r
