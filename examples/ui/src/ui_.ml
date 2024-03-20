@@ -20,17 +20,26 @@ type 'a tbl = (id, 'a) Hashtbl.t
 
 let new_tbl () = Hashtbl.create 16
 
-type scroll_box = { size : size2; offset : float }
+type scroll_box_state = { size : size2; offset : float; grasped : bool }
 (** size is the width or height depending on a vertical on horizontal layout. *)
+
+type slider_state = { v : float; grasped : bool }
+type layout = { box : box2; parent : id option; children : id list }
 
 type state = {
   checkboxes : bool tbl;
-  sliders : float tbl;
-  scroll_boxes : scroll_box tbl;
+  sliders : slider_state tbl;
+  scroll_boxes : scroll_box_state tbl;
+  layout : layout tbl;
 }
 
 let new_state () =
-  { checkboxes = new_tbl (); sliders = new_tbl (); scroll_boxes = new_tbl () }
+  {
+    checkboxes = new_tbl ();
+    sliders = new_tbl ();
+    scroll_boxes = new_tbl ();
+    layout = new_tbl ();
+  }
 
 let state : state tbl = Hashtbl.create 256
 let ui_state ~ui = Hashtbl.find state ui.id
@@ -41,6 +50,16 @@ let find ~default tbl key =
       Hashtbl.add tbl key default;
       default
   | Some v -> v
+
+type ('state, 'r) elt =
+  ui:t ->
+  id:id ->
+  ?size:('state -> size2) ->
+  ?render:(io:io -> box2 -> 'state -> unit) ->
+  ?update:(io:io -> box2 -> 'state -> 'state) ->
+  ?result:('state -> 'r) ->
+  unit ->
+  'r
 
 let padding = 6.
 let padding_x = V2.v padding 0.
@@ -224,18 +243,24 @@ let checkbox ~ui ~id text =
 let slider_val ~ui ~id ~box ~min ~max =
   let { io; _ } = ui in
   let ui_state = ui_state ~ui in
-  let is_clicked =
-    Event.is_pressed ~io `click_left && Box.mem (Event.mouse_pos ~io) box
+  let { v; grasped } =
+    find ~default:{ v = max; grasped = false } ui_state.sliders id
   in
-  let state_n = find ~default:max ui_state.sliders id in
-  let r =
-    if is_clicked then
-      ((V2.x (Event.mouse_pos ~io) -. Box.minx box) *. (max -. min) /. Box.w box)
-      +. min
-    else state_n
+  let grasped =
+    if grasped then not (View.clip_events false ~io @@ Event.is_up `click_left)
+    else Event.is_pressed ~io `click_left && Box.mem (Event.mouse_pos ~io) box
   in
-  Hashtbl.replace ui_state.sliders id r;
-  r
+
+  let v =
+    if grasped then
+      Float.max min @@ Float.min max
+      @@ (V2.x (Event.mouse_pos ~io) -. Box.minx box)
+         *. (max -. min) /. Box.w box
+         +. min
+    else v
+  in
+  Hashtbl.replace ui_state.sliders id { v; grasped };
+  v
 
 let slider ~ui ~id ~w ~min ~max =
   let height = 20. in
@@ -263,7 +288,7 @@ let label ~ui text =
 
 let scroll_box_state ~ui ~id =
   find
-    ~default:{ size = Size2.zero; offset = 0. }
+    ~default:{ size = Size2.zero; offset = 0.; grasped = false }
     (ui_state ~ui).scroll_boxes id
 
 let set_scroll_box_state ~ui ~id s =
@@ -275,7 +300,7 @@ let width ~ui =
   | _ -> failwith "TODO : implement horizontal scrollbars"
 
 let scroll_box ~ui ~id ~size f =
-  let { size = previous_size; offset } = scroll_box_state ~ui ~id in
+  let { size = previous_size; offset; grasped } = scroll_box_state ~ui ~id in
   let scroll_bar_width = 10. in
   let box =
     allocate_area ~ui
@@ -298,13 +323,17 @@ let scroll_box ~ui ~id ~size f =
   in
   let mouse_pos = Event.mouse_pos ~io:ui.io in
   let max_offset = real_height -. size in
+  let grasped =
+    if grasped then
+      not (View.clip_events false ~io:ui.io @@ Event.is_up `click_left)
+    else
+      Event.is_down ~io:ui.io `click_left
+      && Box.mem (Event.mouse_pos ~io:ui.io) scroll_rail_box
+  in
   let offset =
     max 0. @@ min max_offset
     @@
-    if
-      Event.is_pressed ~io:ui.io `click_left
-      && Box.mem mouse_pos scroll_rail_box
-    then
+    if grasped then
       max_offset
       *. (size /. (size -. scroll_bar_height))
       *. (P2.y mouse_pos -. Box.miny scroll_rail_box)
@@ -329,5 +358,5 @@ let scroll_box ~ui ~id ~size f =
   render ~ui (fill_rect ~color:highlight scroll_bar_box);
   ui.pos <- P2.v (Box.minx box) (Box.maxy box);
   let size = Size2.v (width ~ui -. scroll_bar_width) new_real_height in
-  set_scroll_box_state ~ui ~id { size; offset };
+  set_scroll_box_state ~ui ~id { size; offset; grasped };
   r
