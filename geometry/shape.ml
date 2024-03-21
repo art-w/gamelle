@@ -359,4 +359,4 @@ let rec contact_points a b =
 
 let contact_points a b =
   let dist, lst = contact_points a b in
-  (dist, Set_v2.to_list lst)
+  (dist, Set_v2.elements lst)

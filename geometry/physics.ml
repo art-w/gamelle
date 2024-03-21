@@ -249,4 +249,4 @@ let fix_collisions t =
   List.iteri (fun i shape -> shapes := World.add i shape !shapes) t;
   let rec go n = if n > 0 && fix_collisions shapes then go (n - 1) in
   go 10;
-  List.map snd (World.to_list !shapes)
+  List.map snd (World.bindings !shapes)

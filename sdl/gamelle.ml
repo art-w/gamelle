@@ -84,7 +84,7 @@ let run () =
     done;
     events := Event.update_updown previous !events;
 
-    Mutex.protect lock (fun () ->
+    mutex_protect lock (fun () ->
         match !current_run with
         | No_run -> invalid_arg "No game currently running"
         | Run { state; update; clean } ->

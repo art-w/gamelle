@@ -18,13 +18,24 @@ let to_string = function
 
 let wait () = Unix.sleepf 0.01
 
+let[@inline never] mutex_protect m f =
+  let open Mutex in
+  lock m;
+  match f() with
+  | x ->
+    unlock m; x
+  | exception e ->
+    (* NOTE: [unlock] does not poll for asynchronous exceptions *)
+    unlock m;
+    raise e
+
 let watch ~lock cmxs_file =
   let th =
     Thread.create @@ fun () ->
     let target_file = Filename.concat (Sys.getcwd ()) cmxs_file in
     let count = ref 0 in
     while true do
-      Mutex.protect lock @@ fun () ->
+      mutex_protect lock @@ fun () ->
       try
         let rec reload () =
           incr count;
