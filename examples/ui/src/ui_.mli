@@ -43,6 +43,6 @@ val button : (unit, string, bool) elt
 val checkbox : (bool, string, bool) elt
 val label : ui:t -> id:id -> string -> unit
 val slider : (slider_state, slider_params, float) elt
-val vertical : ui:t -> (unit -> 'a) -> 'a
-val horizontal : ui:t -> (unit -> 'a) -> 'a
+val vertical : ui:t -> id:id -> (unit -> 'a) -> 'a
+val horizontal : ui:t -> id:id -> (unit -> 'a) -> 'a
 val scroll_box : (scroll_box_state, 'a scroll_box_params, 'a) node

@@ -3,9 +3,6 @@ open Geometry
 
 type id = int
 
-type direction =
-  | Vertical of { max_width : size1 }
-  | Horizontal of { max_height : size1 }
 
 type dir = V | H
 
@@ -24,9 +21,6 @@ type renderer =
 type t = {
   mutable io : io;
   id : id;
-  mutable pos : p2;
-  mutable direction : direction;
-  mutable dir : dir;
   mutable renderers : renderer list;
   mutable debug_render : unit -> unit;
   mutable sizes : size2 list;
@@ -45,8 +39,6 @@ type scroll_box_state = {
 (** size is the width or height depending on a vertical on horizontal layout. *)
 
 type slider_state = { v : float; grasped : bool }
-type storage_layout = { box : box2; parent : id option; children : id list }
-type layout = { box : box2; parent : box2 option; children : box2 list }
 
 type state = {
   checkboxes : bool tbl;
@@ -74,11 +66,7 @@ let find ~default tbl key =
   | Some v -> v
 
 let register_layout ~ui ~id box = Hashtbl.replace (ui_state ~ui).layout id box
-let query_layout ~ui ~id = Hashtbl.find (ui_state ~ui).layout id
 let query_layout ~ui ~id = find ~default:Box.zero (ui_state ~ui).layout id
-
-let zero_layout : storage_layout =
-  { box = Box.zero; parent = None; children = [] }
 
 type size_requirement = { available : size1; minimal : size1 }
 (** one dim because this is orthogonal to direction *)
@@ -133,27 +121,8 @@ let render_node ~ui ~id ~dir ~children_pos ~children ~children_io ~size renderer
 let debug_box ~ui ~color box =
   debug_render ~ui (fun io -> draw_rect ~io ~color box)
 
-let allocate_area ~ui ~id:_ (size : size2) =
-  let pos = ui.pos in
-  match ui.direction with
-  | Vertical { max_width } ->
-      let box = Box.v V2.(pos + padding_y) size in
-      debug_box ~ui ~color:Color.red box;
-      let max_width = Float.max max_width (Box.w box) in
-      let pos = P2.(v (x pos) (Box.maxy box)) in
-      ui.pos <- pos;
-      ui.direction <- Vertical { max_width };
-      box
-  | Horizontal { max_height } ->
-      let box = Box.v V2.(pos + padding_x) size in
-      debug_box ~ui ~color:Color.blue box;
-      let max_height = Float.max max_height (Box.h box) in
-      let pos = P2.(v (Box.maxx box) (y pos)) in
-      ui.pos <- pos;
-      ui.direction <- Horizontal { max_height };
-      box
 
-let allocate_area_dir ~dir pos (size : size2) =
+let allocate_area ~dir pos (size : size2) =
   match dir with
   | V ->
       let box = Box.v V2.(pos + padding_y) size in
@@ -176,7 +145,7 @@ let total_size ~ui ~dir =
 
 let rec render ~ui ~dir pos = function
   | Leaf { id; size; renderer } ->
-      let pos, box = allocate_area_dir ~dir pos size in
+      let pos, box = allocate_area ~dir pos size in
       register_layout ~ui ~id box;
       debug_box ~ui ~color:Color.red box;
       renderer ~io:ui.io box;
@@ -190,61 +159,17 @@ let rec render ~ui ~dir pos = function
         |> List.fold_left (render ~ui ~dir:dir') children_pos
       in
       ui.io <- old_io;
-      let pos, box = allocate_area_dir ~dir pos size in
+      let pos, box = allocate_area ~dir pos size in
       register_layout ~ui ~id box;
       renderer ~io:ui.io box;
       pos
 
-let horizontal ~ui f =
-  ui.dir <- H;
-  match ui.direction with
-  | Horizontal _ -> failwith "Call to horizontal when already horizontal !"
-  | Vertical { max_width } ->
-      let old_pos = ui.pos in
-      ui.pos <- V2.(ui.pos + padding_y - padding_x);
-      ui.direction <- Horizontal { max_height = 0. };
-      let r = f () in
-      let max_height =
-        match ui.direction with
-        | Horizontal { max_height } -> max_height
-        | Vertical _ -> failwith "inconsistent directions"
-      in
-      let width = P2.(x ui.pos -. x old_pos) in
-      ui.pos <- V2.(old_pos + v 0. max_height + padding_y);
-      debug_box ~ui ~color:Color.green
-        (Box.v_corners old_pos V2.(ui.pos + v width 0.));
-      let max_width = Float.max max_width width in
-      ui.direction <- Vertical { max_width };
-      r
-
-let vertical ~ui f =
-  ui.dir <- V;
-  match ui.direction with
-  | Vertical _ -> failwith "Call to vertical when already vertical !"
-  | Horizontal { max_height } ->
-      let old_pos = ui.pos in
-      ui.pos <- V2.(ui.pos + padding_x - padding_y);
-      ui.direction <- Vertical { max_width = 0. };
-      let r = f () in
-      let max_width =
-        match ui.direction with
-        | Vertical { max_width } -> max_width
-        | Horizontal _ -> failwith "inconsistent directions"
-      in
-      let height = P2.(y ui.pos -. y old_pos) in
-      ui.pos <- V2.(old_pos + v max_width 0. + padding_x);
-      let max_height = Float.max max_height height in
-      ui.direction <- Horizontal { max_height };
-      r
 
 let ui ?(debug = false) ~io ~id pos f =
   let ctx =
     {
       io;
       id;
-      pos = V2.(pos + padding_x);
-      direction = Vertical { max_width = 0. };
-      dir = V;
       renderers = [];
       sizes = [];
       debug_render = Fun.id;
@@ -397,9 +322,6 @@ let label ~ui ~id text =
       let pos = Box.o box in
       draw_string ~io ~color:fg Font.default ~size text pos)
 
-let set_scroll_box_state ~ui ~id s =
-  Hashtbl.replace (ui_state ~ui).scroll_boxes id s
-
 (* let scroll :(scroll_box_state,(size1 * (unit->'a)), 'a ) elt = fun  *)
 
 type 'a scroll_box_params = { height : float; f : unit -> 'a }
@@ -501,3 +423,53 @@ let scroll_box : type a. (scroll_box_state, a scroll_box_params, a) node =
   render_node ~ui ~dir:V ~children_pos ~children_io ~children ~id ~size
     (render params state);
   result
+
+
+
+  let horizontal ~ui ~id f =
+    let box = query_layout ~ui ~id in
+    debug_box ~ui ~color:Color.green box;
+    let children_io = View.clipped_events true @@ View.clipped box ui.io in
+    let old_sizes = ui.sizes
+    and old_renderers = ui.renderers
+    and old_io = ui.io in
+    ui.io <- children_io;
+    ui.sizes <- [];
+    ui.renderers <- [];
+    let result = f () in
+    let children_size = total_size ~ui ~dir:H in
+    let children = ui.renderers in
+    ui.sizes <- old_sizes;
+    ui.renderers <- old_renderers;
+    ui.io <- old_io;
+    let children_pos = (Box.o box) in
+    let size = children_size in
+    register_size ~ui size;
+    render_node ~ui ~dir:H ~children_pos ~children_io ~children ~id ~size
+      (fun ~io:_ _ -> ());
+    result
+
+
+
+    let vertical ~ui ~id f =
+      let box = query_layout ~ui ~id in
+      debug_box ~ui ~color:Color.green box;
+      let children_io = View.clipped_events true @@ View.clipped box ui.io in
+      let old_sizes = ui.sizes
+      and old_renderers = ui.renderers
+      and old_io = ui.io in
+      ui.io <- children_io;
+      ui.sizes <- [];
+      ui.renderers <- [];
+      let result = f () in
+      let children_size = total_size ~ui ~dir:V in
+      let children = ui.renderers in
+      ui.sizes <- old_sizes;
+      ui.renderers <- old_renderers;
+      ui.io <- old_io;
+      let children_pos = (Box.o box) in
+      let size = children_size in
+      register_size ~ui size;
+      render_node ~ui ~dir:V ~children_pos ~children_io ~children ~id ~size
+        (fun ~io:_ _ -> ());
+      result

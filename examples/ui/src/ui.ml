@@ -32,10 +32,10 @@ let () =
                     if button ~ui ~id:10 "button" then
                       print_endline "button pressed");
               };
-            horizontal ~ui (fun () ->
+            horizontal ~ui ~id:18 (fun () ->
                 if button ~ui ~id:11 "button 1" then
                   print_endline "button 1 pressed";
-                vertical ~ui (fun () ->
+                vertical ~ui ~id:17 (fun () ->
                     if button ~ui ~id:12 "button 2" then
                       print_endline "button 2 pressed";
                     if button ~ui ~id:13 "button 3" then
