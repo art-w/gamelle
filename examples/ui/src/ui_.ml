@@ -2,8 +2,6 @@ open Gamelle
 open Geometry
 
 type id = int
-
-
 type dir = V | H
 
 type renderer =
@@ -121,7 +119,6 @@ let render_node ~ui ~id ~dir ~children_pos ~children ~children_io ~size renderer
 let debug_box ~ui ~color box =
   debug_render ~ui (fun io -> draw_rect ~io ~color box)
 
-
 let allocate_area ~dir pos (size : size2) =
   match dir with
   | V ->
@@ -152,6 +149,13 @@ let rec render ~ui ~dir pos = function
       pos
   | Node { id; dir = dir'; children_pos; children_io; size; children; renderer }
     ->
+      let children_pos =
+        if dir <> dir' then
+          match dir' with
+          | V -> V2.(children_pos  - padding_y)
+          | H -> V2.(children_pos - padding_x)
+        else children_pos
+      in
       let old_io = ui.io in
       ui.io <- children_io;
       let _pos =
@@ -162,19 +166,17 @@ let rec render ~ui ~dir pos = function
       let pos, box = allocate_area ~dir pos size in
       register_layout ~ui ~id box;
       renderer ~io:ui.io box;
+      (*let pos =
+        if dir <> dir' then
+          match dir' with
+          | V -> V2.(pos + padding_x)
+          | H -> V2.(pos + padding_y)
+        else pos
+      in*)
       pos
 
-
 let ui ?(debug = false) ~io ~id pos f =
-  let ctx =
-    {
-      io;
-      id;
-      renderers = [];
-      sizes = [];
-      debug_render = Fun.id;
-    }
-  in
+  let ctx = { io; id; renderers = []; sizes = []; debug_render = Fun.id } in
   if not (Hashtbl.mem state id) then Hashtbl.add state id (new_state ());
   let r = f ctx in
   let end_corner = V2.(pos + total_size ~ui:ctx ~dir:V) in
@@ -424,52 +426,45 @@ let scroll_box : type a. (scroll_box_state, a scroll_box_params, a) node =
     (render params state);
   result
 
+let horizontal ~ui ~id f =
+  let box = query_layout ~ui ~id in
+  debug_box ~ui ~color:Color.green box;
+  let children_io = View.clipped_events true @@ View.clipped box ui.io in
+  let old_sizes = ui.sizes
+  and old_renderers = ui.renderers
+  and old_io = ui.io in
+  ui.io <- children_io;
+  ui.sizes <- [];
+  ui.renderers <- [];
+  let result = f () in
+  let children_size = total_size ~ui ~dir:H in
+  let children = ui.renderers in
+  ui.sizes <- old_sizes;
+  ui.renderers <- old_renderers;
+  ui.io <- old_io;
+  let children_pos = Box.o box in
+  let size = children_size in
+  register_size ~ui size;
+  render_node ~ui ~dir:H ~children_pos ~children_io ~children ~id ~size
+    (fun ~io:_ _ -> ());
+  result
 
-
-  let horizontal ~ui ~id f =
-    let box = query_layout ~ui ~id in
-    debug_box ~ui ~color:Color.green box;
-    let children_io = View.clipped_events true @@ View.clipped box ui.io in
-    let old_sizes = ui.sizes
-    and old_renderers = ui.renderers
-    and old_io = ui.io in
-    ui.io <- children_io;
-    ui.sizes <- [];
-    ui.renderers <- [];
-    let result = f () in
-    let children_size = total_size ~ui ~dir:H in
-    let children = ui.renderers in
-    ui.sizes <- old_sizes;
-    ui.renderers <- old_renderers;
-    ui.io <- old_io;
-    let children_pos = (Box.o box) in
-    let size = children_size in
-    register_size ~ui size;
-    render_node ~ui ~dir:H ~children_pos ~children_io ~children ~id ~size
-      (fun ~io:_ _ -> ());
-    result
-
-
-
-    let vertical ~ui ~id f =
-      let box = query_layout ~ui ~id in
-      debug_box ~ui ~color:Color.green box;
-      let children_io = View.clipped_events true @@ View.clipped box ui.io in
-      let old_sizes = ui.sizes
-      and old_renderers = ui.renderers
-      and old_io = ui.io in
-      ui.io <- children_io;
-      ui.sizes <- [];
-      ui.renderers <- [];
-      let result = f () in
-      let children_size = total_size ~ui ~dir:V in
-      let children = ui.renderers in
-      ui.sizes <- old_sizes;
-      ui.renderers <- old_renderers;
-      ui.io <- old_io;
-      let children_pos = (Box.o box) in
-      let size = children_size in
-      register_size ~ui size;
-      render_node ~ui ~dir:V ~children_pos ~children_io ~children ~id ~size
-        (fun ~io:_ _ -> ());
-      result
+let vertical ~ui ~id f =
+  let box = query_layout ~ui ~id in
+  debug_box ~ui ~color:Color.green box;
+  let old_sizes = ui.sizes
+  and old_renderers = ui.renderers
+  in
+  ui.sizes <- [];
+  ui.renderers <- [];
+  let result = f () in
+  let children_size = total_size ~ui ~dir:V in
+  let children = ui.renderers in
+  ui.sizes <- old_sizes;
+  ui.renderers <- old_renderers;
+  let children_pos = Box.o box in
+  let size = children_size in
+  register_size ~ui size;
+  render_node ~ui ~dir:V ~children_pos ~children_io:ui.io ~children ~id ~size
+    (fun ~io:_ _ -> ());
+  result
