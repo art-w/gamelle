@@ -9,34 +9,42 @@ let () =
   if Event.is_pressed ~io `escape then raise Exit;
   show_cursor true;
   let io = View.drawing_box box io in
-  (* let io = View.clipped Box.(v_corners (o box) (mid box)) io in *)
   let box =
     snd
       Ui.(
         ui ~io ~id:0
           P2.(v 0. 0.)
           (fun ui ->
-            label ~ui "This is a label";
-            scroll_box ~ui ~id:4 ~size:100. (fun () ->
-                if button ~ui "button" then print_endline "button pressed";
-                if button ~ui "button" then print_endline "button pressed";
-                if button ~ui "button" then print_endline "button pressed";
-                if button ~ui "button" then print_endline "button pressed";
-                if button ~ui "button" then print_endline "button pressed");
+            label ~ui ~id:5 "This is a label ---";
+            scroll_box ~ui ~id:4
+              {
+                height = 100.;
+                f =
+                  (fun () ->
+                    if button ~ui ~id:6 "button" then
+                      print_endline "button pressed";
+                    if button ~ui ~id:7 "button" then
+                      print_endline "button pressed";
+                    if button ~ui ~id:8 "button" then
+                      print_endline "button pressed";
+                    if button ~ui ~id:9 "button" then
+                      print_endline "button pressed";
+                    if button ~ui ~id:10 "button" then
+                      print_endline "button pressed");
+              };
             horizontal ~ui (fun () ->
-                if button ~ui "button 1" then print_endline "button 1 pressed";
+                if button ~ui ~id:11 "button 1" then
+                  print_endline "button 1 pressed";
                 vertical ~ui (fun () ->
-                    if button ~ui "button 2" then
+                    if button ~ui ~id:12 "button 2" then
                       print_endline "button 2 pressed";
-                    if button ~ui "button 3" then
+                    if button ~ui ~id:13 "button 3" then
                       print_endline "button 3 pressed");
-                if button ~ui "button 4" then print_endline "button 4 pressed");
-            ignore @@ checkbox ~ui ~id:1 "This is a checkbox 🤓";
-            let number = slider ~ui ~id:2 ~w:200. ~min:10. ~max:20. in
-            label ~ui (Printf.sprintf "The slider value is %f" number)))
+                if button ~ui ~id:14 "button 4" then
+                  print_endline "button 4 pressed");
+            if checkbox ~ui ~id:1 "This is a checkbox 🤓" then
+              ignore @@ button ~ui ~id:16 "for checkboxers only";
+            let number = slider ~ui ~id:2 { w = 200.; min = 10.; max = 20. } in
+            label ~ui ~id:15 (Printf.sprintf "The slider value is %f" number)))
   in
-
-  View.clip box ~io
-  @@ draw_string ~color:Color.red Font.default ~size:29
-       "CLIPCLIPCLIPCLIPCLIPCLIPCLIP" (Box.mid box);
   box
