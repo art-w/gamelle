@@ -419,7 +419,7 @@ let scroll_box : type a. (scroll_box_state, a scroll_box_params, a) node =
   ui.sizes <- old_sizes;
   ui.renderers <- old_renderers;
   ui.io <- old_io;
-  let children_pos = V2.(Box.o box - v 0. state.offset) in
+  let children_pos = V2.(Box.o box - v 0. state.offset + padding_x) in
   let space_available = Size2.w (total_size ~ui ~dir:V) in
   let space_required = Size2.w children_size in
   let size = size ~io:ui.io ~space_available ~space_required params in
