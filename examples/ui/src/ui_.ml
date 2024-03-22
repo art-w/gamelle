@@ -42,6 +42,7 @@ type state = {
   checkboxes : bool tbl;
   sliders : slider_state tbl;
   scroll_boxes : scroll_box_state tbl;
+  buttons : bool tbl;
   layout : box2 tbl;
 }
 
@@ -50,6 +51,7 @@ let new_state () =
     checkboxes = new_tbl ();
     sliders = new_tbl ();
     scroll_boxes = new_tbl ();
+    buttons = new_tbl ();
     layout = new_tbl ();
   }
 
@@ -66,23 +68,21 @@ let find ~default tbl key =
 let register_layout ~ui ~id box = Hashtbl.replace (ui_state ~ui).layout id box
 let query_layout ~ui ~id = find ~default:Box.zero (ui_state ~ui).layout id
 
-type size_requirement = { available : size1; minimal : size1 }
-(** one dim because this is orthogonal to direction *)
-
 type ('state, 'params, 'r) elt =
   ui:t ->
   id:id ->
-  ?size:(io:io -> 'params -> size2) ->
+  ?size:(io:io -> space_available:size1 -> 'params -> size2) ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
-  ?update:(io:io -> box2 -> 'state -> 'params -> 'state) ->
-  ?result:(ui:t -> 'state -> box2 -> 'r) ->
+  ?update:(io:io -> 'params -> 'state -> box2 -> 'state) ->
+  ?result:('state -> 'r) ->
   'params ->
   'r
 
 type ('state, 'params, 'r) node =
   ui:t ->
   id:id ->
-  ?size:(io:io -> req:size_requirement -> 'params -> size2) ->
+  ?size:
+    (io:io -> space_available:size1 -> space_required:size1 -> 'params -> size2) ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
   ?update:(io:io -> children_size:size2 -> box2 -> 'state -> 'params -> 'state) ->
   ?result:('params -> 'r) ->
@@ -192,14 +192,28 @@ let ui ?(debug = false) ~io ~id pos f =
   if debug then ctx.debug_render ();
   (r, box)
 
+let elt get_tbl ~(default : 'state) ~ui ~id
+    ~(size : io:io -> space_available:size1 -> 'params -> size2)
+    ~(render : io:io -> 'params -> 'state -> box2 -> unit) ~update ~result
+    params =
+  let box = query_layout ~ui ~id in
+  let size = size ~io:ui.io ~space_available:0. params in
+  register_size ~ui size;
+  let tbl = get_tbl @@ ui_state ~ui in
+  let prev_state = find ~default tbl id in
+  let state = update ~io:ui.io params prev_state box in
+  Hashtbl.replace tbl id state;
+  render_leaf ~ui ~id ~size (render params state);
+  result state
+
 let is_clicked ~io box =
   Event.is_down ~io `click_left && Box.mem (Event.mouse_pos ~io) box
 
-let button_size ~io text =
+let button_size ~io ~space_available:_ text =
   let text_size = text_size ~io Font.default ~size:font_size text in
   V2.(text_size + (2. * (padding_x + padding_y)))
 
-let button_render ~io text () box =
+let button_render ~io text _is_clicked box =
   let pos = Box.o box in
   let pos = V2.(pos + padding_y) in
   fill_rect ~io ~color:bg' box;
@@ -207,20 +221,17 @@ let button_render ~io text () box =
   draw_string ~io ~color:fg Font.default ~size:font_size text
     V2.(pos + padding_x)
 
-let button_update ~io:_ _box () _text = ()
-let button_result ~ui () box = is_clicked ~io:ui.io box
+let button_update ~io _text _old_state box = is_clicked ~io box
+let button_result b = b
 
-let button : (unit, string, bool) elt =
+let button : (bool, string, bool) elt =
  fun ~ui ~id ?(size = button_size) ?(render = button_render)
      ?(update = button_update) ?(result = button_result) text ->
-  let box = query_layout ~ui ~id in
-  let size = size ~io:ui.io text in
-  register_size ~ui size;
-  render_leaf ~ui ~id ~size (render text ());
-  update ~io:ui.io box () text;
-  result ~ui () box
+  elt
+    (fun s -> s.buttons)
+    ~default:false ~ui ~id ~size ~render ~update ~result text
 
-let checkbox_size ~io text =
+let checkbox_size ~io ~space_available:_ text =
   let text_size = text_size ~io Font.default ~size:font_size text in
   let check'box'_size = Size2.h text_size in
   V2.(
@@ -253,24 +264,11 @@ let checkbox_render ~io text is_checked box =
   draw_string ~io ~color:fg Font.default ~size:font_size text
     V2.(pos + padding_x + v check'box'_size 0. + padding_x)
 
-let checkbox_update ~io box previous_is_checked _text =
+let checkbox_update ~io _text previous_is_checked box =
   let is_clicked = is_clicked ~io box in
   if is_clicked then not previous_is_checked else previous_is_checked
 
-let checkbox_result ~ui:_ is_clicked _box = is_clicked
-
-let elt get_tbl ~(default : 'state) ~ui ~id ~size
-    ~(render : io:io -> 'params -> 'state -> box2 -> unit) ~update ~result
-    params =
-  let box = query_layout ~ui ~id in
-  let size = size ~io:ui.io params in
-  register_size ~ui size;
-  let tbl = get_tbl @@ ui_state ~ui in
-  let prev_state = find ~default tbl id in
-  let state = update ~io:ui.io box prev_state params in
-  Hashtbl.replace tbl id state;
-  render_leaf ~ui ~id ~size (render params state);
-  result ~ui state box
+let checkbox_result is_clicked = is_clicked
 
 let checkbox : (bool, string, bool) elt =
  fun ~ui ~id ?(size = checkbox_size) ?(render = checkbox_render)
@@ -281,7 +279,7 @@ let checkbox : (bool, string, bool) elt =
 
 type slider_params = { w : float; min : float; max : float }
 
-let slider_size ~io:_ { w; min = _; max = _ } =
+let slider_size ~io:_ ~space_available:_ { w; min = _; max = _ } =
   let height = 20. in
   Size2.v (w +. (2. *. padding)) height
 
@@ -294,7 +292,7 @@ let slider_render ~io { w; min; max } state box =
   fill_circle ~io ~color:highlight
     (Circle.v (P2.v (Box.minx line +. slider_pos) (Box.midy line)) 8.)
 
-let slider_update ~io box state { w = _; min; max } =
+let slider_update ~io { w = _; min; max } state box =
   let { v; grasped } = state in
   let grasped =
     if grasped then not (View.clip_events false ~io @@ Event.is_up `click_left)
@@ -310,7 +308,7 @@ let slider_update ~io box state { w = _; min; max } =
   in
   { v; grasped }
 
-let slider_result ~ui:_ state _box = state.v
+let slider_result state = state.v
 
 let slider : (slider_state, slider_params, float) elt =
  fun ~ui ~id ?(size = slider_size) ?(render = slider_render)
@@ -332,9 +330,12 @@ type 'a scroll_box_params = { height : float; f : unit -> 'a }
 
 let scroll_bar_width = 10.
 
-let scroll_box_size ~io:_ ~req { height; f = _ } =
+let scroll_box_size ~io:_ ~space_available ~space_required { height; f = _ } =
   let height = height in
-  let width = Float.max req.available (req.minimal +. scroll_bar_width) in
+  let width =
+    Float.max space_available
+      (space_required +. (2. *. padding) +. scroll_bar_width)
+  in
   Size2.(v width height)
 
 let scroll_box_render ~io { height; f = _ } state box =
@@ -415,13 +416,9 @@ let scroll_box : type a. (scroll_box_state, a scroll_box_params, a) node =
   ui.renderers <- old_renderers;
   ui.io <- old_io;
   let children_pos = V2.(Box.o box - v 0. state.offset) in
-  let req =
-    {
-      available = Size2.w (total_size ~ui ~dir:V);
-      minimal = Size2.w children_size;
-    }
-  in
-  let size = size ~io:ui.io ~req params in
+  let space_available = Size2.w (total_size ~ui ~dir:V) in
+  let space_required = Size2.w children_size in
+  let size = size ~io:ui.io ~space_available ~space_required params in
   register_size ~ui size;
   Hashtbl.replace ui_state.scroll_boxes id state;
   render_node ~ui ~dir:V ~children_pos ~children_io ~children ~id ~size
