@@ -3,6 +3,7 @@ open Gamelle_geometry
 type t = {
   view : Transform.t;
   event : Event.t;
+  draw : (unit -> unit) list ref;
   clean : (unit -> unit) list ref;
   centering_translation : v2;
   clip : box2 option;
@@ -13,13 +14,17 @@ let make () =
   {
     view = Transform.default;
     event = Event.default;
+    draw = ref [];
     clean = ref [];
     centering_translation = V2.zero;
     clip = None;
     clip_events = false;
   }
 
+let draw ~io fn = io.draw := fn :: !(io.draw)
 let clean ~io fn = io.clean := fn :: !(io.clean)
+let clock ~io = Event.clock io.event
+let dt ~io = Event.dt io.event
 
 (* *)
 

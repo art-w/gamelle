@@ -64,8 +64,9 @@ let update ~io { x; y; vx; vy; _ } =
     else (vx, vy)
   in
 
-  let x = x +. (vx *. dt ()) in
-  let y = y +. (vy *. dt ()) in
+  let dt = dt ~io in
+  let x = x +. (vx *. dt) in
+  let y = y +. (vy *. dt) in
 
   let vx = vx *. 0.9 in
   let vy = vy *. 0.9 in
@@ -83,7 +84,7 @@ let update ~io { x; y; vx; vy; _ } =
         (scale 3.0
            (draw_rect ~color:yellow (Box2.v (P2.v 0. 0.) (Size2.v 100.0 100.0))
            & translate (V2.v (75. /. 2.) (59. /. 2.))
-             @@ rotate (1.0 *. clock ())
+             @@ rotate (1.0 *. clock ~io)
              @@ translate (V2.v (-75. /. 2.) (-59. /. 2.))
              @@ (fill_rect ~color:blue (Box2.v (P2.v 0. 0.) (Size2.v 75. 59.))
                 & draw_rect ~color:red (Box2.v (P2.v 0. 0.) (Size2.v 75. 59.))

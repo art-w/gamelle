@@ -12,12 +12,16 @@ include Gamelle_geometry.Make (Draw)
 
 (* type ctx = C.t *)
 
-type io = Gamelle_common.Io.t
+module Io = Gamelle_common.Io
+
+type io = Io.t
 
 let prev_now = ref 0.0
 let now = ref 0.0
-let clock () = !now
-let dt () = !now -. !prev_now
+let clock = Io.clock
+let dt = Io.dt
+(* let clock () = !now *)
+(* let dt () = !now -. !prev_now *)
 
 module Window = struct
   let size () =
@@ -55,6 +59,8 @@ let run state update =
         Canvas.of_el elt
   in
 
+  let clock = ref 0 in
+
   global_canvas := Some canvas;
 
   Canvas.set_w canvas 640;
@@ -70,7 +76,10 @@ let run state update =
     prev_now := !now;
     now := elapsed /. 1000.0;
     Event.new_frame ();
-    let io = { (Io.make ()) with event = !Event.current } in
+    let io =
+      { (Io.make ()) with event = { !Event.current with clock = !clock } }
+    in
+    incr clock;
     fill_rect ~io ~color:Color.black (Window.box ());
     let state = update ~io state in
     Event.current := Gamelle_common.Event.reset_wheel !Event.current;

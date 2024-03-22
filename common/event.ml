@@ -26,6 +26,7 @@ type t = {
   mouse_x : float;
   mouse_y : float;
   wheel_delta : float;
+  clock : int;
 }
 
 let mouse_pos t = Gamelle_geometry.P2.v t.mouse_x t.mouse_y
@@ -38,8 +39,13 @@ let default =
     mouse_x = 0.0;
     mouse_y = 0.0;
     wheel_delta = 0.;
+    clock = 0;
   }
 
+let desired_fps = 60.0
+let desired_dt = 1. /. desired_fps
+let dt (_ : t) = desired_dt
+let clock t = float t.clock /. desired_fps
 let insert = Keys.add
 let remove = Keys.remove
 let is_pressed t key = Keys.mem key t.keypressed

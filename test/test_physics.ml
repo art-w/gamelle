@@ -38,7 +38,7 @@ let () =
       obj :: world
     else world
   in
-  let dt = dt () in
+  let dt = dt ~io in
   let gravity = V2.v 0.0 (1500.0 *. dt) in
   let world = List.map (Physics.add_velocity gravity) world in
   let world = List.map (Physics.update ~dt) world in

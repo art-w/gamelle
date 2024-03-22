@@ -66,7 +66,7 @@ let block_player2 =
 
 let update_player ~io ~player:{ shape = player; jumps } ~gravity left right up
     down =
-  let dt = dt () in
+  let dt = dt ~io in
   let player =
     if Event.is_pressed ~io left then
       Physics.add_velocity (V2.v (-.horz_speed *. dt) 0.0) player
@@ -108,7 +108,7 @@ let () =
       { state with ball = init_ball (); points2 = state.points2 + 1 }
     else { state with ball = init_ball (); points1 = state.points1 + 1 }
   else
-    let dt = dt () in
+    let dt = dt ~io in
     let gravity = V2.v 0.0 (1500.0 *. dt) in
     let ball = Physics.add_velocity gravity ball in
     let ball = Physics.update ~dt ball in

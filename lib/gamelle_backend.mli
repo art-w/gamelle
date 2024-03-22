@@ -62,8 +62,8 @@ module View : sig
   val clipped_events : bool -> io -> io
 end
 
-val clock : unit -> float
-val dt : unit -> float
+val clock : io:io -> float
+val dt : io:io -> float
 val draw : io:io -> Bitmap.t -> p2 -> unit
 val draw_line : io:io -> color:Color.t -> Segment.t -> unit
 val draw_rect : io:io -> color:Color.t -> box2 -> unit

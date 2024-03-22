@@ -79,14 +79,18 @@ let draw ~io bmp p =
   ()
 
 let draw_string ~io ~color font ~size text p =
+  Io.draw ~io @@ fun () ->
   let bitmap = Font.draw ~color font size text in
   draw ~io bitmap p;
   Bitmap.free ~io bitmap
+
+let draw ~io bmp p = Io.draw ~io @@ fun () -> draw ~io bmp p
 
 let text_size ~io font ~size text =
   Delayed.force ~io @@ Font.text_size font size text
 
 let draw_line ~io ~color segment =
+  Io.draw ~io @@ fun () ->
   let p, p' = Segment.to_tuple segment in
   set_color color;
   let x0, y0 = project ~io p in
@@ -105,6 +109,7 @@ let draw_rect ~io ~color rect =
   draw_line ~io ~color (Box.right rect)
 
 let draw_poly ~io ~color arr =
+  Io.draw ~io @@ fun () ->
   set_color color;
   let arr = List.map (project ~io) arr in
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
@@ -116,6 +121,7 @@ let draw_poly ~io ~color arr =
   ()
 
 let fill_poly ~io ~color arr =
+  Io.draw ~io @@ fun () ->
   set_color color;
   let arr = List.map (project ~io) arr in
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
@@ -136,6 +142,7 @@ let fill_rect ~io ~color rect =
   fill_poly ~io ~color pts
 
 let draw_circle ~io ~color circle =
+  Io.draw ~io @@ fun () ->
   let center = Circle.center circle in
   let radius = Circle.radius circle in
   set_color color;
@@ -150,6 +157,7 @@ let draw_circle ~io ~color circle =
   ()
 
 let fill_circle ~io ~color circle =
+  Io.draw ~io @@ fun () ->
   let center = Circle.center circle in
   let radius = Circle.radius circle in
   set_color color;
