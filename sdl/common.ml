@@ -18,10 +18,11 @@ let int = int_of_float
 let[@inline never] mutex_protect m f =
   let open Mutex in
   lock m;
-  match f() with
+  match f () with
   | x ->
-    unlock m; x
+      unlock m;
+      x
   | exception e ->
-    (* NOTE: [unlock] does not poll for asynchronous exceptions *)
-    unlock m;
-    raise e
+      (* NOTE: [unlock] does not poll for asynchronous exceptions *)
+      unlock m;
+      raise e
