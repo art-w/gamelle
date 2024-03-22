@@ -12,39 +12,34 @@ let () =
   let box =
     snd
       Ui.(
-        ui ~io ~id:0
+        ui ~io
           P2.(v 0. 0.)
           (fun ui ->
-            label ~ui ~id:5 "This is a label ---";
-            scroll_box ~ui ~id:4
+            label ~ui "This is a label ---";
+            scroll_box ~ui
               {
                 height = 100.;
                 f =
                   (fun () ->
-                    if button ~ui ~id:6 "button" then
-                      print_endline "button pressed";
-                    if button ~ui ~id:7 "button" then
-                      print_endline "button pressed";
-                    if button ~ui ~id:8 "button" then
-                      print_endline "button pressed";
-                    if button ~ui ~id:9 "button" then
-                      print_endline "button pressed";
-                    if button ~ui ~id:10 "button" then
-                      print_endline "button pressed");
+                    if button ~ui "button" then print_endline "button pressed";
+                    if button ~ui "button" then print_endline "button pressed";
+                    if button ~ui "button" then print_endline "button pressed";
+                    if button ~ui "button" then print_endline "button pressed";
+                    if button ~ui "button" then print_endline "button pressed");
               };
-            horizontal ~ui ~id:18 (fun () ->
-                if button ~ui ~id:11 "button 1" then
-                  print_endline "button 1 pressed";
-                vertical ~ui ~id:17 (fun () ->
-                    if button ~ui ~id:12 "button 2" then
+            horizontal ~ui (fun () ->
+                if button ~ui "button 1" then print_endline "button 1 pressed";
+                vertical ~ui (fun () ->
+                    if button ~ui "button 2" then
                       print_endline "button 2 pressed";
-                    if button ~ui ~id:13 "button 3" then
+                    if button ~ui "button 3" then
                       print_endline "button 3 pressed");
-                if button ~ui ~id:14 "button 4" then
-                  print_endline "button 4 pressed");
-            if checkbox ~ui ~id:1 "This is a checkbox 🤓" then
-              ignore @@ button ~ui ~id:16 "for checkboxers only";
-            let number = slider ~ui ~id:2 { w = 200.; min = 10.; max = 20. } in
-            label ~ui ~id:15 (Printf.sprintf "The slider value is %f" number)))
+                if button ~ui "button 4" then print_endline "button 4 pressed");
+            if checkbox ~ui "This is a checkbox 🤓" then (
+              ignore @@ checkbox ~ui "Checkbox 2 !";
+              if button ~ui "for checkboxers only" then
+                print_endline "YOU ARE A CHECKBOXER");
+            let number = slider ~ui { w = 200.; min = 10.; max = 20. } in
+            label ~ui (Printf.sprintf "The slider value is %f" number)))
   in
   box

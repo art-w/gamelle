@@ -148,3 +148,9 @@ module Physics : sig
   val fix_collisions : t list -> t list
   val draw : io:io -> t -> unit
 end
+
+module Stack : sig
+  type t
+
+  val get : unit -> t
+end

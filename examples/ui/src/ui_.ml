@@ -1,7 +1,7 @@
 open Gamelle
 open Geometry
 
-type id = int
+type id = { stack : Stack.t; explicit : int option }
 type dir = V | H
 
 type renderer =
@@ -18,7 +18,7 @@ type renderer =
 
 type t = {
   mutable io : io;
-  id : id;
+  id : p2;
   mutable renderers : renderer list;
   mutable debug_render : unit -> unit;
   mutable sizes : size2 list;
@@ -55,7 +55,7 @@ let new_state () =
     layout = new_tbl ();
   }
 
-let state : state tbl = Hashtbl.create 256
+let state : (p2, state) Hashtbl.t = Hashtbl.create 256
 let ui_state ~ui = Hashtbl.find state ui.id
 
 let find ~default tbl key =
@@ -70,7 +70,7 @@ let query_layout ~ui ~id = find ~default:Box.zero (ui_state ~ui).layout id
 
 type ('state, 'params, 'r) elt =
   ui:t ->
-  id:id ->
+  ?id:int ->
   ?size:(io:io -> space_available:size1 -> 'params -> size2) ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
   ?update:(io:io -> 'params -> 'state -> box2 -> 'state) ->
@@ -80,7 +80,7 @@ type ('state, 'params, 'r) elt =
 
 type ('state, 'params, 'r) node =
   ui:t ->
-  id:id ->
+  ?id:int ->
   ?size:
     (io:io -> space_available:size1 -> space_required:size1 -> 'params -> size2) ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
@@ -175,7 +175,8 @@ let rec render ~ui ~dir pos = function
         in*)
       pos
 
-let ui ?(debug = false) ~io ~id pos f =
+let ui ?(debug = false) ~io pos f =
+  let id = pos in
   let ctx = { io; id; renderers = []; sizes = []; debug_render = Fun.id } in
   if not (Hashtbl.mem state id) then Hashtbl.add state id (new_state ());
   let r = f ctx in
@@ -196,6 +197,7 @@ let elt get_tbl ~(default : 'state) ~ui ~id
     ~(size : io:io -> space_available:size1 -> 'params -> size2)
     ~(render : io:io -> 'params -> 'state -> box2 -> unit) ~update ~result
     params =
+  let id = { stack = Stack.get (); explicit = id } in
   let box = query_layout ~ui ~id in
   let size = size ~io:ui.io ~space_available:0. params in
   register_size ~ui size;
@@ -225,7 +227,7 @@ let button_update ~io _text _old_state box = is_clicked ~io box
 let button_result b = b
 
 let button : (bool, string, bool) elt =
- fun ~ui ~id ?(size = button_size) ?(render = button_render)
+ fun ~ui ?id ?(size = button_size) ?(render = button_render)
      ?(update = button_update) ?(result = button_result) text ->
   elt
     (fun s -> s.buttons)
@@ -271,7 +273,7 @@ let checkbox_update ~io _text previous_is_checked box =
 let checkbox_result is_clicked = is_clicked
 
 let checkbox : (bool, string, bool) elt =
- fun ~ui ~id ?(size = checkbox_size) ?(render = checkbox_render)
+ fun ~ui ?id ?(size = checkbox_size) ?(render = checkbox_render)
      ?(update = checkbox_update) ?(result = checkbox_result) text ->
   elt
     (fun s -> s.checkboxes)
@@ -311,12 +313,13 @@ let slider_update ~io { w = _; min; max } state box =
 let slider_result state = state.v
 
 let slider : (slider_state, slider_params, float) elt =
- fun ~ui ~id ?(size = slider_size) ?(render = slider_render)
+ fun ~ui ?id ?(size = slider_size) ?(render = slider_render)
      ?(update = slider_update) ?(result = slider_result) params ->
   let default = { v = params.max; grasped = false } in
   elt (fun s -> s.sliders) ~default ~ui ~id ~size ~render ~update ~result params
 
-let label ~ui ~id text =
+let label ~ui ?id text =
+  let id = { stack = Stack.get (); explicit = id } in
   let size = 20 in
   let text_size = text_size ~io:ui.io Font.default ~size text in
   register_size ~ui text_size;
@@ -392,11 +395,12 @@ let scroll_box_update ~io ~children_size box state { height; f = _ } =
 let scroll_box_result { height = _; f } = f ()
 
 let scroll_box : type a. (scroll_box_state, a scroll_box_params, a) node =
- fun ~ui ~id ?(size = scroll_box_size) ?(render = scroll_box_render)
+ fun ~ui ?id ?(size = scroll_box_size) ?(render = scroll_box_render)
      ?(update = scroll_box_update) ?(result = scroll_box_result) params ->
   let default =
     { size = Size2.zero; offset = 0.; grasped = false; real_height = 0. }
   in
+  let id = { stack = Stack.get (); explicit = id } in
   let box = query_layout ~ui ~id in
   debug_box ~ui ~color:Color.blue box;
   let ui_state = ui_state ~ui in
@@ -425,7 +429,9 @@ let scroll_box : type a. (scroll_box_state, a scroll_box_params, a) node =
     (render params state);
   result
 
-let horizontal ~ui ~id f =
+let horizontal ~ui ?id f =
+  let id = { stack = Stack.get (); explicit = id } in
+
   let box = query_layout ~ui ~id in
   debug_box ~ui ~color:Color.green box;
   let old_sizes = ui.sizes and old_renderers = ui.renderers in
@@ -443,7 +449,8 @@ let horizontal ~ui ~id f =
     (fun ~io:_ _ -> ());
   result
 
-let vertical ~ui ~id f =
+let vertical ~ui ?id f =
+  let id = { stack = Stack.get (); explicit = id } in
   let box = query_layout ~ui ~id in
   debug_box ~ui ~color:Color.green box;
   let old_sizes = ui.sizes and old_renderers = ui.renderers in

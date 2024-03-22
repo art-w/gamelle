@@ -2,11 +2,10 @@ open Gamelle
 open Geometry
 
 type t
-type id = int
 
 type ('state, 'params, 'r) elt =
   ui:t ->
-  id:id ->
+  ?id:int ->
   ?size:(io:io -> space_available:size1 -> 'params -> size2) ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
   ?update:(io:io -> 'params -> 'state -> box2 -> 'state) ->
@@ -16,7 +15,7 @@ type ('state, 'params, 'r) elt =
 
 type ('state, 'params, 'r) node =
   ui:t ->
-  id:id ->
+  ?id:int ->
   ?size:
     (io:io -> space_available:size1 -> space_required:size1 -> 'params -> size2) ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
@@ -36,11 +35,11 @@ type slider_state = { v : float; grasped : bool }
 type slider_params = { w : float; min : float; max : float }
 type 'a scroll_box_params = { height : float; f : unit -> 'a }
 
-val ui : ?debug:bool -> io:io -> id:id -> p2 -> (t -> 'a) -> 'a * box2
+val ui : ?debug:bool -> io:io -> p2 -> (t -> 'a) -> 'a * box2
 val button : (bool, string, bool) elt
 val checkbox : (bool, string, bool) elt
-val label : ui:t -> id:id -> string -> unit
+val label : ui:t -> ?id:int -> string -> unit
 val slider : (slider_state, slider_params, float) elt
-val vertical : ui:t -> id:id -> (unit -> 'a) -> 'a
-val horizontal : ui:t -> id:id -> (unit -> 'a) -> 'a
+val vertical : ui:t -> ?id:int -> (unit -> 'a) -> 'a
+val horizontal : ui:t -> ?id:int -> (unit -> 'a) -> 'a
 val scroll_box : (scroll_box_state, 'a scroll_box_params, 'a) node

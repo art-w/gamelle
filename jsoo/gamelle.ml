@@ -79,3 +79,9 @@ let run state update =
   animate state
 
 module Event = Gamelle_common.Io
+
+module Stack = struct
+  type t = Jv.t
+
+  let get () = Jv.(get (new' (get global "Error") [||]) "stack")
+end
