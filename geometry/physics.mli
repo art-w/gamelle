@@ -18,5 +18,6 @@ val update : dt:float -> t -> t
 val fix_collisions : t list -> t list
 
 module Make (S : Draw.S) : sig
-  val draw : io:S.io -> t -> unit
+  val draw : io:S.io -> ?color:Color.t -> t -> unit
+  val fill : io:S.io -> ?color:Color.t -> t -> unit
 end

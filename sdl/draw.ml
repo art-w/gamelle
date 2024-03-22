@@ -6,7 +6,8 @@ module Delayed = Gamelle_common.Delayed
 
 type io = Io.t
 
-let set_color c =
+let set_color ~io c =
+  let c = Io.get_color ~io c in
   let r, g, b, a = Color.to_srgbi c in
   let a = int_of_float (a *. 255.) in
   (* Format.printf "%i %i %i %i@." r g b a ; *)
@@ -78,8 +79,9 @@ let draw ~io bmp p =
   in
   ()
 
-let draw_string ~io ~color font ~size text p =
+let draw_string ~io ?color font ~size text p =
   Io.draw ~io @@ fun () ->
+  let color = Io.get_color ~io color in
   let bitmap = Font.draw ~color font size text in
   draw ~io bitmap p;
   Bitmap.free ~io bitmap
@@ -89,10 +91,10 @@ let draw ~io bmp p = Io.draw ~io @@ fun () -> draw ~io bmp p
 let text_size ~io font ~size text =
   Delayed.force ~io @@ Font.text_size font size text
 
-let draw_line ~io ~color segment =
+let draw_line ~io ?color segment =
   Io.draw ~io @@ fun () ->
   let p, p' = Segment.to_tuple segment in
-  set_color color;
+  set_color ~io color;
   let x0, y0 = project ~io p in
   let x1, y1 = project ~io p' in
 
@@ -102,15 +104,15 @@ let draw_line ~io ~color segment =
   in
   ()
 
-let draw_rect ~io ~color rect =
-  draw_line ~io ~color (Box.top rect);
-  draw_line ~io ~color (Box.bottom rect);
-  draw_line ~io ~color (Box.left rect);
-  draw_line ~io ~color (Box.right rect)
+let draw_rect ~io ?color rect =
+  draw_line ~io ?color (Box.top rect);
+  draw_line ~io ?color (Box.bottom rect);
+  draw_line ~io ?color (Box.left rect);
+  draw_line ~io ?color (Box.right rect)
 
-let draw_poly ~io ~color arr =
+let draw_poly ~io ?color arr =
   Io.draw ~io @@ fun () ->
-  set_color color;
+  set_color ~io color;
   let arr = List.map (project ~io) arr in
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
   let& () =
@@ -120,9 +122,9 @@ let draw_poly ~io ~color arr =
   in
   ()
 
-let fill_poly ~io ~color arr =
+let fill_poly ~io ?color arr =
   Io.draw ~io @@ fun () ->
-  set_color color;
+  set_color ~io color;
   let arr = List.map (project ~io) arr in
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
   let& () =
@@ -132,20 +134,19 @@ let fill_poly ~io ~color arr =
   in
   ()
 
-let fill_rect ~io ~color rect =
-  set_color color;
+let fill_rect ~io ?color rect =
   let p0 = Box2.tl_pt rect
   and p1 = Box2.tr_pt rect
   and p2 = Box2.br_pt rect
   and p3 = Box2.bl_pt rect in
   let pts = [ p0; p1; p2; p3 ] in
-  fill_poly ~io ~color pts
+  fill_poly ~io ?color pts
 
-let draw_circle ~io ~color circle =
+let draw_circle ~io ?color circle =
   Io.draw ~io @@ fun () ->
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  set_color color;
+  set_color ~io color;
   let x, y = project ~io center in
   let radius = int (io.Io.view.scale *. radius) in
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
@@ -156,11 +157,11 @@ let draw_circle ~io ~color circle =
   in
   ()
 
-let fill_circle ~io ~color circle =
+let fill_circle ~io ?color circle =
   Io.draw ~io @@ fun () ->
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  set_color color;
+  set_color ~io color;
   let x, y = project ~io center in
   let radius = int (io.Io.view.scale *. radius) in
   let& r, g, b, a = Sdl.get_render_draw_color (render ()) in

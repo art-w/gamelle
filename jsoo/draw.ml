@@ -4,7 +4,8 @@ module Io = Gamelle_common.Io
 
 type io = Io.t
 
-let set_color c =
+let set_color ~io c =
+  let c = Io.get_color ~io c in
   let r, g, b, a = Color.to_srgbi c in
   let color =
     C.color (Jstr.of_string (Printf.sprintf "rgba(%i,%i,%i,%f)" r g b a))
@@ -25,28 +26,28 @@ let draw ~io bmp p =
   let ctx = render () in
   Clip.draw_clip ~io ctx (fun () -> Bitmap.draw ~io ~ctx bmp ~x ~y)
 
-let fill_rect ~io ~color rect =
+let fill_rect ~io ?color rect =
   transform ~io;
+  set_color ~io color;
   let x, y = V2.to_tuple (Box2.o rect) in
   let w, h = V2.to_tuple (Box2.size rect) in
-  set_color color;
   let ctx = render () in
   Clip.draw_clip ~io ctx (fun () -> C.fill_rect ctx ~x ~y ~w ~h)
 
-let draw_rect ~io ~color rect =
+let draw_rect ~io ?color rect =
   transform ~io;
+  set_color ~io color;
   let x, y = V2.to_tuple (Box2.o rect) in
   let w, h = V2.to_tuple (Box2.size rect) in
-  set_color color;
   let ctx = render () in
   Clip.draw_clip ~io ctx (fun () -> C.stroke_rect ctx ~x ~y ~w ~h)
 
-let draw_line ~io ~color segment =
-  let p0, p1 = Segment.to_tuple segment in
+let draw_line ~io ?color segment =
   transform ~io;
+  set_color ~io color;
+  let p0, p1 = Segment.to_tuple segment in
   let x0, y0 = V2.to_tuple p0 in
   let x1, y1 = V2.to_tuple p1 in
-  set_color color;
   let ctx = render () in
   Clip.draw_clip ~io ctx (fun () ->
       let path = C.Path.create () in
@@ -64,17 +65,17 @@ let path_poly pts =
   C.Path.close path;
   path
 
-let draw_poly ~io ~color pts =
+let draw_poly ~io ?color pts =
   transform ~io;
-  set_color color;
+  set_color ~io color;
   let ctx = render () in
   Clip.draw_clip ~io ctx (fun () ->
       let path = path_poly pts in
       C.stroke ctx path)
 
-let fill_poly ~io ~color pts =
+let fill_poly ~io ?color pts =
   transform ~io;
-  set_color color;
+  set_color ~io color;
   let ctx = render () in
   Clip.draw_clip ~io ctx (fun () ->
       let path = path_poly pts in
@@ -82,11 +83,11 @@ let fill_poly ~io ~color pts =
 
 let tau = 8.0 *. atan 1.0
 
-let draw_circle ~io ~color circle =
+let draw_circle ~io ?color circle =
+  transform ~io;
+  set_color ~io color;
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  transform ~io;
-  set_color color;
   let x, y = V2.to_tuple center in
   let path = C.Path.create () in
   let ctx = render () in
@@ -94,11 +95,11 @@ let draw_circle ~io ~color circle =
       C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
       C.stroke ctx path)
 
-let fill_circle ~io ~color circle =
+let fill_circle ~io ?color circle =
+  transform ~io;
+  set_color ~io color;
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  transform ~io;
-  set_color color;
   let x, y = V2.to_tuple center in
   let path = C.Path.create () in
   let ctx = render () in
@@ -106,9 +107,9 @@ let fill_circle ~io ~color circle =
       C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
       C.fill ctx path)
 
-let draw_string ~io ~color font ~size txt p =
+let draw_string ~io ?color font ~size txt p =
   transform ~io;
-  set_color color;
+  set_color ~io color;
   let x, y = V2.to_tuple p in
   Font.draw_at ~io font ~size txt (x, y)
 

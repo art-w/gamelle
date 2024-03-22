@@ -48,12 +48,17 @@ module View : sig
 
   val ( & ) : unit scene -> unit scene -> unit scene
   val drawing_box : Box.t -> io -> io
+  val color : Color.t -> 'a scene -> 'a scene
   val translate : V2.t -> 'a scene -> 'a scene
   val scale : float -> 'a scene -> 'a scene
   val rotate : float -> 'a scene -> 'a scene
   val clip : box2 -> 'a scene -> 'a scene
   val unclip : 'a scene -> 'a scene
   val clip_events : bool -> 'a scene -> 'a scene
+
+  (* *)
+
+  val colored : Color.t -> io -> io
   val translated : V2.t -> io -> io
   val scaled : float -> io -> io
   val rotated : float -> io -> io
@@ -65,17 +70,17 @@ end
 val clock : io:io -> float
 val dt : io:io -> float
 val draw : io:io -> Bitmap.t -> p2 -> unit
-val draw_line : io:io -> color:Color.t -> Segment.t -> unit
-val draw_rect : io:io -> color:Color.t -> box2 -> unit
-val fill_rect : io:io -> color:Color.t -> box2 -> unit
-val draw_poly : io:io -> color:Color.t -> p2 list -> unit
-val fill_poly : io:io -> color:Color.t -> p2 list -> unit
-val draw_circle : io:io -> color:Color.t -> Circle.t -> unit
-val fill_circle : io:io -> color:Color.t -> Circle.t -> unit
+val draw_line : io:io -> ?color:Color.t -> Segment.t -> unit
+val draw_rect : io:io -> ?color:Color.t -> box2 -> unit
+val fill_rect : io:io -> ?color:Color.t -> box2 -> unit
+val draw_poly : io:io -> ?color:Color.t -> p2 list -> unit
+val fill_poly : io:io -> ?color:Color.t -> p2 list -> unit
+val draw_circle : io:io -> ?color:Color.t -> Circle.t -> unit
+val fill_circle : io:io -> ?color:Color.t -> Circle.t -> unit
 val show_cursor : bool -> unit
 
 val draw_string :
-  io:io -> color:Color.t -> Font.t -> size:int -> string -> p2 -> unit
+  io:io -> ?color:Color.t -> Font.t -> size:int -> string -> p2 -> unit
 
 val text_size : io:io -> Font.t -> size:int -> string -> size2
 
@@ -117,8 +122,8 @@ module Shape : sig
   val segment : P2.t -> P2.t -> t
   val rect : Box2.t -> t
   val polygon : P2.t list -> t
-  val draw : io:io -> color:Color.t -> t -> unit
-  val fill : io:io -> color:Color.t -> t -> unit
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
   val translate : V2.t -> t -> t
   val rotate : ?center:P2.t -> angle:float -> t -> t
   val center : t -> P2.t
@@ -146,6 +151,7 @@ module Physics : sig
   val add_rot_velocity : float -> t -> t
   val update : dt:float -> t -> t
   val fix_collisions : t list -> t list
-  val draw : io:io -> t -> unit
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
 end
 

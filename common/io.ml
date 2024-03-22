@@ -8,6 +8,7 @@ type t = {
   centering_translation : v2;
   clip : box2 option;
   clip_events : bool;
+  color : Gg.Color.t;
 }
 
 let make () =
@@ -19,12 +20,26 @@ let make () =
     centering_translation = V2.zero;
     clip = None;
     clip_events = false;
+    color = Gg.Color.white;
   }
 
 let draw ~io fn = io.draw := fn :: !(io.draw)
 let clean ~io fn = io.clean := fn :: !(io.clean)
+
+(* *)
+
 let clock ~io = Event.clock io.event
 let dt ~io = Event.dt io.event
+
+(* *)
+
+let get_color ~io = function
+  | None -> io.color
+  | Some c -> c
+
+let colored color io = { io with color }
+
+let color color fn ~io = fn ~io:(colored color io)
 
 (* *)
 
