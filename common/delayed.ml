@@ -1,5 +1,5 @@
-type 'a s = Value of 'a | Lazy of (io:Io.t -> 'a)
-type 'a t = 'a s ref
+type ('font, 'a) s = Value of 'a | Lazy of (io:'font Io.t -> 'a)
+type ('font, 'a) t = ('font, 'a) s ref
 
 let make fn = ref (Lazy fn)
 

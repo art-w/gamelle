@@ -14,7 +14,7 @@ include Gamelle_geometry.Make (Draw)
 
 module Io = Gamelle_common.Io
 
-type io = Io.t
+type io = Draw.io
 
 let prev_now = ref 0.0
 let now = ref 0.0
@@ -40,6 +40,8 @@ end
 
 module View = struct
   include Gamelle_common.Io
+
+  type 'a scene = io:io -> 'a
 
   let drawing_box box io =
     let tr =
@@ -77,7 +79,10 @@ let run state update =
     now := elapsed /. 1000.0;
     Event.new_frame ();
     let io =
-      { (Io.make ()) with event = { !Event.current with clock = !clock } }
+      {
+        (Io.make ~font:Font.default ()) with
+        event = { !Event.current with clock = !clock };
+      }
     in
     incr clock;
     fill_rect ~io ~color:Color.black (Window.box ());

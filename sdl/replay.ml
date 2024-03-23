@@ -54,7 +54,7 @@ let replay ~events ~latest_io current_run =
               let e = { e with clock = !clock } in
               events := e;
               add e;
-              let io = { (Io.make ()) with event = e } in
+              let io = { (Io.make ~font:Font.default ()) with event = e } in
               latest_io := io;
               Draw.fill_rect ~io ~color:Color.black (Window.box ());
               let state = update ~io state in

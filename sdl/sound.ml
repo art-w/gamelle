@@ -2,7 +2,7 @@ open Common
 module Delayed = Gamelle_common.Delayed
 module Mixer = Tsdl_mixer.Mixer
 
-type sound = Mixer.chunk Delayed.t
+type sound = (Common.custom_io, Mixer.chunk) Delayed.t
 
 let load_file filename =
   Delayed.make @@ fun ~io:_ ->
@@ -23,7 +23,7 @@ let play ~io sound =
     ()
   with Failure msg -> Format.printf "WARNING: play sound: %s@." msg
 
-type music = Mixer.music Delayed.t
+type music = (Common.custom_io, Mixer.music) Delayed.t
 
 let load_music filename =
   Delayed.make @@ fun ~io:_ ->

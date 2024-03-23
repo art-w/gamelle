@@ -3,16 +3,16 @@ module Io = Gamelle_common.Io
 module Delayed = Gamelle_common.Delayed
 module Ttf = Tsdl_ttf
 
-type s = { buffer : Sdl_buffer.t; sizes : (int, Ttf.font) Hashtbl.t }
-type t = s Delayed.t
+type t = font
 
 let load binstring =
-  Delayed.make @@ fun ~io ->
-  { buffer = Sdl_buffer.load ~io binstring; sizes = Hashtbl.create 16 }
+  Font
+    ( Delayed.make @@ fun ~io ->
+      { buffer = Sdl_buffer.load ~io binstring; sizes = Hashtbl.create 16 } )
 
 let default = load Gamelle_common.Font.default
 
-let get ~io font size =
+let get ~io (Font font) size =
   let font = Delayed.force ~io font in
   match Hashtbl.find font.sizes size with
   | font -> font

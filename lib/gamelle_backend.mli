@@ -49,6 +49,7 @@ module View : sig
   val ( & ) : unit scene -> unit scene -> unit scene
   val drawing_box : Box.t -> io -> io
   val color : Color.t -> 'a scene -> 'a scene
+  val font : Font.t -> 'a scene -> 'a scene
   val translate : V2.t -> 'a scene -> 'a scene
   val scale : float -> 'a scene -> 'a scene
   val rotate : float -> 'a scene -> 'a scene
@@ -59,6 +60,7 @@ module View : sig
   (* *)
 
   val colored : Color.t -> io -> io
+  val fonted : Font.t -> io -> io
   val translated : V2.t -> io -> io
   val scaled : float -> io -> io
   val rotated : float -> io -> io
@@ -80,7 +82,7 @@ val fill_circle : io:io -> ?color:Color.t -> Circle.t -> unit
 val show_cursor : bool -> unit
 
 val draw_string :
-  io:io -> ?color:Color.t -> Font.t -> size:int -> string -> p2 -> unit
+  io:io -> ?color:Color.t -> ?font:Font.t -> size:int -> string -> p2 -> unit
 
 val text_size : io:io -> Font.t -> size:int -> string -> size2
 

@@ -4,7 +4,7 @@ module Gfx = Tsdl_gfx.Gfx
 module Io = Gamelle_common.Io
 module Delayed = Gamelle_common.Delayed
 
-type io = Io.t
+type io = Common.io
 
 let set_color ~io c =
   let c = Io.get_color ~io c in
@@ -79,9 +79,10 @@ let draw ~io bmp p =
   in
   ()
 
-let draw_string ~io ?color font ~size text p =
+let draw_string ~io ?color ?font ~size text p =
   Io.draw ~io @@ fun () ->
   let color = Io.get_color ~io color in
+  let font = Io.get_font ~io font in
   let bitmap = Font.draw ~color font size text in
   draw ~io bitmap p;
   Bitmap.free ~io bitmap

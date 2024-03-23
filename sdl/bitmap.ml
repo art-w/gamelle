@@ -2,7 +2,7 @@ open Common
 module Delayed = Gamelle_common.Delayed
 
 type s = { bmp : Sdl.texture; bmp_x : int; bmp_y : int; w : int; h : int }
-type t = s Delayed.t
+type t = (Common.font, s) Delayed.t
 
 let size t = (t.w, t.h)
 

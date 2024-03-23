@@ -33,11 +33,10 @@ module Make (Draw : Draw.S) = struct
   module S = Shape.Make (Draw)
 
   let draw ~io ?color { shape; pos; rot; _ } =
-    S.draw ~io ?color shape ;
+    S.draw ~io ?color shape;
     Draw.draw_line ~io ?color (Segment.v pos V2.(pos + polar 10.0 rot))
 
-  let fill ~io ?color { shape ; _ } =
-    S.fill ~io ?color shape
+  let fill ~io ?color { shape; _ } = S.fill ~io ?color shape
 end
 
 let make ?mass ?inertia ?(restitution = 0.2) ?(kind = Movable) shape =

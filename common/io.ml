@@ -1,6 +1,6 @@
 open Gamelle_geometry
 
-type t = {
+type 'font t = {
   view : Transform.t;
   event : Event.t;
   draw : (unit -> unit) list ref;
@@ -9,9 +9,10 @@ type t = {
   clip : box2 option;
   clip_events : bool;
   color : Gg.Color.t;
+  font : 'font;
 }
 
-let make () =
+let make ~font () =
   {
     view = Transform.default;
     event = Event.default;
@@ -21,6 +22,7 @@ let make () =
     clip = None;
     clip_events = false;
     color = Gg.Color.white;
+    font;
   }
 
 let draw ~io fn = io.draw := fn :: !(io.draw)
@@ -33,13 +35,15 @@ let dt ~io = Event.dt io.event
 
 (* *)
 
-let get_color ~io = function
-  | None -> io.color
-  | Some c -> c
-
+let get_color ~io = function None -> io.color | Some c -> c
 let colored color io = { io with color }
-
 let color color fn ~io = fn ~io:(colored color io)
+
+(* *)
+
+let get_font ~io = function None -> io.font | Some font -> font
+let fonted font io = { io with font }
+let font font fn ~io = fn ~io:(fonted font io)
 
 (* *)
 
@@ -50,7 +54,7 @@ let clipped clip io = { io with clip = Some clip }
 let unclipped io = { io with clip = None }
 let clipped_events b io = { io with clip_events = b }
 
-type 'a scene = io:t -> 'a
+(* type 'a scene = io:t -> 'a *)
 
 let ( & ) f g ~io =
   f ~io;

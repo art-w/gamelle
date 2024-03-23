@@ -1,5 +1,5 @@
+open Sdl_common
 module Io = Gamelle_common.Io
-open Common
 open Ctypes
 open Foreign
 

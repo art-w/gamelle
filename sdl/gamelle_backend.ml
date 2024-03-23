@@ -10,6 +10,8 @@ module Transform = Gamelle_common.Transform
 module View = struct
   include Gamelle_common.Io
 
+  type 'a scene = io:io -> 'a
+
   let drawing_box box io =
     let tr =
       V2.(Box.(o (centered box (Window.box ()))) - io.centering_translation)
@@ -65,7 +67,7 @@ let run () =
   (* Common.now := t0; *)
   let events = ref Event.default in
 
-  let latest_io = ref (Io.make ()) in
+  let latest_io = ref (Io.make ~font:Font.default ()) in
 
   let rec loop () : unit =
     let t0 = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
@@ -100,7 +102,7 @@ let run () =
         | No_run -> invalid_arg "No game currently running"
         | Run { state; update; clean } when has_focus ->
             Replay.add !events;
-            let io = { (Io.make ()) with event = !events } in
+            let io = { (Io.make ~font:Font.default ()) with event = !events } in
             latest_io := io;
             fill_rect ~io ~color:Color.black (Window.box ());
             let state = update ~io state in

@@ -2,7 +2,7 @@ open Gamelle_geometry
 open Common
 module Io = Gamelle_common.Io
 
-type io = Io.t
+type io = Font.t Io.t
 
 let set_color ~io c =
   let c = Io.get_color ~io c in
@@ -107,9 +107,10 @@ let fill_circle ~io ?color circle =
       C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
       C.fill ctx path)
 
-let draw_string ~io ?color font ~size txt p =
+let draw_string ~io ?color ?font ~size txt p =
   transform ~io;
   set_color ~io color;
+  let font = Io.get_font ~io font in
   let x, y = V2.to_tuple p in
   Font.draw_at ~io font ~size txt (x, y)
 
