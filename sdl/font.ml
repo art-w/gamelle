@@ -34,7 +34,7 @@ let draw ~color font size text =
   in
   Bitmap.of_texture bmp
 
-let text_size font size text =
+let text_size (font : t) size text =
   Delayed.make @@ fun ~io ->
   let font = get ~io font size in
   let& w, h = Ttf.size_utf8 font text in

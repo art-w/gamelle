@@ -79,17 +79,20 @@ let draw ~io bmp p =
   in
   ()
 
-let draw_string ~io ?color ?font ~size text p =
+let draw_string ~io ?color ?font ?size ~at:p text =
   Io.draw ~io @@ fun () ->
   let color = Io.get_color ~io color in
   let font = Io.get_font ~io font in
+  let size = Io.get_font_size ~io size in
   let bitmap = Font.draw ~color font size text in
   draw ~io bitmap p;
   Bitmap.free ~io bitmap
 
 let draw ~io bmp p = Io.draw ~io @@ fun () -> draw ~io bmp p
 
-let text_size ~io font ~size text =
+let text_size ~io ?font ?size text =
+  let font = Io.get_font ~io font in
+  let size = Io.get_font_size ~io size in
   Delayed.force ~io @@ Font.text_size font size text
 
 let draw_line ~io ?color segment =

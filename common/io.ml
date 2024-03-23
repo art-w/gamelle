@@ -10,6 +10,7 @@ type 'font t = {
   clip_events : bool;
   color : Gg.Color.t;
   font : 'font;
+  font_size : int;
 }
 
 let make ~font () =
@@ -23,6 +24,7 @@ let make ~font () =
     clip_events = false;
     color = Gg.Color.white;
     font;
+    font_size = 20;
   }
 
 let draw ~io fn = io.draw := fn :: !(io.draw)
@@ -42,8 +44,16 @@ let color color fn ~io = fn ~io:(colored color io)
 (* *)
 
 let get_font ~io = function None -> io.font | Some font -> font
-let fonted font io = { io with font }
-let font font fn ~io = fn ~io:(fonted font io)
+let get_font_size ~io = function None -> io.font_size | Some s -> s
+
+let fonted ?font ?size io =
+  {
+    io with
+    font = Option.value font ~default:io.font;
+    font_size = Option.value size ~default:io.font_size;
+  }
+
+let font ?font ?size fn ~io = fn ~io:(fonted ?font ?size io)
 
 (* *)
 

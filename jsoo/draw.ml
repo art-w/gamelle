@@ -107,14 +107,17 @@ let fill_circle ~io ?color circle =
       C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
       C.fill ctx path)
 
-let draw_string ~io ?color ?font ~size txt p =
+let draw_string ~io ?color ?font ?size ~at txt =
   transform ~io;
   set_color ~io color;
   let font = Io.get_font ~io font in
-  let x, y = V2.to_tuple p in
-  Font.draw_at ~io font ~size txt (x, y)
+  let size = Io.get_font_size ~io size in
+  Font.draw_at ~io ~font ~size ~at txt
 
-let text_size ~io:_ font ~size txt = Font.text_size font ~size txt
+let text_size ~io ?font ?size txt =
+  let font = Io.get_font ~io font in
+  let size = Io.get_font_size ~io size in
+  Font.text_size ~font ~size txt
 
 let show_cursor status =
   match !Common.global_canvas with

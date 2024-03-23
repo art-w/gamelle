@@ -89,7 +89,6 @@ type ('state, 'params, 'r) node =
   'params ->
   'r
 
-let font_size = 20
 let padding = 6.
 let padding_x = V2.v padding 0.
 let padding_y = V2.v 0. padding
@@ -212,7 +211,7 @@ let is_clicked ~io box =
   Event.is_down ~io `click_left && Box.mem (Event.mouse_pos ~io) box
 
 let button_size ~io ~space_available:_ text =
-  let text_size = text_size ~io Font.default ~size:font_size text in
+  let text_size = text_size ~io text in
   V2.(text_size + (2. * (padding_x + padding_y)))
 
 let button_render ~io text _is_clicked box =
@@ -220,7 +219,7 @@ let button_render ~io text _is_clicked box =
   let pos = V2.(pos + padding_y) in
   fill_rect ~io ~color:bg' box;
   draw_rect ~io ~color:fg box;
-  draw_string ~io ~color:fg ~size:font_size text V2.(pos + padding_x)
+  draw_string ~io ~color:fg text ~at:V2.(pos + padding_x)
 
 let button_update ~io _text _old_state box = is_clicked ~io box
 let button_result b = b
@@ -233,7 +232,7 @@ let button : (bool, string, bool) elt =
     ~default:false ~ui ~id ~size ~render ~update ~result text
 
 let checkbox_size ~io ~space_available:_ text =
-  let text_size = text_size ~io Font.default ~size:font_size text in
+  let text_size = text_size ~io text in
   let check'box'_size = Size2.h text_size in
   V2.(
     text_size
@@ -262,8 +261,8 @@ let checkbox_render ~io text is_checked box =
            V2.(Box.size check'box' - (2. * padding_xy)))
      in
      fill_rect ~io ~color:highlight ticked'box');
-  draw_string ~io ~color:fg ~size:font_size text
-    V2.(pos + padding_x + v check'box'_size 0. + padding_x)
+  draw_string ~io ~color:fg text
+    ~at:V2.(pos + padding_x + v check'box'_size 0. + padding_x)
 
 let checkbox_update ~io _text previous_is_checked box =
   let is_clicked = is_clicked ~io box in
@@ -319,12 +318,11 @@ let slider : (slider_state, slider_params, float) elt =
 
 let label ~ui ?id text =
   let id = { stack = Stack.get (); explicit = id } in
-  let size = 20 in
-  let text_size = text_size ~io:ui.io Font.default ~size text in
+  let text_size = text_size ~io:ui.io text in
   register_size ~ui text_size;
   render_leaf ~ui ~id ~size:text_size (fun ~io box ->
       let pos = Box.o box in
-      draw_string ~io ~color:fg ~size text pos)
+      draw_string ~io ~color:fg text ~at:pos)
 
 (* let scroll :(scroll_box_state,(size1 * (unit->'a)), 'a ) elt = fun  *)
 

@@ -138,8 +138,8 @@ let () =
     Physics.draw ~io ball;
     draw_string ~io ~size:40 ~color:Color.white
       (string_of_int state.points1)
-      (P2.v 20.0 10.0);
+      ~at:(P2.v 20.0 10.0);
     draw_string ~io ~size:40 ~color:Color.white
       (string_of_int state.points2)
-      (P2.v 960.0 10.0);
+      ~at:(P2.v 960.0 10.0);
     { state with player1; player2; ball }
