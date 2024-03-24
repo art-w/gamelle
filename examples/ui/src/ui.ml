@@ -15,13 +15,12 @@ let () =
         ui ~io
           P2.(v 0. 0.)
           (fun ui ->
-            label ~ui "This is a label ---";
+            label ~ui "This is a label ---------------------------";
             scroll_box ~ui
               {
                 height = 100.;
                 f =
                   (fun () ->
-                    if button ~ui "button" then print_endline "button pressed";
                     if button ~ui "button" then print_endline "button pressed";
                     if button ~ui "button" then print_endline "button pressed";
                     if button ~ui "button" then print_endline "button pressed";
@@ -33,8 +32,16 @@ let () =
                     if button ~ui "button 2" then
                       print_endline "button 2 pressed";
                     if button ~ui "button 3" then
-                      print_endline "button 3 pressed");
-                if button ~ui "button 4" then print_endline "button 4 pressed");
+                      print_endline "button 3 pressed";
+
+                      horizontal ~ui (fun () ->
+                        if button ~ui "button a" then
+                          print_endline "button a pressed";
+                        if button ~ui "button b" then
+                          print_endline "button b pressed"));
+                if button ~ui "button 4" then print_endline "button 4 pressed";
+                if button ~ui "button 5" then print_endline "button 5 pressed");
+
             if checkbox ~ui "This is a checkbox 🤓" then (
               ignore @@ checkbox ~ui "Checkbox 2 !";
               if button ~ui "for checkboxers only" then
