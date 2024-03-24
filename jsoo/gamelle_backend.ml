@@ -81,7 +81,16 @@ let run state update =
 module Event = Gamelle_common.Io
 
 module Stack = struct
-  type t = Jv.t
+  type t = string
 
-  let get () = Jv.(get (new' (get global "Error") [||]) "stack")
+  let get () =
+    let s = Jv.(get (new' (get global "Error") [||]) "stack") in
+    let s =
+      s |> Jv.to_string |> String.split_on_char '\n'
+      |> (function
+           | a :: b :: c :: d :: e :: f :: g :: _ -> [ a; b; c; d; e; f; g ]
+           | li -> li)
+      |> String.concat "\n"
+    in
+    s
 end

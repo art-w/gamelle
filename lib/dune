@@ -2,4 +2,4 @@
  (public_name gamelle)
  (name gamelle)
  (libraries gamelle_geometry)
- (virtual_modules gamelle))
+ (virtual_modules gamelle_backend))
