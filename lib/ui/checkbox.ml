@@ -46,7 +46,9 @@ let update ~io _text previous_is_checked box =
 
 let result is_clicked = is_clicked
 
+
+
 let v =
   elt ~construct_state ~destruct_state
     ~default:(fun _ -> false)
-    ~size ~render ~update ~result
+    ~size ~render ~update ~result ()

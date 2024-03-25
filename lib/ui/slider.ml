@@ -46,4 +46,4 @@ let result state = state.v
 let v =
   elt ~construct_state ~destruct_state
     ~default:(fun { max; _ } -> { v = max; grasped = false })
-    ~size ~render ~update ~result
+    ~size ~render ~update ~result ()

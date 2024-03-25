@@ -5,15 +5,16 @@ type t
 type cap = t * string
 
 type ('state, 'params, 'r) elt =
-  cap ->
+  t * string ->
   ?id:int ->
   ?size:(ts:(string -> size2) -> 'params -> size2) ->
+  ?weight:float ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
   'params ->
   'r
 
 type 'params inert_elt =
-  cap ->
+  t * string ->
   ?id:int ->
   ?size:(ts:(string -> size2) -> 'params -> size2) ->
   ?render:(io:io -> 'params -> box2 -> unit) ->
@@ -21,9 +22,10 @@ type 'params inert_elt =
   unit
 
 type ('state, 'params, 'r) node =
-  cap ->
+  t * string ->
   ?id:int ->
   ?size:(ts:(string -> size2) -> children_size:size2 -> 'params -> size2) ->
+  ?weight:float ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
   'params ->
   'r

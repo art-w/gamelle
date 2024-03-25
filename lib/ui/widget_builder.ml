@@ -6,6 +6,24 @@ type ('state, 'params, 'r) elt =
   t * string ->
   ?id:int ->
   ?size:(ts:(string -> size2) -> 'params -> size2) ->
+  ?weight:float ->
+  ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
+  'params ->
+  'r
+
+type 'params inert_elt =
+  t * string ->
+  ?id:int ->
+  ?size:(ts:(string -> size2) -> 'params -> size2) ->
+  ?render:(io:io -> 'params -> box2 -> unit) ->
+  'params ->
+  unit
+
+type ('state, 'params, 'r) node =
+  t * string ->
+  ?id:int ->
+  ?size:(ts:(string -> size2) -> children_size:size2 -> 'params -> size2) ->
+  ?weight:float ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
   'params ->
   'r
@@ -22,14 +40,6 @@ module type Widget = sig
   val v : (state, params, return) elt
 end
 
-type 'params inert_elt =
-  t * string ->
-  ?id:int ->
-  ?size:(ts:(string -> size2) -> 'params -> size2) ->
-  ?render:(io:io -> 'params -> box2 -> unit) ->
-  'params ->
-  unit
-
 module type Inert_widget = sig
   type params
 
@@ -37,14 +47,6 @@ module type Inert_widget = sig
   val render : io:io -> params -> box2 -> unit
   val v : params inert_elt
 end
-
-type ('state, 'params, 'r) node =
-  t * string ->
-  ?id:int ->
-  ?size:(ts:(string -> size2) -> children_size:size2 -> 'params -> size2) ->
-  ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
-  'params ->
-  'r
 
 let render_nothing ~io:_ _ = ()
 
@@ -65,11 +67,11 @@ let rec insert e li =
 let insert_padding ~dir rs = insert (padding_elt ~dir) rs
 
 let elt ~(construct_state : 'state -> state) ~destruct_state
-    ~(default : 'params -> 'state)
+    ~(default : 'params -> 'state) ?(weight = 1.)
     ~(size : ts:(string -> size2) -> 'params -> size2)
-    ~(render : io:io -> 'params -> 'state -> box2 -> unit) ~update ~result :
+    ~(render : io:io -> 'params -> 'state -> box2 -> unit) ~update ~result () :
     ('state, 'params, 'result) elt =
- fun (ui, loc) ?id ?(size = size) ?(render = render) params ->
+ fun (ui, loc) ?id ?(size = size) ?(weight = weight) ?(render = render) params ->
   let default = construct_state (default params) in
   let id = { loc; _hint = id } in
   let box = query_layout ~ui ~id in
@@ -78,7 +80,7 @@ let elt ~(construct_state : 'state -> state) ~destruct_state
   let prev_state = destruct_state (find ~default tbl id) in
   let state = update ~io:ui.io params prev_state box in
   Hashtbl.replace tbl id (construct_state state);
-  render_leaf ~ui ~id ~size ~weight:1. (render params state);
+  render_leaf ~ui ~id ~size ~weight (render params state);
   result state
 
 let inert_elt (ui, _loc) ~size ~weight ~render params =
@@ -87,16 +89,17 @@ let inert_elt (ui, _loc) ~size ~weight ~render params =
 
 (* let scroll :(scroll_box_state,(size1 * (unit->'a)), 'a ) elt = fun  *)
 
-let node ~construct_state ~destruct_state ~dir ~default ~size ~size_for_self
-    ~children_offset ~render ~update ~result : ('state, 'params, 'r) node =
- fun (ui, loc) ?id ?(size = size) ?(render = render) params ->
+let node ~construct_state ~children_io ?(weight = 1.) ~destruct_state ~dir
+    ~default ~size ~size_for_self ~children_offset ~render ~update ~result () :
+    ('state, 'params, 'r) node =
+ fun (ui, loc) ?id ?(size = size) ?(weight = weight) ?(render = render) params ->
   let id = { loc; _hint = id } in
   let box = query_layout ~ui ~id in
   debug_box ~ui ~color:Color.blue box;
   let tbl = (ui_state ~ui).state in
   let default = construct_state (default params) in
   let prev_state = destruct_state (find ~default tbl id) in
-  let children_io = View.clipped_events true @@ View.clipped box ui.io in
+  let children_io = children_io ~io:ui.io box in
   let old_renderers = ui.renderers and old_io = ui.io in
   ui.io <- children_io;
   ui.renderers <- [];
@@ -109,7 +112,7 @@ let node ~construct_state ~destruct_state ~dir ~default ~size ~size_for_self
   let children_offset = children_offset state in
   let size = size ~ts:(ui_text_size ~ui) ~children_size params in
   Hashtbl.replace tbl id (construct_state state);
-  render_node ~ui ~dir:V ~weight:1. ~children_offset ~children_io ~children ~id
+  render_node ~ui ~dir:V ~weight ~children_offset ~children_io ~children ~id
     ~size ~size_for_self (render params state);
   result
 

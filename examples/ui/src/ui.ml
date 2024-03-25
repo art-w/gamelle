@@ -32,7 +32,6 @@ let () =
                       print_endline "button 2 pressed";
                     if button [%ui] "button 3" then
                       print_endline "button 3 pressed";
-
                     horizontal [%ui] (fun () ->
                         if button [%ui] "button a" then
                           print_endline "button a pressed";
