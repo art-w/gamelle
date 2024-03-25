@@ -72,8 +72,10 @@ let debug_render ~ui f =
       prev_f ();
       f ui.io)
 
+let push_renderer ~ui renderer = ui.renderers <- renderer :: ui.renderers
+
 let render_leaf ~ui ?id ~weight ~size renderer =
-  ui.renderers <- { id; size; weight; renderer } :: ui.renderers
+  push_renderer ~ui { id; size; weight; renderer }
 (*
 let render_node ~ui ?id ~dir ~weight ~children_offset ~children ~children_io
     ~size ~size_for_self renderer =
@@ -190,10 +192,10 @@ and node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
 
 let render_node ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
     ~children ~size_for_self renderer =
-  ui.renderers <-
-    node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
-      ~children ~size_for_self renderer
-    :: ui.renderers
+  push_renderer ~ui
+    (node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
+       ~children ~size_for_self renderer)
+
 
 let io_text_size ~io = text_size ~io Font.default ~size:font_size
 let ui_text_size ~ui = io_text_size ~io:ui.io

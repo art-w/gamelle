@@ -113,10 +113,9 @@ let node ~construct_state ~destruct_state ~dir ~default ~size ~size_for_self
     ~size ~size_for_self (render params state);
   result
 
-let inert_node ~ui ?id ~render ~weight ~size_for_self ~children_offset ~dir f =
-  let id = { _stack = Stack.get (); _hint = id } in
-  let box = query_layout ~ui ~id in
-  debug_box ~ui ~color:Color.green box;
+
+
+let inert_node ~ui ~render ~weight ~size_for_self ~children_offset ~dir f =
   let old_renderers = ui.renderers in
   ui.renderers <- [];
   let result = f () in
@@ -124,6 +123,6 @@ let inert_node ~ui ?id ~render ~weight ~size_for_self ~children_offset ~dir f =
   let children_size = total_size ~dir children in
   ui.renderers <- old_renderers;
   let size = children_size in
-  render_node ~ui ~dir ~weight ~children_offset ~children_io:ui.io ~children ~id
+  render_node ~ui ~dir ~weight ~children_offset ~children_io:ui.io ~children
     ~size ~size_for_self render;
   result
