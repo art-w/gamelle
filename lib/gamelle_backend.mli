@@ -149,8 +149,3 @@ module Physics : sig
   val draw : io:io -> t -> unit
 end
 
-module Stack : sig
-  type t
-
-  val get : unit -> t
-end

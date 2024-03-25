@@ -133,9 +133,3 @@ let run state update =
       Mutex.unlock lock
 
 module Event = Gamelle_common.Io
-
-module Stack = struct
-  type t = Printexc.raw_backtrace
-
-  let get () = Printexc.get_callstack 164
-end
