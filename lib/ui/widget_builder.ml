@@ -49,10 +49,10 @@ type ('state, 'params, 'r) node =
 let render_nothing ~io:_ _ = ()
 
 let padding_v_elt =
-  Leaf { id = None; size = padding_y; weight = 0.; renderer = render_nothing }
+   { id = None; size = padding_y; weight = 0.; renderer = render_nothing }
 
 let padding_h_elt =
-  Leaf { id = None; size = padding_x; weight = 0.; renderer = render_nothing }
+   { id = None; size = padding_x; weight = 0.; renderer = render_nothing }
 
 let padding_elt ~dir = match dir with V -> padding_v_elt | H -> padding_h_elt
 

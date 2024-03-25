@@ -25,17 +25,7 @@ let ui ?(debug = false) ~io pos f =
   fill_rect ~io ~color:bg box;
   draw_rect ~io ~color:fg box;
   render ~ui:ctx box
-    (Node
-       {
-         id = None;
-         dir = V;
-         weight = 1.;
-         children_offset = V2.zero;
-         children;
-         children_io = io;
-         size;
-         size_for_self = Size2.zero;
-         renderer = (fun ~io:_ _ -> ());
-       });
+    (node_renderer ~ui:ctx ~dir:V ~weight:1. ~children_offset:V2.zero ~children
+       ~children_io:io ~size ~size_for_self:Size2.zero (fun ~io:_ _ -> ()));
   if debug then ctx.debug_render ();
   (r, box)
