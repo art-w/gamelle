@@ -1,6 +1,5 @@
 open Gamelle
 open Geometry
-module Ui = Ui_
 
 type state = unit
 
@@ -16,7 +15,7 @@ let () =
           P2.(v 0. 0.)
           (fun ui ->
             label ~ui "This is a label ---------------------------";
-            scroll_box ~ui
+            vscroll ~ui
               {
                 height = 100.;
                 f =

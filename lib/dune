@@ -3,3 +3,5 @@
  (name gamelle)
  (libraries gamelle_geometry)
  (virtual_modules gamelle_backend))
+
+(include_subdirs qualified)

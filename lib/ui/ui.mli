@@ -1,4 +1,4 @@
-open Gamelle
+open Gamelle_backend
 open Geometry
 
 type t
@@ -8,12 +8,10 @@ type ('state, 'params, 'r) elt =
   ?id:int ->
   ?size:(ts:(string -> size2) -> 'params -> size2) ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
-  ?update:(io:io -> 'params -> 'state -> box2 -> 'state) ->
-  ?result:('state -> 'r) ->
   'params ->
   'r
 
-type ('state, 'params) inert_elt =
+  type 'params inert_elt =
   ui:t ->
   ?id:int ->
   ?size:(ts:(string -> size2) -> 'params -> size2) ->
@@ -21,18 +19,15 @@ type ('state, 'params) inert_elt =
   'params ->
   unit
 
-type ('state, 'params, 'r) node =
+  type ('state, 'params, 'r) node =
   ui:t ->
   ?id:int ->
   ?size:(ts:(string -> size2) -> children_size:size2 -> 'params -> size2) ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
-  ?update:(io:io -> children_size:size2 -> box2 -> 'state -> 'params -> 'state) ->
-  ?result:('params -> 'r) ->
   'params ->
   'r
 
-
-type scroll_box_state = {
+type vscroll_state = {
   size : size2;
   offset : float;
   grasped : bool;
@@ -41,7 +36,7 @@ type scroll_box_state = {
 
 type slider_state = { v : float; grasped : bool }
 type slider_params = { w : float; min : float; max : float }
-type 'a scroll_box_params = { height : float; f : unit -> 'a }
+type 'a vscroll_params = { height : float; f : unit -> 'a }
 
 val ui : ?debug:bool -> io:io -> p2 -> (t -> 'a) -> 'a * box2
 val button : (bool, string, bool) elt
@@ -50,4 +45,4 @@ val label : ui:t -> ?weight:float -> string -> unit
 val slider : (slider_state, slider_params, float) elt
 val vertical : ui:t -> ?id:int -> ?weight:float -> (unit -> 'a) -> 'a
 val horizontal : ui:t -> ?id:int -> ?weight:float -> (unit -> 'a) -> 'a
-val scroll_box : (scroll_box_state, 'a scroll_box_params, 'a) node
+val vscroll : (vscroll_state, 'a vscroll_params, 'a) node
