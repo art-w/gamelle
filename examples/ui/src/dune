@@ -1,5 +1,7 @@
 (library
  (name ui)
+ (preprocess
+  (pps gamelle.ppx_ui))
  (libraries gamelle))
 
 (rule

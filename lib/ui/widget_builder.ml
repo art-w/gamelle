@@ -3,7 +3,7 @@ open Geometry
 open Ui_backend
 
 type ('state, 'params, 'r) elt =
-  ui:t ->
+  t * string ->
   ?id:int ->
   ?size:(ts:(string -> size2) -> 'params -> size2) ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
@@ -23,7 +23,7 @@ module type Widget = sig
 end
 
 type 'params inert_elt =
-  ui:t ->
+  t * string ->
   ?id:int ->
   ?size:(ts:(string -> size2) -> 'params -> size2) ->
   ?render:(io:io -> 'params -> box2 -> unit) ->
@@ -39,7 +39,7 @@ module type Inert_widget = sig
 end
 
 type ('state, 'params, 'r) node =
-  ui:t ->
+  t * string ->
   ?id:int ->
   ?size:(ts:(string -> size2) -> children_size:size2 -> 'params -> size2) ->
   ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
@@ -49,10 +49,10 @@ type ('state, 'params, 'r) node =
 let render_nothing ~io:_ _ = ()
 
 let padding_v_elt =
-   { id = None; size = padding_y; weight = 0.; renderer = render_nothing }
+  { id = None; size = padding_y; weight = 0.; renderer = render_nothing }
 
 let padding_h_elt =
-   { id = None; size = padding_x; weight = 0.; renderer = render_nothing }
+  { id = None; size = padding_x; weight = 0.; renderer = render_nothing }
 
 let padding_elt ~dir = match dir with V -> padding_v_elt | H -> padding_h_elt
 
@@ -69,9 +69,9 @@ let elt ~(construct_state : 'state -> state) ~destruct_state
     ~(size : ts:(string -> size2) -> 'params -> size2)
     ~(render : io:io -> 'params -> 'state -> box2 -> unit) ~update ~result :
     ('state, 'params, 'result) elt =
- fun ~ui ?id ?(size = size) ?(render = render) params ->
+ fun (ui, loc) ?id ?(size = size) ?(render = render) params ->
   let default = construct_state (default params) in
-  let id = { _stack = Stack.get (); _hint = id } in
+  let id = { loc; _hint = id } in
   let box = query_layout ~ui ~id in
   let size = size ~ts:(ui_text_size ~ui) params in
   let tbl : state tbl = (ui_state ~ui).state in
@@ -81,7 +81,7 @@ let elt ~(construct_state : 'state -> state) ~destruct_state
   render_leaf ~ui ~id ~size ~weight:1. (render params state);
   result state
 
-let inert_elt ~ui ~size ~weight ~render params =
+let inert_elt (ui, _loc) ~size ~weight ~render params =
   let size = size ~ts:(ui_text_size ~ui) params in
   render_leaf ~ui ~weight ~size (fun ~io box -> render ~io params box)
 
@@ -89,8 +89,8 @@ let inert_elt ~ui ~size ~weight ~render params =
 
 let node ~construct_state ~destruct_state ~dir ~default ~size ~size_for_self
     ~children_offset ~render ~update ~result : ('state, 'params, 'r) node =
- fun ~ui ?id ?(size = size) ?(render = render) params ->
-  let id = { _stack = Stack.get (); _hint = id } in
+ fun (ui, loc) ?id ?(size = size) ?(render = render) params ->
+  let id = { loc; _hint = id } in
   let box = query_layout ~ui ~id in
   debug_box ~ui ~color:Color.blue box;
   let tbl = (ui_state ~ui).state in
@@ -113,9 +113,8 @@ let node ~construct_state ~destruct_state ~dir ~default ~size ~size_for_self
     ~size ~size_for_self (render params state);
   result
 
-
-
-let inert_node ~ui ~render ~weight ~size_for_self ~children_offset ~dir f =
+let inert_node (ui, _loc) ~render ~weight ~size_for_self ~children_offset ~dir f
+    =
   let old_renderers = ui.renderers in
   ui.renderers <- [];
   let result = f () in

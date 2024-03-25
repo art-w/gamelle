@@ -1,7 +1,7 @@
 open Gamelle_backend
 open Geometry
 
-type id = { _stack : Stack.t; _hint : int option }
+type id = { loc : string; _hint : int option }
 type dir = V | H
 
 let flip = function V -> H | H -> V
@@ -195,7 +195,6 @@ let render_node ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
   push_renderer ~ui
     (node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
        ~children ~size_for_self renderer)
-
 
 let io_text_size ~io = text_size ~io Font.default ~size:font_size
 let ui_text_size ~ui = io_text_size ~io:ui.io

@@ -81,6 +81,6 @@ let size_for_self = Size2.(v scroll_bar_width 0.)
 let children_offset state = V2.(zero - v 0. state.offset)
 
 let v : type a. (_, a params, a) node =
- fun ~ui ?id ?(size = size) ?(render = render) params ->
+ fun (ui, loc) ?id ?(size = size) ?(render = render) params ->
   node ~construct_state ~destruct_state ~dir:V ~default ~size ~size_for_self
-    ~children_offset ~render ~update ~result ~ui ?id ~size ~render params
+    ~children_offset ~render ~update ~result (ui, loc) ?id ~size ~render params

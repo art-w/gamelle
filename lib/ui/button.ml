@@ -3,14 +3,12 @@ open Geometry
 open Ui_backend
 open Widget_builder
 
-
 type params = string
 type state = bool
 type return = bool
-
 type Ui_backend.state += Button of state
-let construct_state b = Button b
 
+let construct_state b = Button b
 let destruct_state s = match s with Button b -> b | _ -> raise IdTypeMismatch
 
 let size ~ts text =
@@ -29,5 +27,7 @@ let render ~io text _is_clicked box =
 let update ~io _text _old_state box = is_clicked ~io box
 let result b = b
 
-
-let v = elt ~construct_state ~destruct_state ~default:(fun _ -> false) ~size ~render ~update ~result
+let v =
+  elt ~construct_state ~destruct_state
+    ~default:(fun _ -> false)
+    ~size ~render ~update ~result

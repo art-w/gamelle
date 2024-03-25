@@ -1,6 +1,8 @@
 include Ui_backend
 include Widget_builder
 
+type cap = t * string
+
 let button = Button.v
 let slider = Slider.v
 let checkbox = Checkbox.v

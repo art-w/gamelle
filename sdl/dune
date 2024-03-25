@@ -1,7 +1,16 @@
 (library
  (public_name gamelle.sdl)
  (name gamelle_sdl)
- (private_modules bitmap common draw event font global sdl_buffer sound window )
+ (private_modules
+  bitmap
+  common
+  draw
+  event
+  font
+  global
+  sdl_buffer
+  sound
+  window)
  (libraries
   gamelle_common
   tsdl

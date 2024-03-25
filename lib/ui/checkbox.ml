@@ -4,15 +4,14 @@ open Ui_backend
 open Widget_builder
 
 type params = string
-
 type state = bool
-
 type return = bool
-
 type Ui_backend.state += Checkbox of state
+
 let construct_state b = Checkbox b
 
-let destruct_state s = match s with Checkbox b -> b | _ -> raise IdTypeMismatch
+let destruct_state s =
+  match s with Checkbox b -> b | _ -> raise IdTypeMismatch
 
 let size ~ts text =
   let text_size = ts text in
@@ -47,5 +46,7 @@ let update ~io _text previous_is_checked box =
 
 let result is_clicked = is_clicked
 
-  let v = elt ~construct_state ~destruct_state ~default:(fun _ -> false) ~size ~render ~update ~result
-
+let v =
+  elt ~construct_state ~destruct_state
+    ~default:(fun _ -> false)
+    ~size ~render ~update ~result

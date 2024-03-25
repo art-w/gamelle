@@ -1,0 +1,8 @@
+(library
+ (name ppx_ui)
+ (public_name gamelle.ppx_ui)
+ (wrapped false)
+ (preprocess
+  (pps ppxlib.metaquot))
+ (kind ppx_rewriter)
+ (libraries ppxlib))
