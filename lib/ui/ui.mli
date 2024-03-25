@@ -43,6 +43,6 @@ val button : (bool, string, bool) elt
 val checkbox : (bool, string, bool) elt
 val label : ui:t -> ?weight:float -> string -> unit
 val slider : (slider_state, slider_params, float) elt
-val vertical : ui:t -> ?id:int -> ?weight:float -> (unit -> 'a) -> 'a
-val horizontal : ui:t -> ?id:int -> ?weight:float -> (unit -> 'a) -> 'a
+val vertical : ui:t -> ?weight:float -> (unit -> 'a) -> 'a
+val horizontal : ui:t -> ?weight:float -> (unit -> 'a) -> 'a
 val vscroll : (vscroll_state, 'a vscroll_params, 'a) node
