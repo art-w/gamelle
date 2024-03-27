@@ -87,7 +87,10 @@ let inert_elt (ui, _loc) ~size ~weight ~render params =
   let size = size ~ts:(ui_text_size ~ui) params in
   render_leaf ~ui ~weight ~size (fun ~io box -> render ~io params box)
 
-(* let scroll :(scroll_box_state,(size1 * (unit->'a)), 'a ) elt = fun  *)
+let nest ~ui ~children_io ~weight ~dir children =
+  node_renderer ~ui ~dir ~size:(total_size ~dir children) ~weight
+    ~children_offset:V2.zero ~children_io ~size_for_self:Size2.zero ~children
+    render_nothing
 
 let node ~construct_state ~children_io ?(weight = 1.) ~destruct_state ~dir
     ~default ~size ~size_for_self ~children_offset ~render ~update ~result () :
@@ -104,7 +107,18 @@ let node ~construct_state ~children_io ?(weight = 1.) ~destruct_state ~dir
   ui.io <- children_io;
   ui.renderers <- [];
   let result = result params in
-  let children = insert_padding ~dir ui.renderers in
+  let children =
+    [
+      padding_elt ~dir;
+      nest ~ui ~children_io ~weight ~dir:(flip dir)
+        [
+          padding_elt ~dir:(flip dir);
+          nest ~ui ~children_io ~weight ~dir (insert_padding ~dir ui.renderers);
+          padding_elt ~dir:(flip dir);
+        ];
+      padding_elt ~dir;
+    ]
+  in
   let children_size = total_size ~dir children in
   let state = update ~io:children_io ~children_size box prev_state params in
   ui.renderers <- old_renderers;
@@ -112,8 +126,8 @@ let node ~construct_state ~children_io ?(weight = 1.) ~destruct_state ~dir
   let children_offset = children_offset state in
   let size = size ~ts:(ui_text_size ~ui) ~children_size params in
   Hashtbl.replace tbl id (construct_state state);
-  render_node ~ui ~dir:V ~weight ~children_offset ~children_io ~children ~id
-    ~size ~size_for_self (render params state);
+  render_node ~ui ~dir ~weight ~children_offset ~children_io ~children ~id ~size
+    ~size_for_self (render params state);
   result
 
 let inert_node (ui, _loc) ~render ~weight ~size_for_self ~children_offset ~dir f
