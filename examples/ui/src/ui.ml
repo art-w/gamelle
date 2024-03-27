@@ -40,7 +40,7 @@ let () =
                 if button [%ui] "button 4" then print_endline "button 4 pressed";
                 if button [%ui] "button 5" then print_endline "button 5 pressed");
 
-            if checkbox [%ui] "This is a checkbox 🤓" then (
+            if checkbox [%ui] ~style:{vertical=Center; horizontal=Center} "This is a checkbox 🤓" then (
               ignore @@ checkbox [%ui] "Checkbox 2 !";
               if button [%ui] "for checkboxers only" then
                 print_endline "YOU ARE A CHECKBOXER");

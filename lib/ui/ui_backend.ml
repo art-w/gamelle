@@ -4,12 +4,25 @@ open Geometry
 type id = { loc : string; _hint : int option }
 type dir = V | H
 
+type alignment = Start | End | Center | Fill
+
+type style = {vertical:alignment; horizontal:alignment}
+let default_style = {vertical=Center;horizontal=Fill}
+
+let apply_style style box size =
+  let h = match style.vertical with Center | Start | End -> Size2.h size | Fill -> Box.h box in
+  let w = match style.horizontal with Center | Start | End -> Size2.w size | Fill -> Box.w box in
+  let x = match style.horizontal with Start | Fill -> Box.minx box | End -> Box.maxx box -. w | Center -> Box.midx box -. w /. 2. in
+  let y = match style.vertical with Start | Fill -> Box.miny box | End -> Box.maxy box -. h | Center -> Box.midy box -. h /. 2. in
+  Box.v (P2.v x y) (Size2.v w h)
+
 let flip = function V -> H | H -> V
 
 type renderer = {
   id : id option;
   weight : size1;
   size : size2;
+  style:style;
   renderer : io:io -> box2 -> unit;
 }
 
@@ -74,8 +87,8 @@ let debug_render ~ui f =
 
 let push_renderer ~ui renderer = ui.renderers <- renderer :: ui.renderers
 
-let render_leaf ~ui ?id ~weight ~size renderer =
-  push_renderer ~ui { id; size; weight; renderer }
+let render_leaf ~ui ?id ~weight ~style ~size renderer =
+  push_renderer ~ui { id; style; size; weight; renderer }
 (*
 let render_node ~ui ?id ~dir ~weight ~children_offset ~children ~children_io
     ~size ~size_for_self renderer =
@@ -110,9 +123,10 @@ let total_size ~dir renderers =
 let renderer_weight = function { weight; _ } -> weight
 
 let rec render ~ui box = function
-  | { id; size = _; weight = _; renderer } ->
+  | { id; size; style; weight = _; renderer } ->
       Option.iter (fun id -> register_layout ~ui ~id box) id;
       debug_box ~ui ~color:Color.red box;
+      let box = apply_style style box size in
       renderer ~io:ui.io box
 
 and node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
@@ -198,7 +212,7 @@ and node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
         Option.iter (fun id -> register_layout ~ui ~id box) id;
         renderer ~io box
   in
-  { id; size; weight; renderer }
+  { id; size; weight; style=default_style; renderer }
 
 let render_node ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
     ~children ~size_for_self renderer =
