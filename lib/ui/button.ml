@@ -21,7 +21,7 @@ let render ~io text _is_clicked box =
   let box = Box.v pos size in
   fill_rect ~io ~color:bg' box;
   draw_rect ~io ~color:fg box;
-  draw_string ~io ~color:fg ~size:font_size text V2.(Box.o box + padding_xy)
+  draw_string ~io ~color:fg text ~at:V2.(Box.o box + padding_xy)
 
 let update ~io _text _old_state box = is_clicked ~io box
 let result b = b

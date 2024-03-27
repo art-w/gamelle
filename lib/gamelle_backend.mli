@@ -162,4 +162,3 @@ module Physics : sig
   val draw : io:io -> ?color:Color.t -> t -> unit
   val fill : io:io -> ?color:Color.t -> t -> unit
 end
-

@@ -79,13 +79,10 @@ let default _ =
 
 let size_for_self = Size2.(v scroll_bar_width 0.)
 let children_offset state = V2.(zero - v 0. state.offset)
-
-let children_io ~io box =
-
- View.clipped_events true @@ View.clipped box io
-
+let children_io ~io box = View.clipped_events true @@ View.clipped box io
 
 let v : type a. (_, a params, a) node =
- fun (ui, loc) ?id ?(size = size) ?(weight=1.) ?(render = render) params ->
-  node ~construct_state ~destruct_state ~dir:V ~default ~size ~size_for_self ~children_io
-    ~children_offset ~render ~update ~result () (ui, loc)  ?id ~size ~weight ~render params
+ fun (ui, loc) ?id ?(size = size) ?(weight = 1.) ?(render = render) params ->
+  node ~construct_state ~destruct_state ~dir:V ~default ~size ~size_for_self
+    ~children_io ~children_offset ~render ~update ~result () (ui, loc) ?id ~size
+    ~weight ~render params

@@ -37,8 +37,8 @@ let render ~io text is_checked box =
            V2.(Box.size check'box' - (2. * padding_xy)))
      in
      fill_rect ~io ~color:highlight ticked'box');
-  draw_string ~io ~color:fg ~size:font_size text
-    V2.(pos + padding_x + v check'box'_size 0. + padding_x)
+  draw_string ~io ~color:fg text
+    ~at:V2.(pos + padding_x + v check'box'_size 0. + padding_x)
 
 let update ~io _text previous_is_checked box =
   let is_clicked = is_clicked ~io box in

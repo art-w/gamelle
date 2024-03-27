@@ -93,4 +93,3 @@ let run state update =
   animate state
 
 module Event = Gamelle_common.Io
-

@@ -9,8 +9,10 @@
   font
   global
   sdl_buffer
+  sdl_common
   sound
-  window)
+  window
+  replay)
  (libraries
   gamelle_common
   tsdl

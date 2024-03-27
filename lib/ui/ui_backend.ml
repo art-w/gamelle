@@ -54,7 +54,6 @@ let find ~default tbl key =
 
 let register_layout ~ui ~id box = Hashtbl.replace (ui_state ~ui).layout id box
 let query_layout ~ui ~id = find ~default:Box.zero (ui_state ~ui).layout id
-let font_size = 20
 let padding = 4.
 let padding_x = V2.v padding 0.
 let padding_y = V2.v 0. padding
@@ -196,8 +195,8 @@ let render_node ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
     (node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
        ~children ~size_for_self renderer)
 
-let io_text_size ~io = text_size ~io Font.default ~size:font_size
-let ui_text_size ~ui = io_text_size ~io:ui.io
+let io_text_size ~io txt = text_size ~io txt
+let ui_text_size ~ui txt = io_text_size ~io:ui.io txt
 
 let is_clicked ~io box =
   Event.is_down ~io `click_left && Box.mem (Event.mouse_pos ~io) box
