@@ -11,7 +11,7 @@ let () =
   let box =
     snd
       Ui.(
-        ui ~io
+        ui ~io ~debug:true
           P2.(v 0. 0.)
           (fun ui ->
             label [%ui] "This is a label ---------------------------";

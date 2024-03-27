@@ -134,11 +134,16 @@ and node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
         let total_weight = List.fold_left ( +. ) 0. weights in
         let coeffs = List.map (fun h -> h /. total_weight) weights in
         let children_sizes =
-          List.map2
-            (fun min_size coeff ->
-              Size2.(
-                v (Box.w children_box) (h min_size +. (leftovers *. coeff))))
-            children_sizes coeffs
+          if total_weight = 0. then
+            List.map
+              (fun min_size -> Size2.(v (Box.w children_box) (h min_size)))
+              children_sizes
+          else
+            List.map2
+              (fun min_size coeff ->
+                Size2.(
+                  v (Box.w children_box) (h min_size +. (leftovers *. coeff))))
+              children_sizes coeffs
         in
         let origin = V2.(children_offset + Box.o box) in
         let _taken =
@@ -168,10 +173,15 @@ and node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
         let total_weight = List.fold_left ( +. ) 0. weights in
         let coeffs = List.map (fun w -> w /. total_weight) weights in
         let children_sizes =
-          List.map2
-            (fun min_size coeff ->
-              Size2.(v (w min_size +. (leftovers *. coeff)) (Box.h box)))
-            children_sizes coeffs
+          if total_weight = 0. then
+            List.map
+              (fun min_size -> Size2.(v (w min_size)) (Box.h box))
+              children_sizes
+          else
+            List.map2
+              (fun min_size coeff ->
+                Size2.(v (w min_size +. (leftovers *. coeff)) (Box.h box)))
+              children_sizes coeffs
         in
         let origin = V2.(children_offset + Box.o box) in
         let _pos =

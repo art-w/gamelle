@@ -23,17 +23,17 @@ let ui ?(debug = false) ~io pos f =
   let children =
     [
       padding_h_elt;
-      nest ~ui ~children_io:io ~weight:1. ~dir:V
+      nest ~ui ~children_io:io ~weight:0. ~dir:V
         [
           padding_v_elt;
-          nest ~ui ~children_io:io ~weight:1. ~dir:V
+          nest ~ui ~children_io:io ~weight:0. ~dir:V
             (insert_padding ~dir ui.renderers);
           padding_v_elt;
         ];
       padding_h_elt;
     ]
   in
-  let size = total_size ~dir:V children in
+  let size = total_size ~dir:H children in
   let end_corner = V2.(pos + size) in
   let box = Box.v_corners pos end_corner in
   debug_box ~ui ~color:Color.green box;
