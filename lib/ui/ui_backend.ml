@@ -3,17 +3,34 @@ open Geometry
 
 type id = { loc : string; _hint : int option }
 type dir = V | H
-
 type alignment = Start | End | Center | Fill
+type style = { vertical : alignment; horizontal : alignment }
 
-type style = {vertical:alignment; horizontal:alignment}
-let default_style = {vertical=Center;horizontal=Fill}
+let default_style = { vertical = Center; horizontal = Fill }
 
 let apply_style style box size =
-  let h = match style.vertical with Center | Start | End -> Size2.h size | Fill -> Box.h box in
-  let w = match style.horizontal with Center | Start | End -> Size2.w size | Fill -> Box.w box in
-  let x = match style.horizontal with Start | Fill -> Box.minx box | End -> Box.maxx box -. w | Center -> Box.midx box -. w /. 2. in
-  let y = match style.vertical with Start | Fill -> Box.miny box | End -> Box.maxy box -. h | Center -> Box.midy box -. h /. 2. in
+  let h =
+    match style.vertical with
+    | Center | Start | End -> Size2.h size
+    | Fill -> Box.h box
+  in
+  let w =
+    match style.horizontal with
+    | Center | Start | End -> Size2.w size
+    | Fill -> Box.w box
+  in
+  let x =
+    match style.horizontal with
+    | Start | Fill -> Box.minx box
+    | End -> Box.maxx box -. w
+    | Center -> Box.midx box -. (w /. 2.)
+  in
+  let y =
+    match style.vertical with
+    | Start | Fill -> Box.miny box
+    | End -> Box.maxy box -. h
+    | Center -> Box.midy box -. (h /. 2.)
+  in
   Box.v (P2.v x y) (Size2.v w h)
 
 let flip = function V -> H | H -> V
@@ -22,7 +39,7 @@ type renderer = {
   id : id option;
   weight : size1;
   size : size2;
-  style:style;
+  style : style;
   renderer : io:io -> box2 -> unit;
 }
 
@@ -212,7 +229,7 @@ and node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
         Option.iter (fun id -> register_layout ~ui ~id box) id;
         renderer ~io box
   in
-  { id; size; weight; style=default_style; renderer }
+  { id; size; weight; style = default_style; renderer }
 
 let render_node ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
     ~children ~size_for_self renderer =
@@ -225,3 +242,8 @@ let ui_text_size ~ui = io_text_size ~io:ui.io
 
 let is_clicked ~io box =
   Event.is_down ~io `click_left && Box.mem (Event.mouse_pos ~io) box
+
+let centered_text ~io ~color font ~size text box =
+  let text_size = text_size ~io font ~size text in
+  let pos = Box.(o (v_mid (mid box) text_size)) in
+  draw_string ~io ~color font ~size text pos

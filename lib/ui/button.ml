@@ -16,13 +16,12 @@ let size ~ts text =
   V2.(text_size + (2. * padding_xy))
 
 let render ~io text _is_clicked box =
-  let size = size ~ts:(io_text_size ~io) text in
-  let pos = Box.o box in
-  let box = Box.v pos size in
   fill_rect ~io ~color:bg' box;
   draw_rect ~io ~color:fg box;
+  let text_size = text_size ~io Font.default ~size:font_size text in
+  let text_box = Box.(v_mid (mid box) text_size) in
   draw_string ~io ~color:fg Font.default ~size:font_size text
-    V2.(Box.o box + padding_xy)
+    (Box.o text_box)
 
 let update ~io _text _old_state box = is_clicked ~io box
 let result b = b

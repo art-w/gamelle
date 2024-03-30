@@ -11,7 +11,7 @@ let () =
   let box =
     snd
       Ui.(
-        ui ~io ~debug:true
+        ui ~io
           P2.(v 0. 0.)
           (fun ui ->
             label [%ui] "This is a label ---------------------------";
@@ -37,7 +37,7 @@ let () =
                           print_endline "button a pressed";
                         if button [%ui] "button b" then
                           print_endline "button b pressed"));
-                if button [%ui] "button 4" then print_endline "button 4 pressed";
+                if button [%ui] ~style:{vertical=End; horizontal=Center}  "button 4" then print_endline "button 4 pressed";
                 if button [%ui] "button 5" then print_endline "button 5 pressed");
 
             if checkbox [%ui] ~style:{vertical=Center; horizontal=Center} "This is a checkbox 🤓" then (
