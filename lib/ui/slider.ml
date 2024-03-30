@@ -16,14 +16,17 @@ let size ~ts:_ { w; min = _; max = _ } =
   Size2.v (w +. (2. *. padding)) height
 
 let render ~io { w = _; min; max } state box =
-  let w = Box.w box in
+  let radius = 8. in
+  let w = Box.w box -. (2. *. padding) in
   let sval = state.v in
   let line = Box.v_mid (Box.mid box) (Size2.v w 4.) in
   fill_rect ~io ~color:lowlight line;
-  let pos = (sval -. min) *. Box.w box /. (max -. min) in
+  let pos =
+    radius +. ((sval -. min) *. (w -. (2. *. radius)) /. (max -. min))
+  in
   fill_rect ~io ~color:highlight (Box.v (Box.o line) (Size2.v pos 4.));
   fill_circle ~io ~color:highlight
-    (Circle.v (P2.v (Box.minx line +. pos) (Box.midy line)) 8.)
+    (Circle.v (P2.v (Box.minx line +. pos) (Box.midy line)) radius)
 
 let update ~io { w = _; min; max } state box =
   let { v; grasped } = state in
