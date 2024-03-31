@@ -51,6 +51,7 @@ val ui : ?debug:bool -> io:io -> p2 -> (t -> 'a) -> 'a * box2
 val button : (bool, string, bool) elt
 val checkbox : (bool, string, bool) elt
 val label : cap -> ?style:style -> ?weight:float -> string -> unit
+val text_area :  cap -> ?style:style -> ?weight:float -> ?width:float -> string -> unit
 val slider : (slider_state, slider_params, float) elt
 val vertical : cap -> ?weight:float -> (unit -> 'a) -> 'a
 val horizontal : cap -> ?weight:float -> (unit -> 'a) -> 'a

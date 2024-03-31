@@ -7,6 +7,8 @@ let button = Button.v
 let slider = Slider.v
 let checkbox = Checkbox.v
 let label = Label.v
+
+let text_area = Text_area.v
 let vscroll = Vscroll.v
 let horizontal = Horizontal.v
 let vertical = Vertical.v

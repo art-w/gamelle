@@ -96,7 +96,7 @@ let elt ~(construct_state : 'state -> state) ~destruct_state
   result state
 
 let inert_elt (ui, _loc) ~size ~weight ~render params =
-  let size = size ~ts:(ui_text_size ~ui) params in
+  let size = size ~io:ui.io params in
   render_leaf ~ui ~weight ~size (fun ~io box -> render ~io params box)
 
 let nest ~ui ~children_io ~weight ~dir children =

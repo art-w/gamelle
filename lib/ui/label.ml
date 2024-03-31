@@ -2,7 +2,7 @@ open Gamelle_backend
 open Ui_backend
 open Widget_builder
 
-let size ~ts text = ts text
+let size ~io text = text_size ~io Font.default ~size:font_size text
 
 let render ~io text box =
   centered_text ~io ~color:fg Font.default ~size:font_size text box

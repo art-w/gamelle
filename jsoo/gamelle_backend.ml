@@ -57,8 +57,8 @@ let run state update =
 
   global_canvas := Some canvas;
 
-  Canvas.set_w canvas 640;
-  Canvas.set_h canvas 480;
+  Canvas.set_w canvas (640 * 2);
+  Canvas.set_h canvas (480 * 2);
 
   let ctx = C.get_context canvas in
   global_ctx := Some ctx;
