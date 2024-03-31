@@ -44,7 +44,7 @@ module type Widget = sig
   val size : ts:(string -> size2) -> params -> size2
   val render : io:io -> params -> state -> box2 -> unit
   val update : io:io -> params -> state -> box2 -> state
-  val result : state -> return
+  val result : params -> state -> return
   val v : (state, params, return) elt
 end
 
@@ -93,7 +93,7 @@ let elt ~(construct_state : 'state -> state) ~destruct_state
   let state = update ~io:ui.io params prev_state box in
   Hashtbl.replace tbl id (construct_state state);
   render_leaf ~ui ~id ~style ~size ~weight (render params state);
-  result state
+  result params state
 
 let inert_elt (ui, _loc) ~size ~weight ~render params =
   let size = size ~io:ui.io params in

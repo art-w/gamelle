@@ -2,6 +2,7 @@ open Gamelle
 open Geometry
 
 type state = unit
+type k = A | B | C
 
 let () =
   Gamelle.run Box.zero @@ fun ~io box ->
@@ -17,7 +18,8 @@ let () =
             text_area [%ui] ~width:300.
               "aaaa aaaa aaaa aaaa aaaa fffffffffffffffffffffffffffffff aaaa\n\
               \ aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb";
-            label [%ui] "This is a label -------------------------------------------";
+            label [%ui]
+              "This is a label -------------------------------------------";
             vscroll [%ui]
               {
                 height = 100.;
@@ -57,7 +59,15 @@ let () =
               if button [%ui] "for checkboxers only" then
                 print_endline "YOU ARE A CHECKBOXER");
             let number = slider [%ui] { w = 200.; min = 10.; max = 20. } in
-            label [%ui] (Printf.sprintf "The slider value is %f" number)))
+            label [%ui] (Printf.sprintf "The slider value is %f" number);
+
+            match
+              radio [%ui] [ (A, "Select A"); (B, "Select B"); (C, "Select C") ]
+            with
+            | None -> label [%ui] "Nothing is selected"
+            | Some A -> label [%ui] "A is selected"
+            | Some B -> label [%ui] "B is selected"
+            | Some C -> label [%ui] "C is selected"))
   in
   draw_line ~io ~color:Color.red (Segment.v V2.zero (V2.v 200. 0.));
   (* draw_text ~io ~color:Color.red ~size:20 "aaaa\nbbb" V2.zero; *)

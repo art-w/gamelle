@@ -56,3 +56,5 @@ val slider : (slider_state, slider_params, float) elt
 val vertical : cap -> ?weight:float -> (unit -> 'a) -> 'a
 val horizontal : cap -> ?weight:float -> (unit -> 'a) -> 'a
 val vscroll : (vscroll_state, 'a vscroll_params, 'a) node
+val radio : (Radio.state, 'a Radio.params, 'a Radio.return) elt
+

@@ -13,6 +13,8 @@ let vscroll = Vscroll.v
 let horizontal = Horizontal.v
 let vertical = Vertical.v
 
+let radio = Radio.v
+
 open Gamelle_backend
 open Geometry
 

@@ -44,7 +44,7 @@ let update ~io { w = _; min; max } state box =
   in
   { v; grasped }
 
-let result state = state.v
+let result _ state = state.v
 
 let v =
   elt ~construct_state ~destruct_state

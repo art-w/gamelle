@@ -44,7 +44,7 @@ let update ~io _text previous_is_checked box =
   let is_clicked = is_clicked ~io box in
   if is_clicked then not previous_is_checked else previous_is_checked
 
-let result is_clicked = is_clicked
+let result _ is_clicked = is_clicked
 
 
 

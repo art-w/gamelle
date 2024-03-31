@@ -24,7 +24,7 @@ let render ~io text _is_clicked box =
     (Box.o text_box)
 
 let update ~io _text _old_state box = is_clicked ~io box
-let result b = b
+let result _ b = b
 
 let v =
   elt ~construct_state ~destruct_state
