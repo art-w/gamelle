@@ -129,15 +129,56 @@ let debug_box ~ui ~color box =
 
 let renderer_size ({ size; _ } : renderer) = size
 
-let total_size ~dir renderers =
-  let sizes = List.map renderer_size renderers in
+let aggregate_sizes ~dir sizes =
   let ws = List.map Size2.w sizes in
   let hs = List.map Size2.h sizes in
   let add s s' = s +. s' in
   let w_op, h_op = match dir with V -> (Float.max, add) | H -> (add, max) in
   Size2.v (List.fold_left w_op 0. ws) (List.fold_left h_op 0. hs)
 
+let total_size ~dir renderers =
+  aggregate_sizes ~dir (List.map renderer_size renderers)
+
 let renderer_weight = function { weight; _ } -> weight
+let size_dir ~dir = match dir with V -> Size2.h | H -> Size2.w
+let box_size_dir ~dir = match dir with V -> Box.h | H -> Box.w
+let basis_dir ~dir = match dir with V -> V2.v 0. 1. | H -> V2.v 1. 0.
+
+let layout_boxes ~dir box weights sizes =
+  let min_space =
+    sizes |> List.map (size_dir ~dir) |> List.fold_left ( +. ) 0.
+  in
+  let leftovers = Float.max 0. (box_size_dir ~dir box -. min_space) in
+  let total_weight = List.fold_left ( +. ) 0. weights in
+  let coeffs = List.map (fun l -> l /. total_weight) weights in
+  let children_sizes =
+    if total_weight = 0. then
+      List.map
+        (fun min_size ->
+          match dir with
+          | V -> Size2.(v (Box.w box) (h min_size))
+          | H -> Size2.(v (w min_size) (Box.h box)))
+        sizes
+    else
+      List.map2
+        (fun min_size coeff ->
+          match dir with
+          | V -> Size2.(v (Box.w box) (h min_size +. (leftovers *. coeff)))
+          | H -> Size2.(v (w min_size +. (leftovers *. coeff)) (Box.h box)))
+        sizes coeffs
+  in
+  let origin = Box.o box in
+  let _taken, boxes =
+    List.fold_left_map
+      (fun space_taken child_size ->
+        let box =
+          Box.v V2.(origin + (space_taken * basis_dir ~dir)) child_size
+        in
+        let space_taken = space_taken +. size_dir ~dir child_size in
+        (space_taken, box))
+      0. children_sizes
+  in
+  boxes
 
 let rec render ~ui box = function
   | { id; size; style; weight = _; renderer } ->
@@ -149,85 +190,20 @@ let rec render ~ui box = function
 and node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
     ~children ~size_for_self renderer =
   let renderer ~io box =
-    match dir with
-    | V ->
-        debug_box ~ui ~color:Color.green box;
-        let old_io = ui.io in
-        ui.io <- children_io;
-        let children_box = Box.(v (o box) V2.(size box - size_for_self)) in
-        let children = List.rev children in
-        let children_sizes = children |> List.map renderer_size in
-        let min_space =
-          children_sizes |> List.map Size2.h |> List.fold_left ( +. ) 0.
-        in
-        let leftovers = Float.max 0. (Box2.h children_box -. min_space) in
-        let weights = children |> List.map renderer_weight in
-        let total_weight = List.fold_left ( +. ) 0. weights in
-        let coeffs = List.map (fun h -> h /. total_weight) weights in
-        let children_sizes =
-          if total_weight = 0. then
-            List.map
-              (fun min_size -> Size2.(v (Box.w children_box) (h min_size)))
-              children_sizes
-          else
-            List.map2
-              (fun min_size coeff ->
-                Size2.(
-                  v (Box.w children_box) (h min_size +. (leftovers *. coeff))))
-              children_sizes coeffs
-        in
-        let origin = V2.(children_offset + Box.o box) in
-        let _taken =
-          List.fold_left2
-            (fun space_taken child child_size ->
-              let box = Box.v V2.(origin + v 0. space_taken) child_size in
-              let space_taken = space_taken +. Size2.h child_size in
-              render ~ui box child;
-              space_taken)
-            0. children children_sizes
-        in
-        ui.io <- old_io;
-        Option.iter (fun id -> register_layout ~ui ~id box) id;
-        renderer ~io box
-    | H ->
-        debug_box ~ui ~color:Color.blue box;
-        let old_io = ui.io in
-        ui.io <- children_io;
-        (* compute pos here : compare weights *)
-        let children = List.rev children in
-        let children_sizes = children |> List.map renderer_size in
-        let min_space =
-          children_sizes |> List.map Size2.w |> List.fold_left ( +. ) 0.
-        in
-        let leftovers = Box2.w box -. min_space in
-        let weights = children |> List.map renderer_weight in
-        let total_weight = List.fold_left ( +. ) 0. weights in
-        let coeffs = List.map (fun w -> w /. total_weight) weights in
-        let children_sizes =
-          if total_weight = 0. then
-            List.map
-              (fun min_size -> Size2.(v (w min_size)) (Box.h box))
-              children_sizes
-          else
-            List.map2
-              (fun min_size coeff ->
-                Size2.(v (w min_size +. (leftovers *. coeff)) (Box.h box)))
-              children_sizes coeffs
-        in
-        let origin = V2.(children_offset + Box.o box) in
-        let _pos =
-          List.fold_left2
-            (fun space_taken child child_size ->
-              let box = Box.v V2.(origin + v space_taken 0.) child_size in
-              let space_taken = space_taken +. Size2.w child_size in
-
-              render ~ui box child;
-              space_taken)
-            0. children children_sizes
-        in
-        ui.io <- old_io;
-        Option.iter (fun id -> register_layout ~ui ~id box) id;
-        renderer ~io box
+    debug_box ~ui ~color:Color.green box;
+    let old_io = ui.io in
+    ui.io <- children_io;
+    let children_box =
+      Box.(v V2.(o box + children_offset) V2.(size box - size_for_self))
+    in
+    let children = List.rev children in
+    let children_sizes = children |> List.map renderer_size in
+    let weights = children |> List.map renderer_weight in
+    let boxes = layout_boxes ~dir children_box weights children_sizes in
+    List.iter2 (fun box child -> render ~ui box child) boxes children;
+    ui.io <- old_io;
+    Option.iter (fun id -> register_layout ~ui ~id box) id;
+    renderer ~io box
   in
   { id; size; weight; style = default_style; renderer }
 
