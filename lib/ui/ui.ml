@@ -13,14 +13,16 @@ let vscroll = Vscroll.v
 let horizontal = Horizontal.v
 let vertical = Vertical.v
 
+let text_input = Text_input.v
+
 let radio = Radio.v
 
 open Gamelle_backend
 open Geometry
 
-let ui ?(debug = false) ~io pos f =
+let window ?(debug = false) ~io pos f =
   let id = pos in
-  let ui = { io; id; renderers = []; debug_render = Fun.id } in
+  let ui = { io; id; renderers = []; debug_render = Fun.id; loc_stack = [] } in
   if not (Hashtbl.mem state id) then Hashtbl.add state id (new_state ());
   let r = f ui in
   let dir = V in

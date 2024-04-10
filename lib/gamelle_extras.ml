@@ -92,3 +92,8 @@ let draw_text ~io ?(width = Float.infinity) ?(interline = -8.)
   in
   ignore (List.fold_left print_line pos lines);
   ()
+
+
+let milliseconds () = int_of_float (Sys.time () *. 10000.)
+
+let rythm n = (milliseconds ()) mod n = 0

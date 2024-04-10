@@ -84,7 +84,7 @@ let elt ~(construct_state : 'state -> state) ~destruct_state
     ('state, 'params, 'result) elt =
  fun (ui, loc) ?id ?(size = size) ?(weight = weight) ?(style=default_style) ?(render = render) params ->
   let default = construct_state (default params) in
-  let id = { loc; _hint = id } in
+  let id = { loc_stack = loc :: ui.loc_stack; _hint = id } in
   let box = query_layout ~ui ~id in
   let size = size ~ts:(ui_text_size ~ui) params in
   let box = apply_style style box size in
@@ -108,7 +108,7 @@ let node ~construct_state ~children_io ?(weight = 1.) ~destruct_state ~dir
     ~default ~size ~size_for_self ~children_offset ~render ~update ~result () :
     ('state, 'params, 'r) node =
  fun (ui, loc) ?id  ?(style=default_style) ?(size = size) ?(weight = weight) ?(render = render) params ->
-  let id = { loc; _hint = id } in
+  let id = { loc_stack = loc :: ui.loc_stack; _hint = id } in
   let _ = style in
   let box = query_layout ~ui ~id in
   debug_box ~ui ~color:Color.blue box;

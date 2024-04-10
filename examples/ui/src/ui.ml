@@ -4,6 +4,15 @@ open Geometry
 type state = unit
 type k = A | B | C
 
+
+let f [%ui] text1 text2 =
+  Ui.(checkbox [%ui] text1, checkbox [%ui] text2)
+
+let checboxes ui li =
+  List.map (Ui.checkbox [%ui] ) li
+
+
+
 let () =
   Gamelle.run Box.zero @@ fun ~io box ->
   if Event.is_pressed ~io `escape then raise Exit;
@@ -12,14 +21,14 @@ let () =
   let box =
     snd
       Ui.(
-        ui ~io
+        window ~io
           P2.(v 0. 0.)
           (fun ui ->
+            ignore @@ (text_input [%ui] 200.);
             text_area [%ui] ~width:300.
               "aaaa aaaa aaaa aaaa aaaa fffffffffffffffffffffffffffffff aaaa\n\
               \ aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb";
-            label [%ui]
-              "This is a label -------------------------------------------";
+            label [%ui] "This is a label ----";
             vscroll [%ui]
               {
                 height = 100.;
@@ -58,8 +67,8 @@ let () =
               ignore @@ checkbox [%ui] "Checkbox 2 !";
               if button [%ui] "for checkboxers only" then
                 print_endline "YOU ARE A CHECKBOXER");
-            let number = slider [%ui] { w = 200.; min = 10.; max = 20. } in
-            label [%ui] (Printf.sprintf "The slider value is %f" number);
+            let _number = slider [%ui] { w = 200.; min = 10.; max = 20. } in
+            label [%ui] (Printf.sprintf "The slider value is %f" (slider [%ui] { w = 200.; min = 10.; max = 20. }));
 
             match
               radio [%ui] [ (A, "Select A"); (B, "Select B"); (C, "Select C") ]

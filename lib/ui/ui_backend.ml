@@ -1,7 +1,7 @@
 open Gamelle_backend
 open Geometry
 
-type id = { loc : string; _hint : int option }
+type id = { loc_stack : string list; _hint : int option }
 type dir = V | H
 type alignment = Start | End | Center | Fill
 type style = { vertical : alignment; horizontal : alignment }
@@ -48,6 +48,7 @@ type t = {
   id : p2;
   mutable renderers : renderer list;
   mutable debug_render : unit -> unit;
+  mutable loc_stack : string list;
 }
 
 type 'a tbl = (id, 'a) Hashtbl.t
@@ -216,6 +217,9 @@ let render_node ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
 let io_text_size ~io = text_size ~io Font.default ~size:font_size
 let ui_text_size ~ui = io_text_size ~io:ui.io
 
+let clicked_outside ~io box =
+  Event.is_down ~io `click_left && (not @@ Box.mem (Event.mouse_pos ~io) box)
+
 let is_clicked ~io box =
   Event.is_down ~io `click_left && Box.mem (Event.mouse_pos ~io) box
 
@@ -223,3 +227,9 @@ let centered_text ~io ~color font ~size text box =
   let text_size = text_size ~io font ~size text in
   let pos = Box.(o (v_mid (mid box) text_size)) in
   draw_string ~io ~color font ~size text pos
+
+let nest_loc (ui,loc) f =
+  ui.loc_stack <- loc :: ui.loc_stack ;
+  let r = f () in
+  ui.loc_stack <- List.tl ui.loc_stack;
+  r
