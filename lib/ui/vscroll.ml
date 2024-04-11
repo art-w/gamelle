@@ -28,7 +28,6 @@ let render ~io { height = _; f = _ } state box =
       (Size2.v scroll_bar_width height)
   in
   let scroll_bar_height = height *. height /. real_height in
-
   let scroll_bar_box =
     Box.v
       (P2.v
@@ -81,7 +80,6 @@ let size_for_self = Size2.(v scroll_bar_width 0.)
 let children_offset state = V2.(zero - v 0. state.offset)
 
 let children_io ~io box =
-
  View.clipped_events true @@ View.clipped box io
 
 

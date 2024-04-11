@@ -44,9 +44,9 @@ let cursor_offset ~io text cursor = text_length ~io (String.sub text 0 cursor)
 
 let render ~io _params
     { text; offset; cursor; focused; arrow_key = _; char_key = _ } box =
-  let io = View.clipped box io in
   fill_rect ~io ~color:bg' box;
   draw_rect ~io ~color:(if focused then highlight else fg) box;
+  let io = View.clipped box io in
   let nsize = V2.(Box.size box - (2. * padding_xy)) in
   let box = Box.(v_mid (mid box) nsize) in
   draw_string ~io ~color:fg Font.default ~size:font_size text
