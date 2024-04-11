@@ -1,5 +1,5 @@
-open Gamelle_backend
-open Geometry
+open Gamelle_common
+open Gamelle_geometry
 
 type t
 type cap = t * string

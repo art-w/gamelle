@@ -1,5 +1,5 @@
+open Gamelle_common
 open Gamelle_geometry
-open Gamelle_backend
 
 type t
 type kind = Movable | Immovable

@@ -1,10 +1,7 @@
-type io
+open Gamelle_common
+open Gamelle_geometry
 
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
-
-open Gamelle_geometry
-module Geometry : module type of Gamelle_geometry
-module Color : module type of Color
 
 module Bitmap : sig
   type t
@@ -32,35 +29,6 @@ module Sound : sig
 
   val load_music : string -> music
   val play_music : io:io -> music -> unit
-end
-
-module Transform : sig
-  type t
-
-  val default : t
-  val translate : V2.t -> t -> t
-  val scale : float -> t -> t
-  val rotate : float -> t -> t
-  val project : t -> P2.t -> P2.t
-end
-
-module View : sig
-  type 'a scene = io:io -> 'a
-
-  val ( & ) : unit scene -> unit scene -> unit scene
-  val drawing_box : Box.t -> io -> io
-  val translate : V2.t -> 'a scene -> 'a scene
-  val scale : float -> 'a scene -> 'a scene
-  val rotate : float -> 'a scene -> 'a scene
-  val clip : box2 -> 'a scene -> 'a scene
-  val unclip : 'a scene -> 'a scene
-  val clip_events : bool -> 'a scene -> 'a scene
-  val translated : V2.t -> io -> io
-  val scaled : float -> io -> io
-  val rotated : float -> io -> io
-  val clipped : box2 -> io -> io
-  val unclipped : io -> io
-  val clipped_events : bool -> io -> io
 end
 
 val clock : unit -> float

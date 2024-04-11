@@ -7,17 +7,6 @@ module Font = Font
 module Sound = Sound
 module Transform = Gamelle_common.Transform
 
-module View = struct
-  include Gamelle_common.Io
-
-  let drawing_box box io =
-    let tr =
-      V2.(Box.(o (centered box (Window.box ()))) - io.centering_translation)
-    in
-    let io = { io with centering_translation = tr } in
-    translated tr io
-end
-
 include Draw
 
 let clock = Common.clock

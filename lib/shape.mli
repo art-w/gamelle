@@ -1,5 +1,5 @@
+open Gamelle_common
 open Gg
-open Gamelle_backend
 
 type t
 
