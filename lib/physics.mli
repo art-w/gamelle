@@ -1,4 +1,5 @@
-open Gg
+open Gamelle_geometry
+open Gamelle_backend
 
 type t
 type kind = Movable | Immovable
@@ -16,7 +17,4 @@ val add_velocity : V2.t -> t -> t
 val add_rot_velocity : float -> t -> t
 val update : dt:float -> t -> t
 val fix_collisions : t list -> t list
-
-module Make (S : Draw.S) : sig
-  val draw : io:S.io -> t -> unit
-end
+val draw : io:io -> t -> unit

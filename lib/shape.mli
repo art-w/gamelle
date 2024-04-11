@@ -1,4 +1,5 @@
 open Gg
+open Gamelle_backend
 
 type t
 
@@ -27,7 +28,5 @@ val separation_axis : t -> t -> V2.t option
 val contact_points : t -> t -> float * P2.t list
 
 (* *)
-module Make (S : Draw.S) : sig
-  val draw : io:S.io -> color:Color.t -> t -> unit
-  val fill : io:S.io -> color:Color.t -> t -> unit
-end
+val draw : io:io -> color:Color.t -> t -> unit
+val fill : io:io -> color:Color.t -> t -> unit

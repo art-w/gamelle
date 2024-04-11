@@ -8,7 +8,6 @@ module Font = Font
 module Sound = Sound
 module Transform = Gamelle_common.Transform
 include Draw
-include Gamelle_geometry.Make (Draw)
 
 (* type ctx = C.t *)
 
@@ -79,4 +78,3 @@ let run state update =
   animate state
 
 module Event = Gamelle_common.Io
-

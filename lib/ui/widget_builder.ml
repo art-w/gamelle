@@ -2,9 +2,6 @@ open Gamelle_backend
 open Geometry
 open Ui_backend
 
-
-
-
 type ('state, 'params, 'r) elt =
   t * string ->
   ?id:int ->
@@ -39,8 +36,6 @@ module type Widget = sig
   type state
   type return
 
-
-
   val size : ts:(string -> size2) -> params -> size2
   val render : io:io -> params -> state -> box2 -> unit
   val update : io:io -> params -> state -> box2 -> state
@@ -59,10 +54,22 @@ end
 let render_nothing ~io:_ _ = ()
 
 let padding_v_elt =
-  { id = None; size = padding_y; weight = 0.; style=default_style; renderer = render_nothing }
+  {
+    id = None;
+    size = padding_y;
+    weight = 0.;
+    style = default_style;
+    renderer = render_nothing;
+  }
 
 let padding_h_elt =
-  { id = None; size = padding_x; weight = 0.; style=default_style; renderer = render_nothing }
+  {
+    id = None;
+    size = padding_x;
+    weight = 0.;
+    style = default_style;
+    renderer = render_nothing;
+  }
 
 let padding_elt ~dir = match dir with V -> padding_v_elt | H -> padding_h_elt
 
@@ -74,15 +81,13 @@ let rec insert e li =
 
 let insert_padding ~dir rs = insert (padding_elt ~dir) rs
 
-
-
-
 let elt ~(construct_state : 'state -> state) ~destruct_state
     ~(default : 'params -> 'state) ?(weight = 1.)
     ~(size : ts:(string -> size2) -> 'params -> size2)
     ~(render : io:io -> 'params -> 'state -> box2 -> unit) ~update ~result () :
     ('state, 'params, 'result) elt =
- fun (ui, loc) ?id ?(size = size) ?(weight = weight) ?(style=default_style) ?(render = render) params ->
+ fun (ui, loc) ?id ?(size = size) ?(weight = weight) ?(style = default_style)
+     ?(render = render) params ->
   let default = construct_state (default params) in
   let id = { loc_stack = loc :: ui.loc_stack; _hint = id } in
   let box = query_layout ~ui ~id in
@@ -107,7 +112,8 @@ let nest ~ui ~children_io ~weight ~dir children =
 let node ~construct_state ~children_io ?(weight = 1.) ~destruct_state ~dir
     ~default ~size ~size_for_self ~children_offset ~render ~update ~result () :
     ('state, 'params, 'r) node =
- fun (ui, loc) ?id  ?(style=default_style) ?(size = size) ?(weight = weight) ?(render = render) params ->
+ fun (ui, loc) ?id ?(style = default_style) ?(size = size) ?(weight = weight)
+     ?(render = render) params ->
   let id = { loc_stack = loc :: ui.loc_stack; _hint = id } in
   let _ = style in
   let box = query_layout ~ui ~id in

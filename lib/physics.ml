@@ -1,5 +1,6 @@
 (* Based on https://github.com/twobitcoder101/FlatPhysics-part-24 *)
-open Gg
+open Gamelle_geometry
+open Gamelle_backend
 
 type kind = Movable | Immovable
 
@@ -29,19 +30,15 @@ let add_rot_velocity dv t =
   | Immovable -> t
   | _ -> { t with rot_speed = t.rot_speed +. dv }
 
-module Make (Draw : Draw.S) = struct
-  module S = Shape.Make (Draw)
-
-  let draw ~io { kind; shape; pos; rot; _ } =
-    let color, colora =
-      match kind with
-      | Immovable -> (Color.v 0.0 1.0 1.0 1.0, Color.v 0.0 1.0 1.0 0.3)
-      | Movable -> (Color.v 1.0 1.0 0.0 1.0, Color.v 1.0 1.0 0.0 0.3)
-    in
-    S.draw ~io ~color shape;
-    S.fill ~io ~color:colora shape;
-    Draw.draw_line ~io ~color:colora (Segment.v pos V2.(pos + polar 10.0 rot))
-end
+let draw ~io { kind; shape; pos; rot; _ } =
+  let color, colora =
+    match kind with
+    | Immovable -> (Color.v 0.0 1.0 1.0 1.0, Color.v 0.0 1.0 1.0 0.3)
+    | Movable -> (Color.v 1.0 1.0 0.0 1.0, Color.v 1.0 1.0 0.0 0.3)
+  in
+  Shape.draw ~io ~color shape;
+  Shape.fill ~io ~color:colora shape;
+  draw_line ~io ~color:colora (Segment.v pos V2.(pos + polar 10.0 rot))
 
 let make ?mass ?inertia ?(restitution = 0.2) ?(kind = Movable) shape =
   let pos = Shape.center shape in

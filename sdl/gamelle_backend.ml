@@ -19,7 +19,6 @@ module View = struct
 end
 
 include Draw
-include Gamelle_geometry.Make (Draw)
 
 let clock = Common.clock
 let dt = Common.dt

@@ -1,4 +1,5 @@
-open Gg
+open Gamelle_backend
+open Gamelle_geometry
 
 type t = Segment of p2 * p2 | Circle of p2 * size1 | Polygon of p2 list
 
@@ -9,19 +10,15 @@ let polygon pts = Polygon pts
 let rect box =
   polygon [ Box2.tl_pt box; Box2.tr_pt box; Box2.br_pt box; Box2.bl_pt box ]
 
-module Make (Draw : Draw.S) = struct
-  open Draw
+let draw ~io ~color = function
+  | Segment (p0, p1) -> draw_line ~io ~color (Segment.v p0 p1)
+  | Circle (center, radius) -> draw_circle ~io ~color (Circle.v center radius)
+  | Polygon pts -> draw_poly ~io ~color pts
 
-  let draw ~io ~color = function
-    | Segment (p0, p1) -> draw_line ~io ~color (Segment.v p0 p1)
-    | Circle (center, radius) -> draw_circle ~io ~color (Circle.v center radius)
-    | Polygon pts -> draw_poly ~io ~color pts
-
-  let fill ~io ~color = function
-    | Segment (p0, p1) -> draw_line ~io ~color (Segment.v p0 p1)
-    | Circle (center, radius) -> fill_circle ~io ~color (Circle.v center radius)
-    | Polygon pts -> fill_poly ~io ~color pts
-end
+let fill ~io ~color = function
+  | Segment (p0, p1) -> draw_line ~io ~color (Segment.v p0 p1)
+  | Circle (center, radius) -> fill_circle ~io ~color (Circle.v center radius)
+  | Polygon pts -> fill_poly ~io ~color pts
 
 let translate dxy = function
   | Segment (p0, p1) -> Segment (V2.(p0 + dxy), V2.(p1 + dxy))

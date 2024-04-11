@@ -32,7 +32,6 @@ let load binstring =
      name)
 
 let default = load Gamelle_common.Font.default
-
 let default_size = Gamelle_common.Font.default_size
 
 let draw_at ~io (lazy font_name) ~size text (x, y) =

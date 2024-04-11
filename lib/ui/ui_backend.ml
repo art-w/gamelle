@@ -228,8 +228,8 @@ let centered_text ~io ~color ?font ?size text box =
   let pos = Box.(o (v_mid (mid box) text_size)) in
   draw_string ~io ~color ?font ?size text pos
 
-let nest_loc (ui,loc) f =
-  ui.loc_stack <- loc :: ui.loc_stack ;
+let nest_loc (ui, loc) f =
+  ui.loc_stack <- loc :: ui.loc_stack;
   let r = f () in
   ui.loc_stack <- List.tl ui.loc_stack;
   r

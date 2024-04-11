@@ -78,13 +78,14 @@ let draw ~io bmp p =
   in
   ()
 
-let draw_string ~io ~color ?(font=Font.default) ?(size=Font.default_size) text p =
+let draw_string ~io ~color ?(font = Font.default) ?(size = Font.default_size)
+    text p =
   if text <> "" then (
     let bitmap = Font.draw ~color font size text in
     draw ~io bitmap p;
     Bitmap.free ~io bitmap)
 
-let text_size ~io ?(font=Font.default) ?(size=Font.default_size) text =
+let text_size ~io ?(font = Font.default) ?(size = Font.default_size) text =
   Delayed.force ~io @@ Font.text_size font size text
 
 let draw_line ~io ~color segment =

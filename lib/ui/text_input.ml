@@ -37,9 +37,7 @@ let size ~ts width =
   let text_size = Size2.(v width (h (ts "a"))) in
   V2.(text_size + (2. * padding_xy))
 
-let text_length ~io text =
-  Size2.w (text_size ~io ~size:font_size text)
-
+let text_length ~io text = Size2.w (text_size ~io ~size:font_size text)
 let cursor_offset ~io text cursor = text_length ~io (String.sub text 0 cursor)
 
 let render ~io _params
@@ -49,8 +47,7 @@ let render ~io _params
   let io = View.clipped box io in
   let nsize = V2.(Box.size box - (2. * padding_xy)) in
   let box = Box.(v_mid (mid box) nsize) in
-  draw_string ~io ~color:fg ~size:font_size text
-    V2.(Box.o box + v offset 0.);
+  draw_string ~io ~color:fg ~size:font_size text V2.(Box.o box + v offset 0.);
   let cursor_offset = cursor_offset ~io text cursor in
   let cursor_pos = cursor_offset +. offset in
   let cursor_seg =
@@ -58,8 +55,7 @@ let render ~io _params
       (P2.v (Box.minx box +. cursor_pos) (Box.miny box))
       (P2.v
          (Box.minx box +. cursor_pos)
-         (Box.miny box
-         +. Size2.h (text_size ~io ~size:font_size "a")))
+         (Box.miny box +. Size2.h (text_size ~io ~size:font_size "a")))
   in
   if focused then draw_line ~io ~color:highlight cursor_seg
 
