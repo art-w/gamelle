@@ -110,25 +110,23 @@ let update ~io _param { text; offset; cursor; focused; arrow_key; char_key } box
     else (cursor, focused)
   in
   let cursor =
-    match arrow_key with
-    | None -> cursor
-    | Some (0, dir) -> ( cursor + match dir with `left -> -1 | `right -> 1)
-    | Some (n, dir) when n < slow_frames && n mod slow_frequency = 0 -> (
-        cursor + match dir with `left -> -1 | `right -> 1)
-    | Some (n, dir) when n mod fast_frequency = 0 -> (
-        cursor + match dir with `left -> -1 | `right -> 1)
-    | _ -> cursor
+    Int.max 0
+      (Int.min (String.length text)
+         (match arrow_key with
+         | None -> cursor
+         | Some (0, dir) -> (
+             cursor + match dir with `left -> -1 | `right -> 1)
+         | Some (n, dir) when n < slow_frames && n mod slow_frequency = 0 -> (
+             cursor + match dir with `left -> -1 | `right -> 1)
+         | Some (n, dir) when n >= slow_frames && n mod fast_frequency = 0 -> (
+             cursor + match dir with `left -> -1 | `right -> 1)
+         | _ -> cursor))
   in
   let char_to_add =
     match char_key with
     | None -> None
-    | Some (0, char) ->
-        Printf.printf "n 0 slow_frames %i slow_freq %i\n%!" slow_frames
-          slow_frequency;
-        Some char
+    | Some (0, char) -> Some char
     | Some (n, char) when n < slow_frames && n mod slow_frequency = 0 ->
-        Printf.printf "n %i slow_frames %i slow_freq %i\n%!" n slow_frames
-          slow_frequency;
         Some char
     | Some (n, char) when n >= slow_frames && n mod fast_frequency = 0 ->
         Some char

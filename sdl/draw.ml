@@ -79,9 +79,10 @@ let draw ~io bmp p =
   ()
 
 let draw_string ~io ~color font ~size text p =
-  let bitmap = Font.draw ~color font size text in
-  draw ~io bitmap p;
-  Bitmap.free ~io bitmap
+  if text <> "" then (
+    let bitmap = Font.draw ~color font size text in
+    draw ~io bitmap p;
+    Bitmap.free ~io bitmap)
 
 let text_size ~io font ~size text =
   Delayed.force ~io @@ Font.text_size font size text

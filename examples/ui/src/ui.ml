@@ -4,14 +4,8 @@ open Geometry
 type state = unit
 type k = A | B | C
 
-
-let f [%ui] text1 text2 =
-  Ui.(checkbox [%ui] text1, checkbox [%ui] text2)
-
-let checboxes ui li =
-  List.map (Ui.checkbox [%ui] ) li
-
-
+let f [%ui] text1 text2 = Ui.(checkbox [%ui] text1, checkbox [%ui] text2)
+let checboxes ui li = List.map (Ui.checkbox [%ui]) li
 
 let () =
   Gamelle.run Box.zero @@ fun ~io box ->
@@ -24,7 +18,7 @@ let () =
         window ~io
           P2.(v 0. 0.)
           (fun ui ->
-            ignore @@ (text_input [%ui] 200.);
+            ignore @@ text_input [%ui] 200.;
             text_area [%ui] ~width:300.
               "aaaa aaaa aaaa aaaa aaaa fffffffffffffffffffffffffffffff aaaa\n\
               \ aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb";
@@ -68,8 +62,9 @@ let () =
               if button [%ui] "for checkboxers only" then
                 print_endline "YOU ARE A CHECKBOXER");
             let _number = slider [%ui] { w = 200.; min = 10.; max = 20. } in
-            label [%ui] (Printf.sprintf "The slider value is %f" (slider [%ui] { w = 200.; min = 10.; max = 20. }));
-
+            label [%ui]
+              (Printf.sprintf "The slider value is %f"
+                 (slider [%ui] { w = 200.; min = 10.; max = 20. }));
             match
               radio [%ui] [ (A, "Select A"); (B, "Select B"); (C, "Select C") ]
             with
