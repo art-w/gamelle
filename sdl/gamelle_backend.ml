@@ -6,7 +6,6 @@ module Bitmap = Bitmap
 module Font = Font
 module Sound = Sound
 module Transform = Gamelle_common.Transform
-
 include Draw
 
 let clock = Common.clock

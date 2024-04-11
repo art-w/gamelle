@@ -33,8 +33,6 @@ end
 
 module View = struct
   include Gamelle_common.Io
-
-
 end
 
 let run state update =

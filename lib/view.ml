@@ -1,5 +1,4 @@
 open Gamelle_backend
-
 include Gamelle_common.Io
 
 let drawing_box box io =
