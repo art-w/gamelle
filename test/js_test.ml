@@ -72,9 +72,9 @@ let update ~io { x; y; vx; vy; _ } =
 
   Window.set_size (800, 800);
   fill_rect ~io ~color:black (Window.box ());
-  draw_string ~io ~color:Color.white Font.default ~size:30 "Hello World!"
+  draw_string ~io ~color:Color.white ~size:30 "Hello World!"
     V2.zero;
-  draw_string ~io:(View.scaled 2.0 io) ~color:Color.white Font.default ~size:30
+  draw_string ~io:(View.scaled 2.0 io) ~color:Color.white ~size:30
     "Hello World!" V2.zero;
   View.(
     translate (V2.v mx my)
