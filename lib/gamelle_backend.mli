@@ -17,6 +17,7 @@ module Font : sig
   type t
 
   val default : t
+  val default_size : int
   val load : string -> t
   val draw : color:Color.t -> t -> int -> string -> Bitmap.t
 end
@@ -75,9 +76,9 @@ val fill_circle : io:io -> color:Color.t -> Circle.t -> unit
 val show_cursor : bool -> unit
 
 val draw_string :
-  io:io -> color:Color.t -> Font.t -> size:int -> string -> p2 -> unit
+  io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> string -> p2 -> unit
 
-val text_size : io:io -> Font.t -> size:int -> string -> size2
+val text_size : io:io -> ?font:Font.t -> ?size:int -> string -> size2
 
 module Event : sig
   val mouse_pos : io:io -> p2
@@ -148,4 +149,3 @@ module Physics : sig
   val fix_collisions : t list -> t list
   val draw : io:io -> t -> unit
 end
-

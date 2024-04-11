@@ -214,7 +214,7 @@ let render_node ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
     (node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
        ~children ~size_for_self renderer)
 
-let io_text_size ~io = text_size ~io Font.default ~size:font_size
+let io_text_size ~io = text_size ~io ~size:font_size
 let ui_text_size ~ui = io_text_size ~io:ui.io
 
 let clicked_outside ~io box =
@@ -223,10 +223,10 @@ let clicked_outside ~io box =
 let is_clicked ~io box =
   Event.is_down ~io `click_left && Box.mem (Event.mouse_pos ~io) box
 
-let centered_text ~io ~color font ~size text box =
-  let text_size = text_size ~io font ~size text in
+let centered_text ~io ~color ?font ?size text box =
+  let text_size = text_size ~io ?font ?size text in
   let pos = Box.(o (v_mid (mid box) text_size)) in
-  draw_string ~io ~color font ~size text pos
+  draw_string ~io ~color ?font ?size text pos
 
 let nest_loc (ui,loc) f =
   ui.loc_stack <- loc :: ui.loc_stack ;

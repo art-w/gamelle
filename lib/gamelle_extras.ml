@@ -1,10 +1,10 @@
 open Gamelle_backend
 open Gamelle_geometry
 
-let text_area_size ~io ?(width = Float.infinity) ?(interline = -8.)
-    ?(font = Font.default) ~size text =
+let text_area_size ~io ?(width = Float.infinity) ?(interline = -8.) ?font ?size
+    text =
   let pos = V2.zero in
-  let text_size = text_size ~io font ~size in
+  let text_size = text_size ~io ?font ?size in
   let limx = width +. P2.x pos in
   let startx = P2.x pos in
   let lines = String.split_on_char '\n' text in
@@ -46,10 +46,10 @@ let text_area_size ~io ?(width = Float.infinity) ?(interline = -8.)
   let maxw, end_pos = List.fold_left print_line (0., pos) lines in
   Size2.v maxw (P2.y end_pos)
 
-let draw_text ~io ?(width = Float.infinity) ?(interline = -8.)
-    ?(font = Font.default) ~color ~size text pos =
-  let text_size = text_size ~io font ~size in
-  let draw_string = draw_string ~io ~color ~size font in
+let draw_text ~io ?(width = Float.infinity) ?(interline = -8.) ?font ~color
+    ?size text pos =
+  let text_size = text_size ~io ?font ?size in
+  let draw_string = draw_string ~io ~color ?size ?font in
   let limx = width +. P2.x pos in
   let startx = P2.x pos in
   let lines = String.split_on_char '\n' text in
@@ -93,7 +93,5 @@ let draw_text ~io ?(width = Float.infinity) ?(interline = -8.)
   ignore (List.fold_left print_line pos lines);
   ()
 
-
 let milliseconds () = int_of_float (Sys.time () *. 10000.)
-
-let rythm n = (milliseconds ()) mod n = 0
+let rythm n = milliseconds () mod n = 0

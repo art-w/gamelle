@@ -18,9 +18,9 @@ let size ~ts text =
 let render ~io text _is_clicked box =
   fill_rect ~io ~color:bg' box;
   draw_rect ~io ~color:fg box;
-  let text_size = text_size ~io Font.default ~size:font_size text in
+  let text_size = text_size ~io  ~size:font_size text in
   let text_box = Box.(v_mid (mid box) text_size) in
-  draw_string ~io ~color:fg Font.default ~size:font_size text
+  draw_string ~io ~color:fg  ~size:font_size text
     (Box.o text_box)
 
 let update ~io _text _old_state box = is_clicked ~io box
