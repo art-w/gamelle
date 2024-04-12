@@ -1,4 +1,4 @@
-open Gg
+open Geometry
 
 type t = {
   view : Transform.t;

@@ -2,9 +2,7 @@ open Gamelle
 
 type state = unit
 type k = A | B | C
-
-let f [%ui] text1 text2 = Ui.(checkbox [%ui] text1, checkbox [%ui] text2)
-let checboxes ui li = List.map (Ui.checkbox [%ui]) li
+type k' = k
 
 let () =
   Gamelle.run Box.zero @@ fun ~io box ->
@@ -19,8 +17,8 @@ let () =
           (fun ui ->
             ignore @@ text_input [%ui] 200.;
             text_area [%ui] ~width:300.
-              "aaaa aaaa aaaa aaaa aaaa fffffffffffffffffffffffffffffff aaaa\n\
-              \ aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb";
+              "aaaa aaaa aaaa aaaa aaaa fffffffffffffffffffffffffffffff aaaa \
+               aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb";
             label [%ui] "This is a label ----";
             vscroll [%ui]
               {
@@ -64,13 +62,15 @@ let () =
             label [%ui]
               (Printf.sprintf "The slider value is %f"
                  (slider [%ui] { w = 200.; min = 10.; max = 20. }));
-            match
-              radio [%ui] [ (A, "Select A"); (B, "Select B"); (C, "Select C") ]
-            with
+            let v =
+              radio [%ui]
+                [ (`A, "Select A"); (`B, "Select B")]
+            in
+            match v with
             | None -> label [%ui] "Nothing is selected"
-            | Some A -> label [%ui] "A is selected"
-            | Some B -> label [%ui] "B is selected"
-            | Some C -> label [%ui] "C is selected"))
+            | Some `A -> label [%ui] "A is selected"
+            | Some `B -> label [%ui] "B is selected"
+            | Some `C -> label [%ui] "C is selected"))
   in
   draw_line ~io ~color:Color.red (Segment.v V2.zero (V2.v 200. 0.));
   (* draw_text ~io ~color:Color.red ~size:20 "aaaa\nbbb" V2.zero; *)

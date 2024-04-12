@@ -1,6 +1,7 @@
 open Brr
 open Brr_canvas
 open Gamelle_common
+open Geometry
 module Color = Color
 module Bitmap = Bitmap
 module Font = Font_

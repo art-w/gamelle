@@ -1,4 +1,5 @@
 open Gamelle_common
+open Geometry
 
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
 

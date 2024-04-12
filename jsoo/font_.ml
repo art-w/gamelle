@@ -1,6 +1,7 @@
 open Brr
 open Globals
 open Gamelle_common
+open Geometry
 
 type t = string Lazy.t
 

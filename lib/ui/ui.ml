@@ -1,3 +1,7 @@
+
+open Gamelle_common.Geometry
+open Gamelle_backend
+
 include Ui_backend
 include Widget_builder
 
@@ -14,8 +18,6 @@ let vertical = Vertical.v
 let text_input = Text_input.v
 let radio = Radio.v
 
-open Gamelle_backend
-open Gamelle_common
 
 let window ?(debug = false) ~io pos f =
   let id = pos in

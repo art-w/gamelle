@@ -1,5 +1,6 @@
 open Gamelle_backend
 open Gamelle_common
+open Geometry
 
 type t = Segment of p2 * p2 | Circle of p2 * size1 | Polygon of p2 list
 

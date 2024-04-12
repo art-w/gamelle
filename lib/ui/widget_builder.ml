@@ -1,5 +1,6 @@
 open Gamelle_common
 open Ui_backend
+open Geometry
 
 type ('state, 'params, 'r) elt =
   t * string ->

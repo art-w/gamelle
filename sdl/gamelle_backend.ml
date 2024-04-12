@@ -1,4 +1,5 @@
 open Common
+module Geometry = Gamelle_common.Geometry
 module Bitmap = Bitmap
 module Font = Font_
 module Sound = Sound
@@ -75,7 +76,7 @@ let run () =
         | Run { state; update; clean } ->
             let& () = Sdl.render_clear renderer in
             let io = { (Io.make ()) with event = !events } in
-            fill_rect ~io ~color:Gamelle_common.Color.black (Window.box ());
+            fill_rect ~io ~color:Geometry.Color.black (Window.box ());
             let state = update ~io state in
             let clean = List.rev_append !(io.clean) clean in
             current_run := Run { state; update; clean });

@@ -1,4 +1,5 @@
 open Common
+module Geometry = Gamelle_common.Geometry
 module Io = Gamelle_common.Io
 module Delayed = Gamelle_common.Delayed
 module Ttf = Tsdl_ttf
@@ -38,6 +39,6 @@ let text_size font size text =
   Delayed.make @@ fun ~io ->
   let font = get ~io font size in
   let& w, h = Ttf.size_utf8 font text in
-  Gamelle_common.(Size2.v (float w) (float h))
+  Geometry.(Size2.v (float w) (float h))
 
 let default_size = Gamelle_common.Font.default_size

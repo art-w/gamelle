@@ -1,4 +1,3 @@
-open Gg
 open Gamelle
 
 type player = { shape : Physics.t; jumps : int }

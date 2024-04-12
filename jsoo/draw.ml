@@ -1,4 +1,5 @@
 open Gamelle_common
+open Geometry
 open Globals
 module Io = Gamelle_common.Io
 

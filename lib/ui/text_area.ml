@@ -1,4 +1,5 @@
 open Gamelle_common
+open Geometry
 open Gamelle_backend
 open Gamelle_extras
 open Ui_backend

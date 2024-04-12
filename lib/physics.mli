@@ -1,4 +1,5 @@
 open Gamelle_common
+open Geometry
 
 type t
 type kind = Movable | Immovable

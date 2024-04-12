@@ -1,5 +1,6 @@
 open Gamelle_backend
 open Gamelle_common
+open Geometry
 include Gamelle_common.Io
 
 let previous_size = ref Size2.zero
