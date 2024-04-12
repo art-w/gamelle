@@ -40,10 +40,10 @@ module Transform : sig
   type t
 
   val default : t
-  val translate : V2.t -> t -> t
+  val translate : Vec.t -> t -> t
   val scale : float -> t -> t
   val rotate : float -> t -> t
-  val project : t -> P2.t -> P2.t
+  val project : t -> Point.t -> Point.t
 end
 
 module View : sig
@@ -51,39 +51,39 @@ module View : sig
 
   val ( & ) : unit scene -> unit scene -> unit scene
   val drawing_box : Box.t -> io -> io
-  val translate : V2.t -> 'a scene -> 'a scene
+  val translate : Vec.t -> 'a scene -> 'a scene
   val scale : float -> 'a scene -> 'a scene
   val rotate : float -> 'a scene -> 'a scene
-  val clip : box2 -> 'a scene -> 'a scene
+  val clip : box -> 'a scene -> 'a scene
   val unclip : 'a scene -> 'a scene
   val clip_events : bool -> 'a scene -> 'a scene
-  val translated : V2.t -> io -> io
+  val translated : Vec.t -> io -> io
   val scaled : float -> io -> io
   val rotated : float -> io -> io
-  val clipped : box2 -> io -> io
+  val clipped : box -> io -> io
   val unclipped : io -> io
   val clipped_events : bool -> io -> io
 end
 
 val clock : unit -> float
 val dt : unit -> float
-val draw : io:io -> Bitmap.t -> p2 -> unit
+val draw : io:io -> Bitmap.t -> point -> unit
 val draw_line : io:io -> color:Color.t -> Segment.t -> unit
-val draw_rect : io:io -> color:Color.t -> box2 -> unit
-val fill_rect : io:io -> color:Color.t -> box2 -> unit
-val draw_poly : io:io -> color:Color.t -> p2 list -> unit
-val fill_poly : io:io -> color:Color.t -> p2 list -> unit
+val draw_rect : io:io -> color:Color.t -> box -> unit
+val fill_rect : io:io -> color:Color.t -> box -> unit
+val draw_poly : io:io -> color:Color.t -> point list -> unit
+val fill_poly : io:io -> color:Color.t -> point list -> unit
 val draw_circle : io:io -> color:Color.t -> Circle.t -> unit
 val fill_circle : io:io -> color:Color.t -> Circle.t -> unit
 val show_cursor : bool -> unit
 
 val draw_string :
-  io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> string -> p2 -> unit
+  io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> string -> point -> unit
 
-val text_size : io:io -> ?font:Font.t -> ?size:int -> string -> size2
+val text_size : io:io -> ?font:Font.t -> ?size:int -> string -> size
 
 module Event : sig
-  val mouse_pos : io:io -> p2
+  val mouse_pos : io:io -> point
   val wheel_delta : io:io -> float
 
   type key =
@@ -107,9 +107,9 @@ module Event : sig
 end
 
 module Window : sig
-  val set_size : size2 -> unit
-  val size : unit -> size2
-  val box : unit -> box2
+  val set_size : size -> unit
+  val size : unit -> size
+  val box : unit -> box
 end
 
 (* *)
@@ -117,20 +117,20 @@ end
 module Shape : sig
   type t
 
-  val circle : P2.t -> float -> t
-  val segment : P2.t -> P2.t -> t
-  val rect : Box2.t -> t
-  val polygon : P2.t list -> t
+  val circle : Point.t -> float -> t
+  val segment : Point.t -> Point.t -> t
+  val rect : Box.t -> t
+  val polygon : Point.t list -> t
   val draw : io:io -> color:Color.t -> t -> unit
   val fill : io:io -> color:Color.t -> t -> unit
-  val translate : V2.t -> t -> t
-  val rotate : ?center:P2.t -> angle:float -> t -> t
-  val center : t -> P2.t
-  val distance2 : P2.t -> t -> float
-  val mem : P2.t -> t -> bool
+  val translate : Vec.t -> t -> t
+  val rotate : ?center:Point.t -> angle:float -> t -> t
+  val center : t -> Point.t
+  val distance2 : Point.t -> t -> float
+  val mem : Point.t -> t -> bool
   val intersects : t -> t -> bool
-  val intersections : t -> t -> P2.t list
-  val nearest_points : P2.t -> t -> (P2.t * V2.t) list
+  val intersections : t -> t -> Point.t list
+  val nearest_points : Point.t -> t -> (Point.t * Vec.t) list
 end
 
 module Physics : sig
@@ -145,8 +145,8 @@ module Physics : sig
     Shape.t ->
     t
 
-  val center : t -> P2.t
-  val add_velocity : V2.t -> t -> t
+  val center : t -> Point.t
+  val add_velocity : Vec.t -> t -> t
   val add_rot_velocity : float -> t -> t
   val update : dt:float -> t -> t
   val fix_collisions : t list -> t list

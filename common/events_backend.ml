@@ -29,7 +29,7 @@ type t = {
   wheel_delta : float;
 }
 
-let mouse_pos t = P2.v t.mouse_x t.mouse_y
+let mouse_pos t = Point.v t.mouse_x t.mouse_y
 
 let default =
   {

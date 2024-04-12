@@ -23,15 +23,15 @@ module Window = struct
     let canvas = Option.get !global_canvas in
     let w = Canvas.w canvas in
     let h = Canvas.h canvas in
-    Size2.v (float w) (float h)
+    Size.v (float w) (float h)
 
   let set_size s =
-    let w = s |> Size2.w |> int_of_float and h = s |> Size2.h |> int_of_float in
+    let w = s |> Size.w |> int_of_float and h = s |> Size.h |> int_of_float in
     let canvas = Option.get !global_canvas in
     Canvas.set_w canvas w;
     Canvas.set_h canvas h
 
-  let box () = Box2.v V2.zero (size ())
+  let box () = Box.v Vec.zero (size ())
 end
 
 module View = struct

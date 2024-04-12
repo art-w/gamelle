@@ -3,7 +3,7 @@ open Gamelle_common
 open Geometry
 include Gamelle_common.Io
 
-let previous_size = ref Size2.zero
+let previous_size = ref Size.zero
 
 let drawing_box box io =
 
@@ -16,7 +16,7 @@ let drawing_box box io =
     Window.set_size (Box.size box));
   let tr =
     (
-      V2.(Box.(o (centered box (Window.box ()))) - io.centering_translation))
+      Vec.(Box.(o (centered box (Window.box ()))) - io.centering_translation))
   in
   let io = { io with centering_translation = tr } in
   translated tr io

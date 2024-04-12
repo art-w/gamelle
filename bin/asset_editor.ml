@@ -24,10 +24,10 @@ let compute_rect ((x1, y1), (x2, y2)) =
   (* some strong assumptions here *)
   let w = x2 -. x1 in
   let h = y2 -. y1 in
-  Box2.v (P2.v x1 y1) (Size2.v w h)
+  Box.v (Point.v x1 y1) (Size.v w h)
 
 let main ~io st =
-  let x, y = V2.to_tuple @@ Event.mouse_pos ~io in
+  let x, y = Vec.to_tuple @@ Event.mouse_pos ~io in
   let mouse = (x /. st.scale, y /. st.scale) in
   let st = { st with mouse } in
   let st =
@@ -42,10 +42,10 @@ let main ~io st =
     | Some fst_pos, false ->
         { st with click = None; rects = (fst_pos, st.mouse) :: st.rects }
   in
-  fill_rect ~io ~color:Color.black (Box2.v (P2.v 0. 0.) (P2.v 500. 500.));
+  fill_rect ~io ~color:Color.black (Box.v (Point.v 0. 0.) (Point.v 500. 500.));
   show_cursor true;
   let io = View.scaled st.scale io in
-  draw ~io st.bmp (P2.v 0. 0.);
+  draw ~io st.bmp (Point.v 0. 0.);
   Option.iter
     (fun pos ->
       let rect = compute_rect (pos, st.mouse) in
@@ -64,8 +64,8 @@ let print_rects ~file { rects; _ } =
   List.iter
     (fun poss ->
       let rect = compute_rect poss in
-      let x, y = V2.to_tuple (Box2.o rect) in
-      let w, h = V2.to_tuple (Box2.size rect) in
+      let x, y = Vec.to_tuple (Box.o rect) in
+      let w, h = Vec.to_tuple (Box.size rect) in
       Printf.fprintf oc "%.0f %.0f %.0f %.0f\n%!" x y w h)
     rects;
   close_out oc

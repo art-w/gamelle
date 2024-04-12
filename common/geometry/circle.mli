@@ -1,8 +1,6 @@
-open Gg
-
 type t
 
-val v : v2 -> float -> t
-val center : t -> v2
+val v : Point.t -> float -> t
+val center : t -> Point.t
 val radius : t -> float
-val translate : t -> v2 -> t
+val translate : t -> Vec.t -> t

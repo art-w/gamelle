@@ -5,10 +5,10 @@ open Geometry
 type ('state, 'params, 'r) elt =
   t * string ->
   ?id:int ->
-  ?size:(ts:(string -> size2) -> 'params -> size2) ->
+  ?size:(ts:(string -> size) -> 'params -> size) ->
   ?weight:float ->
   ?style:style ->
-  ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
+  ?render:(io:io -> 'params -> 'state -> box -> unit) ->
   'params ->
   'r
 
@@ -16,8 +16,8 @@ type 'params inert_elt =
   t * string ->
   ?id:int ->
   ?style:style ->
-  ?size:(ts:(string -> size2) -> 'params -> size2) ->
-  ?render:(io:io -> 'params -> box2 -> unit) ->
+  ?size:(ts:(string -> size) -> 'params -> size) ->
+  ?render:(io:io -> 'params -> box -> unit) ->
   'params ->
   unit
 
@@ -25,9 +25,9 @@ type ('state, 'params, 'r) node =
   t * string ->
   ?id:int ->
   ?style:style ->
-  ?size:(ts:(string -> size2) -> children_size:size2 -> 'params -> size2) ->
+  ?size:(ts:(string -> size) -> children_size:size -> 'params -> size) ->
   ?weight:float ->
-  ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
+  ?render:(io:io -> 'params -> 'state -> box -> unit) ->
   'params ->
   'r
 
@@ -36,9 +36,9 @@ module type Widget = sig
   type state
   type return
 
-  val size : ts:(string -> size2) -> params -> size2
-  val render : io:io -> params -> state -> box2 -> unit
-  val update : io:io -> params -> state -> box2 -> state
+  val size : ts:(string -> size) -> params -> size
+  val render : io:io -> params -> state -> box -> unit
+  val update : io:io -> params -> state -> box -> state
   val result : params -> state -> return
   val v : (state, params, return) elt
 end
@@ -46,8 +46,8 @@ end
 module type Inert_widget = sig
   type params
 
-  val size : ts:(string -> size2) -> params -> size2
-  val render : io:io -> params -> box2 -> unit
+  val size : ts:(string -> size) -> params -> size
+  val render : io:io -> params -> box -> unit
   val v : params inert_elt
 end
 
@@ -83,8 +83,8 @@ let insert_padding ~dir rs = insert (padding_elt ~dir) rs
 
 let elt ~(construct_state : 'state -> state) ~destruct_state
     ~(default : 'params -> 'state) ?(weight = 1.)
-    ~(size : ts:(string -> size2) -> 'params -> size2)
-    ~(render : io:io -> 'params -> 'state -> box2 -> unit) ~update ~result () :
+    ~(size : ts:(string -> size) -> 'params -> size)
+    ~(render : io:io -> 'params -> 'state -> box -> unit) ~update ~result () :
     ('state, 'params, 'result) elt =
  fun (ui, loc) ?id ?(size = size) ?(weight = weight) ?(style = default_style)
      ?(render = render) params ->
@@ -106,7 +106,7 @@ let inert_elt (ui, _loc) ~size ~weight ~render params =
 
 let nest ~ui ~children_io ~weight ~dir children =
   node_renderer ~ui ~dir ~size:(total_size ~dir children) ~weight
-    ~children_offset:V2.zero ~children_io ~size_for_self:Size2.zero ~children
+    ~children_offset:Vec.zero ~children_io ~size_for_self:Size.zero ~children
     render_nothing
 
 let node ~construct_state ~children_io ?(weight = 1.) ~destruct_state ~dir

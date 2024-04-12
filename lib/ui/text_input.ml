@@ -35,10 +35,10 @@ let destruct_state s =
   match s with Text_input b -> b | _ -> raise IdTypeMismatch
 
 let size ~ts width =
-  let text_size = Size2.(v width (h (ts "a"))) in
-  V2.(text_size + (2. * padding_xy))
+  let text_size = Size.(v width (h (ts "a"))) in
+  Vec.(text_size + (2. * padding_xy))
 
-let text_length ~io text = Size2.w (text_size ~io ~size:font_size text)
+let text_length ~io text = Size.w (text_size ~io ~size:font_size text)
 let cursor_offset ~io text cursor = text_length ~io (String.sub text 0 cursor)
 
 let render ~io _params
@@ -46,17 +46,17 @@ let render ~io _params
   fill_rect ~io ~color:bg' box;
   draw_rect ~io ~color:(if focused then highlight else fg) box;
   let io = View.clipped box io in
-  let nsize = V2.(Box.size box - (2. * padding_xy)) in
+  let nsize = Vec.(Box.size box - (2. * padding_xy)) in
   let box = Box.(v_mid (mid box) nsize) in
-  draw_string ~io ~color:fg ~size:font_size text V2.(Box.o box + v offset 0.);
+  draw_string ~io ~color:fg ~size:font_size text Vec.(Box.o box + v offset 0.);
   let cursor_offset = cursor_offset ~io text cursor in
   let cursor_pos = cursor_offset +. offset in
   let cursor_seg =
     Segment.v
-      (P2.v (Box.minx box +. cursor_pos) (Box.miny box))
-      (P2.v
+      (Point.v (Box.minx box +. cursor_pos) (Box.miny box))
+      (Point.v
          (Box.minx box +. cursor_pos)
-         (Box.miny box +. Size2.h (text_size ~io ~size:font_size "a")))
+         (Box.miny box +. Size.h (text_size ~io ~size:font_size "a")))
   in
   if focused then draw_line ~io ~color:highlight cursor_seg
 
@@ -79,7 +79,7 @@ let fast_frequency = 3
 
 let update ~io _param { text; offset; cursor; focused; arrow_key; char_key } box
     =
-  let nsize = V2.(Box.size box - (2. * padding_xy)) in
+  let nsize = Vec.(Box.size box - (2. * padding_xy)) in
   let box = Box.(v_mid (mid box) nsize) in
   let width = max (Box.w box) 0. in
   let arrow_key =
@@ -101,7 +101,7 @@ let update ~io _param { text; offset; cursor; focused; arrow_key; char_key } box
   in
   let cursor, focused =
     if is_clicked ~io box then
-      let x = (P2.x @@ Event.mouse_pos ~io) -. Box.minx box +. offset in
+      let x = (Point.x @@ Event.mouse_pos ~io) -. Box.minx box +. offset in
       (find_cursor_click ~io text x, true)
     else if clicked_outside ~io box then (cursor, false)
     else (cursor, focused)

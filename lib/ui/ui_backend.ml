@@ -13,12 +13,12 @@ let default_style = { vertical = Center; horizontal = Fill }
 let apply_style style box size =
   let h =
     match style.vertical with
-    | Center | Start | End -> Size2.h size
+    | Center | Start | End -> Size.h size
     | Fill -> Box.h box
   in
   let w =
     match style.horizontal with
-    | Center | Start | End -> Size2.w size
+    | Center | Start | End -> Size.w size
     | Fill -> Box.w box
   in
   let x =
@@ -33,21 +33,21 @@ let apply_style style box size =
     | End -> Box.maxy box -. h
     | Center -> Box.midy box -. (h /. 2.)
   in
-  Box.v (P2.v x y) (Size2.v w h)
+  Box.v (Point.v x y) (Size.v w h)
 
 let flip = function V -> H | H -> V
 
 type renderer = {
   id : id option;
-  weight : size1;
-  size : size2;
+  weight : float;
+  size : size;
   style : style;
-  renderer : io:io -> box2 -> unit;
+  renderer : io:io -> box -> unit;
 }
 
 type t = {
   mutable io : io;
-  id : p2;
+  id : point;
   mutable renderers : renderer list;
   mutable debug_render : unit -> unit;
   mutable loc_stack : string list;
@@ -58,7 +58,7 @@ type 'a tbl = (id, 'a) Hashtbl.t
 let new_tbl () = Hashtbl.create 16
 
 type vscroll_state = {
-  size : size2;
+  size : size;
   offset : float;
   grasped : bool;
   real_height : float;
@@ -72,10 +72,10 @@ type 'a vscroll_params = { height : float; f : unit -> 'a }
 exception IdTypeMismatch
 
 type state = ..
-type state_layout = { state : state tbl; layout : box2 tbl }
+type state_layout = { state : state tbl; layout : box tbl }
 
 let new_state () = { state = new_tbl (); layout = new_tbl () }
-let state : (p2, state_layout) Hashtbl.t = Hashtbl.create 256
+let state : (point, state_layout) Hashtbl.t = Hashtbl.create 256
 let ui_state ~ui = Hashtbl.find state ui.id
 
 let find ~default tbl key =
@@ -89,9 +89,9 @@ let register_layout ~ui ~id box = Hashtbl.replace (ui_state ~ui).layout id box
 let query_layout ~ui ~id = find ~default:Box.zero (ui_state ~ui).layout id
 let font_size = 20
 let padding = 4.
-let padding_x = V2.v padding 0.
-let padding_y = V2.v 0. padding
-let padding_xy = V2.(padding_x + padding_y)
+let padding_x = Vec.v padding 0.
+let padding_y = Vec.v 0. padding
+let padding_xy = Vec.(padding_x + padding_y)
 let fg = Color.Gruvbox.Light.fg
 let bg = Color.Gruvbox.Light.bg
 let bg' = Color.Gruvbox.Light.bg1
@@ -133,19 +133,19 @@ let debug_box ~ui ~color box =
 let renderer_size ({ size; _ } : renderer) = size
 
 let aggregate_sizes ~dir sizes =
-  let ws = List.map Size2.w sizes in
-  let hs = List.map Size2.h sizes in
+  let ws = List.map Size.w sizes in
+  let hs = List.map Size.h sizes in
   let add s s' = s +. s' in
   let w_op, h_op = match dir with V -> (Float.max, add) | H -> (add, max) in
-  Size2.v (List.fold_left w_op 0. ws) (List.fold_left h_op 0. hs)
+  Size.v (List.fold_left w_op 0. ws) (List.fold_left h_op 0. hs)
 
 let total_size ~dir renderers =
   aggregate_sizes ~dir (List.map renderer_size renderers)
 
 let renderer_weight = function { weight; _ } -> weight
-let size_dir ~dir = match dir with V -> Size2.h | H -> Size2.w
+let size_dir ~dir = match dir with V -> Size.h | H -> Size.w
 let box_size_dir ~dir = match dir with V -> Box.h | H -> Box.w
-let basis_dir ~dir = match dir with V -> V2.v 0. 1. | H -> V2.v 1. 0.
+let basis_dir ~dir = match dir with V -> Vec.v 0. 1. | H -> Vec.v 1. 0.
 
 let layout_boxes ~dir box weights sizes =
   let min_space =
@@ -159,15 +159,15 @@ let layout_boxes ~dir box weights sizes =
       List.map
         (fun min_size ->
           match dir with
-          | V -> Size2.(v (Box.w box) (h min_size))
-          | H -> Size2.(v (w min_size) (Box.h box)))
+          | V -> Size.(v (Box.w box) (h min_size))
+          | H -> Size.(v (w min_size) (Box.h box)))
         sizes
     else
       List.map2
         (fun min_size coeff ->
           match dir with
-          | V -> Size2.(v (Box.w box) (h min_size +. (leftovers *. coeff)))
-          | H -> Size2.(v (w min_size +. (leftovers *. coeff)) (Box.h box)))
+          | V -> Size.(v (Box.w box) (h min_size +. (leftovers *. coeff)))
+          | H -> Size.(v (w min_size +. (leftovers *. coeff)) (Box.h box)))
         sizes coeffs
   in
   let origin = Box.o box in
@@ -175,7 +175,7 @@ let layout_boxes ~dir box weights sizes =
     List.fold_left_map
       (fun space_taken child_size ->
         let box =
-          Box.v V2.(origin + (space_taken * basis_dir ~dir)) child_size
+          Box.v Vec.(origin + (space_taken * basis_dir ~dir)) child_size
         in
         let space_taken = space_taken +. size_dir ~dir child_size in
         (space_taken, box))
@@ -197,7 +197,7 @@ and node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
     let old_io = ui.io in
     ui.io <- children_io;
     let children_box =
-      Box.(v V2.(o box + children_offset) V2.(size box - size_for_self))
+      Box.(v Vec.(o box + children_offset) Vec.(size box - size_for_self))
     in
     let children = List.rev children in
     let children_sizes = children |> List.map renderer_size in

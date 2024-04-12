@@ -4,8 +4,8 @@ type t = {
   view : Transform.t;
   event : Events_backend.t;
   clean : (unit -> unit) list ref;
-  centering_translation : v2;
-  clip : box2 option;
+  centering_translation : vec;
+  clip : box option;
   clip_events : bool;
 }
 
@@ -14,7 +14,7 @@ let make () =
     view = Transform.default;
     event = Events_backend.default;
     clean = ref [];
-    centering_translation = V2.zero;
+    centering_translation = Vec.zero;
     clip = None;
     clip_events = false;
   }
@@ -48,7 +48,7 @@ module Event = struct
   type key = Events_backend.key
 
   let mouse_pos ~io =
-    V2.(Events_backend.mouse_pos io.event - io.centering_translation)
+    Vec.(Events_backend.mouse_pos io.event - io.centering_translation)
 
   let handle_clip_events ~io b =
     if io.clip_events then

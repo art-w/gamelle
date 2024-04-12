@@ -117,16 +117,16 @@ let size = cell_size *. 3.
 
 let draw_background ~io () =
   let color = Color.white in
-  fill_rect ~io ~color (Box.v (P2.v 0. 0.) (Size2.v size size))
+  fill_rect ~io ~color (Box.v (Point.v 0. 0.) (Size.v size size))
 
 let draw_grid ~io () =
   let color = Color.black in
-  draw_line ~io ~color (Segment.v (P2.v cell_size 0.) (P2.v cell_size size)) ;
+  draw_line ~io ~color (Segment.v (Point.v cell_size 0.) (Point.v cell_size size)) ;
   draw_line ~io ~color
-    (Segment.v (P2.v (cell_size *. 2.) 0.) (P2.v (cell_size *. 2.) size)) ;
-  draw_line ~io ~color (Segment.v (P2.v 0. cell_size) (P2.v size cell_size)) ;
+    (Segment.v (Point.v (cell_size *. 2.) 0.) (Point.v (cell_size *. 2.) size)) ;
+  draw_line ~io ~color (Segment.v (Point.v 0. cell_size) (Point.v size cell_size)) ;
   draw_line ~io ~color
-    (Segment.v (P2.v 0. (cell_size *. 2.)) (P2.v size (cell_size *. 2.)))
+    (Segment.v (Point.v 0. (cell_size *. 2.)) (Point.v size (cell_size *. 2.)))
 
 let draw_cell ~io cell p =
   match cell with
@@ -148,15 +148,15 @@ let draw_board ~io
      ; center_bottom
      ; right_bottom } :
       board ) =
-  draw_cell ~io left_top (P2.v 0. 0.) ;
-  draw_cell ~io center_top (P2.v cell_size 0.) ;
-  draw_cell ~io right_top (P2.v (cell_size *. 2.) 0.) ;
-  draw_cell ~io left_center (P2.v 0. cell_size) ;
-  draw_cell ~io center_center (P2.v cell_size cell_size) ;
-  draw_cell ~io right_center (P2.v (cell_size *. 2.) cell_size) ;
-  draw_cell ~io left_bottom (P2.v 0. (cell_size *. 2.)) ;
-  draw_cell ~io center_bottom (P2.v cell_size (cell_size *. 2.)) ;
-  draw_cell ~io right_bottom (P2.v (cell_size *. 2.) (cell_size *. 2.))
+  draw_cell ~io left_top (Point.v 0. 0.) ;
+  draw_cell ~io center_top (Point.v cell_size 0.) ;
+  draw_cell ~io right_top (Point.v (cell_size *. 2.) 0.) ;
+  draw_cell ~io left_center (Point.v 0. cell_size) ;
+  draw_cell ~io center_center (Point.v cell_size cell_size) ;
+  draw_cell ~io right_center (Point.v (cell_size *. 2.) cell_size) ;
+  draw_cell ~io left_bottom (Point.v 0. (cell_size *. 2.)) ;
+  draw_cell ~io center_bottom (Point.v cell_size (cell_size *. 2.)) ;
+  draw_cell ~io right_bottom (Point.v (cell_size *. 2.) (cell_size *. 2.))
 
 let () =
   run state
@@ -170,7 +170,7 @@ let () =
         print_endline "Cross won" ; exit 0
     | None ->
         if Event.is_up ~io `click_left then
-          let x, y = V2.to_tuple @@ Event.mouse_pos ~io in
+          let x, y = Vec.to_tuple @@ Event.mouse_pos ~io in
           (* first column *)
           let cell_x = Int.of_float (floor x /. 64.)
           and cell_y = Int.of_float (floor (y /. 64.)) in

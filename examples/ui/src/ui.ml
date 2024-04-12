@@ -13,7 +13,7 @@ let () =
     snd
       Ui.(
         window ~io
-          P2.(v 0. 0.)
+          Point.(v 0. 0.)
           (fun ui ->
             ignore @@ text_input [%ui] 200.;
             text_area [%ui] ~width:300.
@@ -72,6 +72,6 @@ let () =
             | Some `B -> label [%ui] "B is selected"
             | Some `C -> label [%ui] "C is selected"))
   in
-  draw_line ~io ~color:Color.red (Segment.v V2.zero (V2.v 200. 0.));
-  (* draw_text ~io ~color:Color.red ~size:20 "aaaa\nbbb" V2.zero; *)
+  draw_line ~io ~color:Color.red (Segment.v Vec.zero (Vec.v 200. 0.));
+  (* draw_text ~io ~color:Color.red ~size:20 "aaaa\nbbb" Vec.zero; *)
   box

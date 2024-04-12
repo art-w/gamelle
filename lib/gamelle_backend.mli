@@ -33,25 +33,25 @@ end
 
 val clock : unit -> float
 val dt : unit -> float
-val draw : io:io -> Bitmap.t -> p2 -> unit
+val draw : io:io -> Bitmap.t -> point -> unit
 val draw_line : io:io -> color:Color.t -> Segment.t -> unit
-val draw_rect : io:io -> color:Color.t -> box2 -> unit
-val fill_rect : io:io -> color:Color.t -> box2 -> unit
-val draw_poly : io:io -> color:Color.t -> p2 list -> unit
-val fill_poly : io:io -> color:Color.t -> p2 list -> unit
+val draw_rect : io:io -> color:Color.t -> box -> unit
+val fill_rect : io:io -> color:Color.t -> box -> unit
+val draw_poly : io:io -> color:Color.t -> point list -> unit
+val fill_poly : io:io -> color:Color.t -> point list -> unit
 val draw_circle : io:io -> color:Color.t -> Circle.t -> unit
 val fill_circle : io:io -> color:Color.t -> Circle.t -> unit
 val show_cursor : bool -> unit
 
 val draw_string :
-  io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> string -> p2 -> unit
+  io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> string -> point -> unit
 
-val text_size : io:io -> ?font:Font.t -> ?size:int -> string -> size2
+val text_size : io:io -> ?font:Font.t -> ?size:int -> string -> size
 
 module Window : sig
-  val set_size : size2 -> unit
-  val size : unit -> size2
-  val box : unit -> box2
+  val set_size : size -> unit
+  val size : unit -> size
+  val box : unit -> box
 end
 
 (* *)

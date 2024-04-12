@@ -56,6 +56,6 @@ let text_size (lazy font_name) ~size text =
     C.Text_metrics.font_bounding_box_ascent metrics
     +. C.Text_metrics.font_bounding_box_descent metrics
   in
-  Size2.v w h
+  Size.v w h
 
 let draw ~color:_ _ _ _ = failwith "Font.draw"

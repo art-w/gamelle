@@ -9,10 +9,10 @@ type style = { vertical : alignment; horizontal : alignment }
 type ('state, 'params, 'r) elt =
   t * string ->
   ?id:int ->
-  ?size:(ts:(string -> size2) -> 'params -> size2) ->
+  ?size:(ts:(string -> size) -> 'params -> size) ->
   ?weight:float ->
   ?style:style ->
-  ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
+  ?render:(io:io -> 'params -> 'state -> box -> unit) ->
   'params ->
   'r
 
@@ -20,8 +20,8 @@ type 'params inert_elt =
   t * string ->
   ?id:int ->
   ?style:style ->
-  ?size:(ts:(string -> size2) -> 'params -> size2) ->
-  ?render:(io:io -> 'params -> box2 -> unit) ->
+  ?size:(ts:(string -> size) -> 'params -> size) ->
+  ?render:(io:io -> 'params -> box -> unit) ->
   'params ->
   unit
 
@@ -29,14 +29,14 @@ type ('state, 'params, 'r) node =
   t * string ->
   ?id:int ->
   ?style:style ->
-  ?size:(ts:(string -> size2) -> children_size:size2 -> 'params -> size2) ->
+  ?size:(ts:(string -> size) -> children_size:size -> 'params -> size) ->
   ?weight:float ->
-  ?render:(io:io -> 'params -> 'state -> box2 -> unit) ->
+  ?render:(io:io -> 'params -> 'state -> box -> unit) ->
   'params ->
   'r
 
 type vscroll_state = {
-  size : size2;
+  size : size;
   offset : float;
   grasped : bool;
   real_height : float;
@@ -46,7 +46,7 @@ type slider_state = { v : float; grasped : bool }
 type slider_params = { w : float; min : float; max : float }
 type 'a vscroll_params = { height : float; f : unit -> 'a }
 
-val window : ?debug:bool -> io:io -> p2 -> (t -> 'a) -> 'a * box2
+val window : ?debug:bool -> io:io -> point -> (t -> 'a) -> 'a * box
 val button : (bool, string, bool) elt
 val checkbox : (bool, string, bool) elt
 val label : cap -> ?style:style -> ?weight:float -> string -> unit

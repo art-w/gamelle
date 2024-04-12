@@ -16,25 +16,25 @@ let size ~ts:_ ~children_size { height; f = _ } =
   let height = height in
   let width =
     (* Float.max space_available *)
-    Size2.w children_size +. scroll_bar_width
+    Size.w children_size +. scroll_bar_width
   in
-  Size2.(v width height)
+  Size.(v width height)
 
 let render ~io { height = _; f = _ } state box =
   let height = Box.h box in
   let { size = _; offset; grasped = _; real_height } = state in
   let scroll_rail_box =
     Box.v
-      (P2.v (Box.maxx box -. scroll_bar_width) (Box.miny box))
-      (Size2.v scroll_bar_width height)
+      (Point.v (Box.maxx box -. scroll_bar_width) (Box.miny box))
+      (Size.v scroll_bar_width height)
   in
   let scroll_bar_height = height *. height /. real_height in
   let scroll_bar_box =
     Box.v
-      (P2.v
+      (Point.v
          (Box.maxx box -. scroll_bar_width)
          ((offset *. height /. state.real_height) +. Box.miny box))
-      (Size2.v scroll_bar_width scroll_bar_height)
+      (Size.v scroll_bar_width scroll_bar_height)
   in
   draw_rect ~io ~color:fg box;
   fill_rect ~io ~color:lowlight scroll_rail_box;
@@ -43,11 +43,11 @@ let render ~io { height = _; f = _ } state box =
 let update ~io ~children_size box state { height = _; f = _ } =
   let { size; offset; grasped; real_height = _ } = state in
   let height = Box.h box in
-  let real_height = Size2.h children_size in
+  let real_height = Size.h children_size in
   let scroll_rail_box =
     Box.v
-      (P2.v (Box.maxx box -. scroll_bar_width) (Box.miny box))
-      (Size2.v scroll_bar_width height)
+      (Point.v (Box.maxx box -. scroll_bar_width) (Box.miny box))
+      (Size.v scroll_bar_width height)
   in
   let scroll_bar_height = height *. height /. real_height in
   let max_offset = real_height -. height in
@@ -62,7 +62,7 @@ let update ~io ~children_size box state { height = _; f = _ } =
     if grasped then
       max_offset
       *. (height /. (height -. scroll_bar_height))
-      *. (P2.y mouse_pos -. Box.miny scroll_rail_box)
+      *. (Point.y mouse_pos -. Box.miny scroll_rail_box)
       /. height
       -. (height /. 2.)
     else if Event.is_pressed ~io `wheel then
@@ -75,10 +75,10 @@ let update ~io ~children_size box state { height = _; f = _ } =
 let result { height = _; f } = f ()
 
 let default _ =
-  { size = Size2.zero; offset = 0.; grasped = false; real_height = 0. }
+  { size = Size.zero; offset = 0.; grasped = false; real_height = 0. }
 
-let size_for_self = Size2.(v scroll_bar_width 0.)
-let children_offset state = V2.(zero - v 0. state.offset)
+let size_for_self = Size.(v scroll_bar_width 0.)
+let children_offset state = Vec.(zero - v 0. state.offset)
 let children_io ~io box = View.clipped_events true @@ View.clipped box io
 
 let v : type a. (_, a params, a) node =

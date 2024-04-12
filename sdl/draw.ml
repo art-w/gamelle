@@ -18,7 +18,7 @@ let tau = 8.0 *. atan 1.0
 let point_zero = Sdl.Point.create ~x:0 ~y:0
 
 let project ~io p =
-  let x, y = V2.to_tuple (Io.project ~io p) in
+  let x, y = Vec.to_tuple (Io.project ~io p) in
   (int x, int y)
 
 let draw_clip ~io renderer f =
@@ -131,10 +131,10 @@ let fill_poly ~io ~color arr =
 
 let fill_rect ~io ~color rect =
   set_color color;
-  let p0 = Box2.tl_pt rect
-  and p1 = Box2.tr_pt rect
-  and p2 = Box2.br_pt rect
-  and p3 = Box2.bl_pt rect in
+  let p0 = Box.tl_pt rect
+  and p1 = Box.tr_pt rect
+  and p2 = Box.br_pt rect
+  and p3 = Box.bl_pt rect in
   let pts = [ p0; p1; p2; p3 ] in
   fill_poly ~io ~color pts
 

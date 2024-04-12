@@ -41,7 +41,7 @@ let update ~io { x; y; vx; vy; _ } =
   let vy = if Event.is_pressed ~io `arrow_up then vy -. 100.0 else vy in
   let vx = if Event.is_pressed ~io `arrow_right then vx +. 100.0 else vx in
   let vx = if Event.is_pressed ~io `arrow_left then vx -. 100.0 else vx in
-  let mx, my = V2.to_tuple @@ Event.mouse_pos ~io in
+  let mx, my = Vec.to_tuple @@ Event.mouse_pos ~io in
 
   if Event.is_down ~io `click_left then (
     cursor := not !cursor;
@@ -69,31 +69,31 @@ let update ~io { x; y; vx; vy; _ } =
   let vx = vx *. 0.9 in
   let vy = vy *. 0.9 in
 
-  Window.set_size (Size2.v 800. 800.);
+  Window.set_size (Size.v 800. 800.);
   fill_rect ~io ~color:black (Window.box ());
-  draw_string ~io ~color:Color.white ~size:30 "Hello World!" V2.zero;
+  draw_string ~io ~color:Color.white ~size:30 "Hello World!" Vec.zero;
   draw_string ~io:(View.scaled 2.0 io) ~color:Color.white ~size:30
-    "Hello World!" V2.zero;
+    "Hello World!" Vec.zero;
   View.(
-    translate (V2.v mx my)
-      (fill_circle ~color:red (Circle.v (P2.v 0.0 0.0) 10.0))
-    & translate (V2.v x y)
+    translate (Vec.v mx my)
+      (fill_circle ~color:red (Circle.v (Point.v 0.0 0.0) 10.0))
+    & translate (Vec.v x y)
         (scale 3.0
-           (draw_rect ~color:yellow (Box.v (P2.v 0. 0.) (Size2.v 100.0 100.0))
-           & translate (V2.v (75. /. 2.) (59. /. 2.))
+           (draw_rect ~color:yellow (Box.v (Point.v 0. 0.) (Size.v 100.0 100.0))
+           & translate (Vec.v (75. /. 2.) (59. /. 2.))
              @@ rotate (1.0 *. clock ())
-             @@ translate (V2.v (-75. /. 2.) (-59. /. 2.))
-             @@ (fill_rect ~color:blue (Box.v (P2.v 0. 0.) (Size2.v 75. 59.))
-                & draw_rect ~color:red (Box.v (P2.v 0. 0.) (Size2.v 75. 59.))
-                & draw img (P2.v 0. 0.)
-                & draw_line ~color:red (Segment.v (P2.v 0. 0.) (P2.v 75. 59.))
-                & translate (V2.v 5. 5.)
+             @@ translate (Vec.v (-75. /. 2.) (-59. /. 2.))
+             @@ (fill_rect ~color:blue (Box.v (Point.v 0. 0.) (Size.v 75. 59.))
+                & draw_rect ~color:red (Box.v (Point.v 0. 0.) (Size.v 75. 59.))
+                & draw img (Point.v 0. 0.)
+                & draw_line ~color:red (Segment.v (Point.v 0. 0.) (Point.v 75. 59.))
+                & translate (Vec.v 5. 5.)
                     (fill_poly ~color:yellow
-                       [ P2.v 20. 0.; P2.v 30. 30.; P2.v 15. 40. ])
+                       [ Point.v 20. 0.; Point.v 30. 30.; Point.v 15. 40. ])
                 & draw_poly ~color:green
-                    [ P2.v 20. 0.; P2.v 30. 30.; P2.v 15. 40. ]
+                    [ Point.v 20. 0.; Point.v 30. 30.; Point.v 15. 40. ]
                 & draw_circle ~color:green
-                    (Circle.v (P2.v (75.0 /. 2.) (59.0 /. 2.)) 10.)))))
+                    (Circle.v (Point.v (75.0 /. 2.) (59.0 /. 2.)) 10.)))))
     ~io;
   { x; y; vx; vy; mx; my }
 

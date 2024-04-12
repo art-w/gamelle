@@ -1,31 +1,31 @@
 open Gamelle_common
-open Gg
+open Geometry
 
 type t
 
-val circle : P2.t -> float -> t
-val segment : P2.t -> P2.t -> t
-val polygon : P2.t list -> t
-val rect : Box2.t -> t
+val circle : Point.t -> float -> t
+val segment : Point.t -> Point.t -> t
+val polygon : Point.t list -> t
+val rect : Box.t -> t
 
 (* *)
-val translate : V2.t -> t -> t
-val rotate : ?center:P2.t -> angle:float -> t -> t
+val translate : Vec.t -> t -> t
+val rotate : ?center:Point.t -> angle:float -> t -> t
 
 (* *)
 
-val center : t -> P2.t
+val center : t -> Point.t
 val signed_area : t -> float
-val distance2 : P2.t -> t -> float
-val mem : P2.t -> t -> bool
+val distance2 : Point.t -> t -> float
+val mem : Point.t -> t -> bool
 val intersects : t -> t -> bool
-val intersections : t -> t -> P2.t list
-val nearest_points : P2.t -> t -> (P2.t * V2.t) list
+val intersections : t -> t -> Point.t list
+val nearest_points : Point.t -> t -> (Point.t * Vec.t) list
 
 (* *)
 
-val separation_axis : t -> t -> V2.t option
-val contact_points : t -> t -> float * P2.t list
+val separation_axis : t -> t -> Vec.t option
+val contact_points : t -> t -> float * Point.t list
 
 (* *)
 val draw : io:io -> color:Color.t -> t -> unit

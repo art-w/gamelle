@@ -14,7 +14,7 @@ let destruct_state s = match s with Button b -> b | _ -> raise IdTypeMismatch
 
 let size ~ts text =
   let text_size = ts text in
-  V2.(text_size + (2. * padding_xy))
+  Vec.(text_size + (2. * padding_xy))
 
 let render ~io text _is_clicked box =
   fill_rect ~io ~color:bg' box;

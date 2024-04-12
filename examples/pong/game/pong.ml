@@ -3,7 +3,7 @@ open Gamelle
 type player = {pos: float; score: int}
 
 type state =
-  {player_left: player; player_right: player; ball_speed: v2; ball_pos: p2}
+  {player_left: player; player_right: player; ball_speed: vec; ball_pos: point}
 
 type side = Left | Right
 
@@ -20,14 +20,14 @@ let set_player ~side state player =
 let init =
   { player_left= {pos= 120.; score= 0}
   ; player_right= {pos= 120.; score= 0}
-  ; ball_speed= V2.v 1. 0.
-  ; ball_pos= P2.v 200. 120. }
+  ; ball_speed= Vec.v 1. 0.
+  ; ball_pos= Point.v 200. 120. }
 
-let ball_noise = Box.v (P2.v (-0.01) (-0.01)) (P2.v (-0.02) (-0.02))
+let ball_noise = Box.v (Point.v (-0.01) (-0.01)) (Point.v (-0.02) (-0.02))
 
-let box_game = Box.v (P2.v 0. 0.) (V2.v 400. 220.)
+let box_game = Box.v (Point.v 0. 0.) (Vec.v 400. 220.)
 
-let court = Box.v (P2.v 0. 20.) (V2.v 400. 200.)
+let court = Box.v (Point.v 0. 20.) (Vec.v 400. 200.)
 
 let player_left_x = Box.ox court +. 20.
 
@@ -39,12 +39,12 @@ let player_grip = 0.4
 
 let ball_x_boost = 0.2
 
-let player_speed {ball_speed; _} = 2. *. V2.norm ball_speed
+let player_speed {ball_speed; _} = 2. *. Vec.norm ball_speed
 
 let player_segment_x x player =
   Segment.v
-    (V2.v x (player.pos -. (player_height /. 2.)))
-    (V2.v x (player.pos +. (player_height /. 2.)))
+    (Vec.v x (player.pos -. (player_height /. 2.)))
+    (Vec.v x (player.pos +. (player_height /. 2.)))
 
 let player_left_segment state = player_segment_x player_left_x state.player_left
 
@@ -65,15 +65,15 @@ let update_player ~x ~player ~delta_y =
   if Box.mem start court && Box.mem end_ court then new_player else player
 
 let reflexion ray edge =
-  let normal vec = V2.(v (-1. *. y vec) (x vec)) in
-  let normal = V2.unit (normal edge) in
-  V2.(ray - (2. * (dot ray normal * normal)))
+  let normal vec = Vec.(v (-1. *. y vec) (x vec)) in
+  let normal = Vec.unit (normal edge) in
+  Vec.(ray - (2. * (dot ray normal * normal)))
 
 let incr_score player = {player with score= player.score + 1}
 
 let new_point_ball_speed ball_speed =
-  let length = V2.((norm init.ball_speed +. norm ball_speed) /. 2.) in
-  V2.(-.length * unit ball_speed)
+  let length = Vec.((norm init.ball_speed +. norm ball_speed) /. 2.) in
+  Vec.(-.length * unit ball_speed)
 
 let goal ~side state =
   let ball_speed = state.ball_speed in
@@ -85,7 +85,7 @@ let goal ~side state =
 let player_collision ~side ~player_speed state =
   let player_vector = Segment.vector (player_segment ~side state) in
   let ball_speed =
-    V2.(
+    Vec.(
       reflexion state.ball_speed player_vector
       + v ball_x_boost (player_grip *. player_speed)
       + Box.random_mem ball_noise )
@@ -94,7 +94,7 @@ let player_collision ~side ~player_speed state =
 
 let wall_collision state wall =
   let ball_speed =
-    V2.(
+    Vec.(
       reflexion state.ball_speed (Segment.vector wall)
       + Box.random_mem ball_noise )
   in
@@ -102,7 +102,7 @@ let wall_collision state wall =
 
 let tick state ~player_left_speed ~player_right_speed =
   let {ball_pos; ball_speed; _} = state in
-  let new_ball_pos = V2.(ball_pos + ball_speed) in
+  let new_ball_pos = Vec.(ball_pos + ball_speed) in
   let ball_pos = state.ball_pos in
   let top, right, bottom, left = Box.sides court in
   let ball_segment = Segment.v ball_pos new_ball_pos in
@@ -136,9 +136,9 @@ let draw_score ~io ~state =
   let score_left = string_of_int score_left in
   let score_right = string_of_int score_right in
   draw_string ~io ~color ~size:18 score_left
-    (V2.v (Box.ox box_game +. 10.) (Box.oy court -. 22.)) ;
+    (Vec.v (Box.ox box_game +. 10.) (Box.oy court -. 22.)) ;
   draw_string ~io ~color ~size:18 score_right
-    (V2.v (Box.midx box_game +. 10.) (Box.oy court -. 22.))
+    (Vec.v (Box.midx box_game +. 10.) (Box.oy court -. 22.))
 
 let draw_ball ~io {ball_pos; _} = fill_circle ~io ~color (Circle.v ball_pos 4.)
 

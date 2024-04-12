@@ -10,12 +10,12 @@ let sides box = (top box, right box, bottom box, left box)
 let random_mem box =
   let x = Random.float (Box2.w box) +. Box2.ox box
   and y = Random.float (Box2.h box) +. Box2.oy box in
-  P2.v x y
+  Point.v x y
 
-let translate box vec = v V2.(o box + vec) (size box)
+let translate box vec = v Vec.(o box + vec) (size box)
 
 let centered b1 b2 =
-  let diff = V2.(mid b2 - mid b1) in
-  v V2.(o b1 + diff) (size b1)
+  let diff = Vec.(mid b2 - mid b1) in
+  v Vec.(o b1 + diff) (size b1)
 
-let v_corners p1 p2 = v p1 V2.(p2 - p1)
+let v_corners p1 p2 = v p1 Vec.(p2 - p1)
