@@ -1,5 +1,4 @@
 open Gamelle
-open Gg
 
 type pos = float * float
 

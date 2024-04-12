@@ -28,7 +28,7 @@ let get ~io font size =
 let draw ~color font size text =
   Delayed.make @@ fun ~io ->
   let font = get ~io font size in
-  let r, g, b, a = Gg.Color.to_srgbi color in
+  let r, g, b, a = Geometry.Color.to_srgbi color in
   let a = int_of_float (a *. 255.) in
   let& bmp =
     Ttf.render_utf8_blended font text (Tsdl.Sdl.Color.create ~r ~g ~b ~a)

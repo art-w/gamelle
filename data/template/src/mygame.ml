@@ -1,4 +1,3 @@
-open Gg
 open Gamelle
 
 type state = unit
