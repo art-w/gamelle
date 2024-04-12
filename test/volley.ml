@@ -99,7 +99,7 @@ let () =
   Gamelle.run initial_state
   @@ fun ~io ({ player1; player2; ball; _ } as state) ->
   let io = View.translated (V2.v 0.0 500.0) io in
-  Window.set_size (1010, 1020);
+  Window.set_size (Size2.v 1010. 1020.);
   fill_rect ~io ~color:Color.black (Window.box ());
   if Event.is_pressed ~io `escape then raise Exit
   else if Event.is_down ~io (`char 'r') then initial_state

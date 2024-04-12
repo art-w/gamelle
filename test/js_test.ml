@@ -70,7 +70,7 @@ let update ~io { x; y; vx; vy; _ } =
   let vx = vx *. 0.9 in
   let vy = vy *. 0.9 in
 
-  Window.set_size (800, 800);
+  Window.set_size (Size2.v 800. 800.);
   fill_rect ~io ~color:black (Window.box ());
   draw_string ~io ~color:Color.white ~size:30 "Hello World!" V2.zero;
   draw_string ~io:(View.scaled 2.0 io) ~color:Color.white ~size:30

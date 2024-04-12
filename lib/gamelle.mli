@@ -106,7 +106,7 @@ module Event : sig
 end
 
 module Window : sig
-  val set_size : int * int -> unit
+  val set_size : size2 -> unit
   val size : unit -> size2
   val box : unit -> box2
 end
