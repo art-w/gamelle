@@ -1,5 +1,5 @@
 open Common
-open Geometry
+open Gamelle_common
 module Gfx = Tsdl_gfx.Gfx
 module Io = Gamelle_common.Io
 module Delayed = Gamelle_common.Delayed
@@ -78,15 +78,15 @@ let draw ~io bmp p =
   in
   ()
 
-let draw_string ~io ~color ?(font = Font.default) ?(size = Font.default_size)
+let draw_string ~io ~color ?(font = Font_.default) ?(size = Font.default_size)
     text p =
   if text <> "" then (
-    let bitmap = Font.draw ~color font size text in
+    let bitmap = Font_.draw ~color font size text in
     draw ~io bitmap p;
     Bitmap.free ~io bitmap)
 
-let text_size ~io ?(font = Font.default) ?(size = Font.default_size) text =
-  Delayed.force ~io @@ Font.text_size font size text
+let text_size ~io ?(font = Font_.default) ?(size = Font.default_size) text =
+  Delayed.force ~io @@ Font_.text_size font size text
 
 let draw_line ~io ~color segment =
   let p, p' = Segment.to_tuple segment in

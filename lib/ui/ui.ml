@@ -15,7 +15,7 @@ let text_input = Text_input.v
 let radio = Radio.v
 
 open Gamelle_backend
-open Geometry
+open Gamelle_common
 
 let window ?(debug = false) ~io pos f =
   let id = pos in

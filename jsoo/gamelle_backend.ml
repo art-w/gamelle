@@ -1,10 +1,9 @@
 open Brr
-open Common
-module Geometry = Geometry
-open Geometry
+open Brr_canvas
+open Gamelle_common
 module Color = Color
 module Bitmap = Bitmap
-module Font = Font
+module Font = Font_
 module Sound = Sound
 module Transform = Gamelle_common.Transform
 include Draw
@@ -17,6 +16,8 @@ let clock () = !now
 let dt () = !now -. !prev_now
 
 module Window = struct
+  open Globals
+
   let size () =
     let canvas = Option.get !global_canvas in
     let w = Canvas.w canvas in
@@ -41,10 +42,10 @@ let run state update =
     match Document.find_el_by_id G.document (Jstr.of_string "target") with
     | None -> failwith "missing 'target' canvas"
     | Some elt ->
-        Event.attach ~target:(El.as_target elt);
+        Events_js.attach ~target:(El.as_target elt);
         Canvas.of_el elt
   in
-
+  let open Globals in
   global_canvas := Some canvas;
 
   Canvas.set_w canvas (640 * 2);
@@ -57,15 +58,14 @@ let run state update =
     let _ = G.request_animation_frame (loop state) in
     ()
   and loop state elapsed =
+    let open Events_backend in
     prev_now := !now;
     now := elapsed /. 1000.0;
-    Event.new_frame ();
-    let io = { (Io.make ()) with event = !Event.current } in
+    Events_js.new_frame ();
+    let io = { (Io.make ()) with event = !Events_js.current } in
     fill_rect ~io ~color:Color.black (Window.box ());
     let state = update ~io state in
-    Event.current := Gamelle_common.Event.reset_wheel !Event.current;
+    Events_js.current := reset_wheel !Events_js.current;
     animate state
   in
   animate state
-
-module Event = Gamelle_common.Io

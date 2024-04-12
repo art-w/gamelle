@@ -1,5 +1,5 @@
 open Gamelle_backend
-open Geometry
+open Gamelle_common
 
 let text_area_size ~io ?(width = Float.infinity) ?(interline = -8.) ?font ?size
     text =

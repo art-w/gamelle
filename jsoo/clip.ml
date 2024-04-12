@@ -11,7 +11,7 @@ let draw_clip ~io ctx f =
       ignore
       @@ Jv.call (C.to_jv ctx) "rect"
            (Array.map Jv.of_float
-              Geometry.
+              
                 [| Box.minx clip; Box.miny clip; Box.w clip; Box.h clip |]);
 
       ignore @@ Jv.call (C.to_jv ctx) "clip" [||])

@@ -1,5 +1,4 @@
 open Gamelle_common
-open Geometry
 open Ui_backend
 
 type ('state, 'params, 'r) elt =

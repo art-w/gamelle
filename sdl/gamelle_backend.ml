@@ -1,9 +1,6 @@
 open Common
-open Geometry
-module Geometry = Geometry
-module Color = Color
 module Bitmap = Bitmap
-module Font = Font
+module Font = Font_
 module Sound = Sound
 module Transform = Gamelle_common.Transform
 include Draw
@@ -56,7 +53,8 @@ let run () =
   Common.start_time := t0;
   Common.now := t0;
 
-  let events = ref Event.default in
+  let open Gamelle_common in
+  let events = ref Events_backend.default in
 
   let rec loop () : unit =
     let t0 = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
@@ -64,12 +62,12 @@ let run () =
     Common.now := t0;
     let e = Sdl.Event.create () in
     let previous = !events in
-    events := Event.reset !events;
+    events := Events_sdl.reset !events;
     while Sdl.poll_event (Some e) do
-      events := Event.update !events e;
-      events := Event.update_mouse !events
+      events := Events_sdl.update !events e;
+      events := Events_sdl.update_mouse !events
     done;
-    events := Event.update_updown previous !events;
+    events := Events_backend.update_updown previous !events;
 
     mutex_protect lock (fun () ->
         match !current_run with
@@ -77,13 +75,13 @@ let run () =
         | Run { state; update; clean } ->
             let& () = Sdl.render_clear renderer in
             let io = { (Io.make ()) with event = !events } in
-            fill_rect ~io ~color:Color.black (Window.box ());
+            fill_rect ~io ~color:Gamelle_common.Color.black (Window.box ());
             let state = update ~io state in
             let clean = List.rev_append !(io.clean) clean in
             current_run := Run { state; update; clean });
     Sdl.render_present renderer;
 
-    if Gamelle_common.Event.is_pressed !events `quit then raise Exit;
+    if Events_backend.is_pressed !events `quit then raise Exit;
 
     let now = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
     let frame_elapsed = now -. t0 in
@@ -119,4 +117,4 @@ let run state update =
       List.iter (fun fn -> fn ()) clean;
       Mutex.unlock lock
 
-module Event = Gamelle_common.Io
+module Event = Gamelle_common.Io.Event

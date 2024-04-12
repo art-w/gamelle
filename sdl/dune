@@ -5,8 +5,8 @@
   bitmap
   common
   draw
-  event
-  font
+  events_sdl
+  font_
   global
   sdl_buffer
   sound

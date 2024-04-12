@@ -1,6 +1,6 @@
+open Gamelle_common
 open Gamelle_backend
 open Gamelle_extras
-open Geometry
 open Ui_backend
 open Widget_builder
 

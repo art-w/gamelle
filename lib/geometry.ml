@@ -1,1 +1,0 @@
-include Gamelle_common.Geometry

@@ -1,5 +1,4 @@
 open Gamelle_common
-open Geometry
 
 type t
 type cap = t * string

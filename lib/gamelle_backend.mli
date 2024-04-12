@@ -1,5 +1,4 @@
 open Gamelle_common
-open Geometry
 
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
 
@@ -47,30 +46,6 @@ val draw_string :
   io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> string -> p2 -> unit
 
 val text_size : io:io -> ?font:Font.t -> ?size:int -> string -> size2
-
-module Event : sig
-  val mouse_pos : io:io -> p2
-  val wheel_delta : io:io -> float
-
-  type key =
-    [ `quit
-    | `escape
-    | `control_left
-    | `control_right
-    | `arrow_left
-    | `arrow_right
-    | `arrow_up
-    | `arrow_down
-    | `char of char
-    | `click_left
-    | `click_right
-    | `wheel
-    | `unknown_key ]
-
-  val is_pressed : io:io -> key -> bool
-  val is_up : io:io -> key -> bool
-  val is_down : io:io -> key -> bool
-end
 
 module Window : sig
   val set_size : size2 -> unit

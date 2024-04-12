@@ -1,5 +1,6 @@
 open Brr
-open Common
+open Globals
+open Gamelle_common
 
 type t = string Lazy.t
 
@@ -54,6 +55,6 @@ let text_size (lazy font_name) ~size text =
     C.Text_metrics.font_bounding_box_ascent metrics
     +. C.Text_metrics.font_bounding_box_descent metrics
   in
-  Geometry.Size2.v w h
+  Size2.v w h
 
 let draw ~color:_ _ _ _ = failwith "Font.draw"

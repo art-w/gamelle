@@ -1,5 +1,5 @@
 open! Common
-include Gamelle_common.Event
+open Gamelle_common.Events_backend
 
 let key_of_keycode kc =
   match () with

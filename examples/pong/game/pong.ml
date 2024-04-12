@@ -1,5 +1,4 @@
 open Gamelle
-open Geometry
 
 type player = {pos: float; score: int}
 
@@ -24,15 +23,15 @@ let init =
   ; ball_speed= V2.v 1. 0.
   ; ball_pos= P2.v 200. 120. }
 
-let ball_noise = Box2.v (P2.v (-0.01) (-0.01)) (P2.v (-0.02) (-0.02))
+let ball_noise = Box.v (P2.v (-0.01) (-0.01)) (P2.v (-0.02) (-0.02))
 
-let box_game = Box2.v (P2.v 0. 0.) (V2.v 400. 220.)
+let box_game = Box.v (P2.v 0. 0.) (V2.v 400. 220.)
 
-let court = Box2.v (P2.v 0. 20.) (V2.v 400. 200.)
+let court = Box.v (P2.v 0. 20.) (V2.v 400. 200.)
 
-let player_left_x = Box2.ox court +. 20.
+let player_left_x = Box.ox court +. 20.
 
-let player_right_x = Box2.w court -. 20.
+let player_right_x = Box.w court -. 20.
 
 let player_height = 50.
 
@@ -63,7 +62,7 @@ let update_player ~x ~player ~delta_y =
   let pos = player.pos +. delta_y in
   let new_player = {player with pos} in
   let start, end_ = Segment.to_tuple (player_segment_x x new_player) in
-  if Box2.mem start court && Box2.mem end_ court then new_player else player
+  if Box.mem start court && Box.mem end_ court then new_player else player
 
 let reflexion ray edge =
   let normal vec = V2.(v (-1. *. y vec) (x vec)) in

@@ -1,5 +1,4 @@
 open Gamelle
-open Geometry
 
 type state = unit
 type k = A | B | C

@@ -2,8 +2,7 @@ type io = Gamelle_common.io
 
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
 
-open Geometry
-module Geometry : module type of Geometry
+open Gamelle_common
 module Color : module type of Color
 module Ui : module type of Ui
 
@@ -151,3 +150,13 @@ module Physics : sig
   val fix_collisions : t list -> t list
   val draw : io:io -> t -> unit
 end
+
+type v2 = Gg.v2
+type p2 = Gg.p2
+
+module V2 : module type of Gg.V2
+module P2 : module type of Gamelle_common.P2
+module Segment : module type of Gamelle_common.Segment
+module Circle : module type of Gamelle_common.Circle
+module Box : module type of Gamelle_common.Box
+module Size2 : module type of Gamelle_common.Size2

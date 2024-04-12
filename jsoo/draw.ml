@@ -1,5 +1,5 @@
-open Geometry
-open Common
+open Gamelle_common
+open Globals
 module Io = Gamelle_common.Io
 
 type io = Io.t
@@ -106,21 +106,21 @@ let fill_circle ~io ~color circle =
       C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
       C.fill ctx path)
 
-let draw_string ~io ~color ?(font = Font.default) ?(size = Font.default_size)
+let draw_string ~io ~color ?(font = Font_.default) ?(size = Font.default_size)
     txt p =
   transform ~io;
   set_color color;
   let x, y = V2.to_tuple p in
-  Font.draw_at ~io font ~size txt (x, y)
+  Font_.draw_at ~io font ~size txt (x, y)
 
-let text_size ~io:_ ?(font = Font.default) ?(size = Font.default_size) txt =
-  Font.text_size font ~size txt
+let text_size ~io:_ ?(font = Font_.default) ?(size = Font.default_size) txt =
+  Font_.text_size font ~size txt
 
 let show_cursor status =
-  match !Common.global_canvas with
+  match !Globals.global_canvas with
   | None -> ()
   | Some t ->
-      let el = Common.Canvas.to_el t in
+      let el = Globals.Canvas.to_el t in
       if status then Brr.El.remove_inline_style Brr.El.Style.cursor el
       else
         Brr.El.set_inline_style Brr.El.Style.cursor (Jstr.of_string "none") el

@@ -1,8 +1,8 @@
+open Gamelle_common
 open Gamelle_backend
 open Gamelle_extras
 open Ui_backend
 open Widget_builder
-open Geometry
 
 type params = { text : string; width : float option }
 

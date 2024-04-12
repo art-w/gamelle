@@ -1,11 +1,12 @@
 open Brr
-include Gamelle_common.Event
+
+open Gamelle_common.Events_backend
 
 let previous = ref default
 let current = ref default
 
 let new_frame () =
-  current := Gamelle_common.Event.update_updown !previous !current;
+  current := update_updown !previous !current;
   previous := !current
 
 let key_of_keycode kc =

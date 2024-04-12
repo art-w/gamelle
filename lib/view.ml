@@ -1,5 +1,5 @@
-open Geometry
 open Gamelle_backend
+open Gamelle_common
 include Gamelle_common.Io
 
 let previous_size = ref Size2.zero
@@ -14,7 +14,7 @@ let drawing_box box io =
     previous_size := size;
     Window.set_size (Box.size box));
   let tr =
-    Geometry.(
+    (
       V2.(Box.(o (centered box (Window.box ()))) - io.centering_translation))
   in
   let io = { io with centering_translation = tr } in

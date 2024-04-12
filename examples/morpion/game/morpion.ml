@@ -1,5 +1,4 @@
 open Gamelle
-open Geometry
 
 type player = Circle | Cross
 
@@ -118,7 +117,7 @@ let size = cell_size *. 3.
 
 let draw_background ~io () =
   let color = Color.white in
-  fill_rect ~io ~color (Box2.v (P2.v 0. 0.) (Size2.v size size))
+  fill_rect ~io ~color (Box.v (P2.v 0. 0.) (Size2.v size size))
 
 let draw_grid ~io () =
   let color = Color.black in

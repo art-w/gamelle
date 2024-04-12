@@ -1,6 +1,5 @@
 open Gamelle_common
 open Gamelle_backend
-open Geometry
 
 type id = { loc_stack : string list; _hint : int option }
 type dir = V | H
