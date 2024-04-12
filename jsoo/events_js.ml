@@ -1,5 +1,4 @@
 open Brr
-
 open Gamelle_common.Events_backend
 
 let previous = ref default
@@ -29,9 +28,22 @@ let key_of_event e = key_of_keycode (Ev.Keyboard.code e)
 
 let update ~status t e =
   let key = key_of_event e in
+  let chars =
+    match key with `char c -> Chars.singleton c | _ -> Chars.empty
+  in
   match status with
-  | `Up -> { t with keypressed = remove key t.keypressed }
-  | `Down -> { t with keypressed = insert key t.keypressed }
+  | `Up ->
+      {
+        t with
+        keypressed = remove key t.keypressed;
+        pressed_chars = Chars.diff t.pressed_chars chars;
+      }
+  | `Down ->
+      {
+        t with
+        keypressed = insert key t.keypressed;
+        pressed_chars = Chars.union t.pressed_chars chars;
+      }
 
 let do_update ~status e = current := update ~status !current (Ev.as_type e)
 

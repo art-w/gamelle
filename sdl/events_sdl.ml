@@ -24,12 +24,24 @@ let update t e =
   | _ when typ = Sdl.Event.key_down -> (
       let key = key_of_event e in
       match key with
-      | Some key -> { t with keypressed = insert key t.keypressed }
+      | Some key ->
+          let down_chars =
+            match key with
+            | `char c -> Chars.add c t.pressed_chars
+            | _ -> t.pressed_chars
+          in
+          { t with keypressed = insert key t.keypressed; down_chars }
       | None -> t)
   | _ when typ = Sdl.Event.key_up -> (
       let key = key_of_event e in
       match key with
-      | Some key -> { t with keypressed = remove key t.keypressed }
+      | Some key ->
+          let up_chars =
+            match key with
+            | `char c -> Chars.remove c t.pressed_chars
+            | _ -> t.pressed_chars
+          in
+          { t with keypressed = remove key t.keypressed; up_chars }
       | None -> t)
   | _ when typ = Sdl.Event.mouse_wheel -> (
       let wheel_delta = Sdl.Event.(get e mouse_wheel_y) in

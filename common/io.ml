@@ -47,6 +47,7 @@ let clip_events b fn ~io = fn ~io:(clipped_events b io)
 module Event = struct
   type key = Events_backend.key
 
+  module Chars = Events_backend.Chars
   let mouse_pos ~io =
     Vec.(Events_backend.mouse_pos io.event - io.centering_translation)
 
@@ -66,4 +67,8 @@ module Event = struct
     handle_clip_events ~io @@ Events_backend.is_down io.event k
 
   let wheel_delta ~io = Events_backend.wheel_delta io.event
+
+  let pressed_chars ~io = io.event.pressed_chars
+let down_chars ~io = io.event.down_chars
+let up_chars ~io = io.event.up_chars
 end

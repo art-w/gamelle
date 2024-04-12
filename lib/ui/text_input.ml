@@ -93,11 +93,15 @@ let update ~io _param { text; offset; cursor; focused; arrow_key; char_key } box
       None
     else arrow_key
   in
+  let module Chars = Event.Chars in
   let char_key =
-    if Event.is_down ~io (`char 'a') then Some (0, 'a')
-    else if Event.is_down ~io (`char 'b') then Some (0, 'b')
-    else if Event.is_up ~io (`char 'a') || Event.is_up ~io (`char 'b') then None
-    else char_key
+    let char_down = Event.down_chars ~io |> Chars.choose_opt in
+    match char_down with
+    | Some c -> Some (0, c)
+    | None -> (
+        match char_key with
+        | Some (_, c) when Chars.mem c (Event.up_chars ~io) -> None
+        | _ -> char_key)
   in
   let cursor, focused =
     if is_clicked ~io box then
