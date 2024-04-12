@@ -1,6 +1,6 @@
 open Brr
 open Common
-module Geometry = Gamelle_geometry
+module Geometry = Geometry
 open Geometry
 module Color = Color
 module Bitmap = Bitmap

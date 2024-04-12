@@ -1,5 +1,5 @@
 open Common
-open Gamelle_geometry
+open Geometry
 module Gfx = Tsdl_gfx.Gfx
 module Io = Gamelle_common.Io
 module Delayed = Gamelle_common.Delayed

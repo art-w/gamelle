@@ -1,5 +1,5 @@
 open Common
-open Gamelle_geometry
+open Geometry
 
 let set_size s =
   let w = s |> Size2.w |> int_of_float and h = s |> Size2.h |> int_of_float in

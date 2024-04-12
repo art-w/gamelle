@@ -38,6 +38,6 @@ let text_size font size text =
   Delayed.make @@ fun ~io ->
   let font = get ~io font size in
   let& w, h = Ttf.size_utf8 font text in
-  Gamelle_geometry.(Size2.v (float w) (float h))
+  Geometry.(Size2.v (float w) (float h))
 
 let default_size = Gamelle_common.Font.default_size

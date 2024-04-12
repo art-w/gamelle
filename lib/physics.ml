@@ -1,5 +1,5 @@
 (* Based on https://github.com/twobitcoder101/FlatPhysics-part-24 *)
-open Gamelle_geometry
+open Geometry
 open Gamelle_backend
 
 type kind = Movable | Immovable

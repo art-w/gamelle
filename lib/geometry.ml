@@ -1,1 +1,1 @@
-include Gamelle_geometry
+include Gamelle_common.Geometry

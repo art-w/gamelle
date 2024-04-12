@@ -1,4 +1,4 @@
-open Gamelle_geometry
+open Geometry
 open Common
 module Io = Gamelle_common.Io
 

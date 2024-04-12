@@ -1,7 +1,9 @@
 (library
  (public_name gamelle.common)
  (name gamelle_common)
- (libraries gamelle_geometry)
+ (libraries gg)
  (preprocess
   (pps ppx_blob))
  (preprocessor_deps ../data/FreeMono.ttf))
+
+(include_subdirs qualified)

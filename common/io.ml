@@ -1,4 +1,4 @@
-open Gamelle_geometry
+open Geometry
 
 type t = {
   view : Transform.t;

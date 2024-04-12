@@ -1,4 +1,4 @@
-open Gamelle_geometry
+open Geometry
 open Gamelle_backend
 include Gamelle_common.Io
 

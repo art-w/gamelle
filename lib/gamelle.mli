@@ -2,8 +2,8 @@ type io = Gamelle_common.io
 
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
 
-open Gamelle_geometry
-module Geometry : module type of Gamelle_geometry
+open Geometry
+module Geometry : module type of Geometry
 module Color : module type of Color
 module Ui : module type of Ui
 
