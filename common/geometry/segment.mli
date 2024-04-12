@@ -9,3 +9,5 @@ val intersection : t -> t -> Point.t option
 val intersect : t -> t -> bool
 val equal : t -> t -> bool
 val translate : t -> Vec.t -> t
+val map_points : (Point.t -> Point.t) -> t -> t
+val center : t -> Point.t

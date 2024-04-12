@@ -26,7 +26,8 @@ let () =
   let world =
     if Event.is_down ~io `click_left then
       let obj =
-        Physics.make @@ Shape.circle (Event.mouse_pos ~io) (random_size1 ())
+        Physics.make
+        @@ Shape.circle (Circle.v (Event.mouse_pos ~io) (random_size1 ()))
       in
       obj :: world
     else if Event.is_down ~io `click_right then

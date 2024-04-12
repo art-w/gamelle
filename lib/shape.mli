@@ -3,8 +3,8 @@ open Geometry
 
 type t
 
-val circle : Point.t -> float -> t
-val segment : Point.t -> Point.t -> t
+val circle : Circle.t -> t
+val segment : Segment.t -> t
 val polygon : Point.t list -> t
 val rect : Box.t -> t
 

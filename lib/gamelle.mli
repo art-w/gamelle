@@ -112,24 +112,7 @@ end
 
 (* *)
 
-module Shape : sig
-  type t
-
-  val circle : Point.t -> float -> t
-  val segment : Point.t -> Point.t -> t
-  val rect : Box.t -> t
-  val polygon : Point.t list -> t
-  val draw : io:io -> color:Color.t -> t -> unit
-  val fill : io:io -> color:Color.t -> t -> unit
-  val translate : Vec.t -> t -> t
-  val rotate : ?center:Point.t -> angle:float -> t -> t
-  val center : t -> Point.t
-  val distance2 : Point.t -> t -> float
-  val mem : Point.t -> t -> bool
-  val intersects : t -> t -> bool
-  val intersections : t -> t -> Point.t list
-  val nearest_points : Point.t -> t -> (Point.t * Vec.t) list
-end
+module Shape : module type of Shape
 
 module Physics : sig
   type t

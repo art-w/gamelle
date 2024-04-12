@@ -34,3 +34,6 @@ let equal s s' = Vec.equal s.start s.end_ && Vec.equal s'.start s'.end_
 
 let translate { start; end_ } vec =
   { start = Point.translate start vec; end_ = Point.translate end_ vec }
+
+let map_points f { start; end_ } = { start = f start; end_ = f end_ }
+let center { start; end_ } = Vec.(0.5 * (start + end_))

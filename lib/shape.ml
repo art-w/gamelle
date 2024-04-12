@@ -2,50 +2,41 @@ open Gamelle_backend
 open Gamelle_common
 open Geometry
 
-type t =
-  | Segment of point * point
-  | Circle of point * float
-  | Polygon of point list
+type t = Segment of segment | Circle of circle | Polygon of point list
 
-let segment p0 p1 = Segment (p0, p1)
-let circle center radius = Circle (center, radius)
+let segment seg = Segment seg
+let circle c = Circle c
 let polygon pts = Polygon pts
 
 let rect box =
   polygon [ Box.tl_pt box; Box.tr_pt box; Box.br_pt box; Box.bl_pt box ]
 
 let draw ~io ~color = function
-  | Segment (p0, p1) -> draw_line ~io ~color (Segment.v p0 p1)
-  | Circle (center, radius) -> draw_circle ~io ~color (Circle.v center radius)
+  | Segment s -> draw_line ~io ~color s
+  | Circle c -> draw_circle ~io ~color c
   | Polygon pts -> draw_poly ~io ~color pts
 
 let fill ~io ~color = function
-  | Segment (p0, p1) -> draw_line ~io ~color (Segment.v p0 p1)
-  | Circle (center, radius) -> fill_circle ~io ~color (Circle.v center radius)
+  | Segment s -> draw_line ~io ~color s
+  | Circle c -> fill_circle ~io ~color c
   | Polygon pts -> fill_poly ~io ~color pts
 
 let translate dxy = function
-  | Segment (p0, p1) -> Segment (Vec.(p0 + dxy), Vec.(p1 + dxy))
-  | Circle (center, radius) -> Circle (Vec.(center + dxy), radius)
+  | Segment s -> Segment (Segment.translate s dxy)
+  | Circle c -> Circle (Circle.translate c dxy)
   | Polygon pts -> Polygon (List.map (Vec.( + ) dxy) pts)
 
-let square x = x *. x
 let ( + ) = ( +. )
 let ( - ) = ( -. )
 let ( ~- ) = ( ~-. )
 let ( * ) = ( *. )
 let ( / ) = ( /. )
 
-let rotate_v2_around ~angle:(cos, sin) ~center pt =
-  let x, y = Vec.to_tuple @@ Vec.(pt - center) in
-  let pt = Vec.v ((x * cos) - (y * sin)) ((y * cos) + (x * sin)) in
-  Vec.(pt + center)
-
 let rotate_around ~angle ~center shape =
-  let rot = rotate_v2_around ~angle ~center in
+  let rot = Vec.rotate_around ~angle ~center in
   match shape with
-  | Circle (center, radius) -> Circle (rot center, radius)
-  | Segment (a, b) -> Segment (rot a, rot b)
+  | Circle c -> Circle (Circle.map_center rot c)
+  | Segment s -> Segment (Segment.map_points rot s)
   | Polygon pts -> Polygon (List.map rot pts)
 
 let polygon_center = function
@@ -67,8 +58,8 @@ let polygon_center = function
       go ~area:0.0 ~cx:0.0 ~cy:0.0 (hd :: List.rev ps)
 
 let center = function
-  | Circle (center, _) -> center
-  | Segment (a, b) -> Vec.(0.5 * (a + b))
+  | Circle c -> Circle.center c
+  | Segment s -> Segment.center s
   | Polygon pts -> polygon_center pts
 
 let polygon_signed_area = function
@@ -84,10 +75,8 @@ let polygon_signed_area = function
       in
       go ~area:0.0 (hd :: List.rev ps)
 
-let pi = 4.0 * atan 1.0
-
 let signed_area = function
-  | Circle (_, radius) -> pi * radius * radius
+  | Circle c -> Circle.area c
   | Segment _ -> 1.0
   | Polygon pts -> polygon_signed_area pts
 
@@ -103,12 +92,13 @@ let segments_of_polygon pts =
   | first :: _ ->
       let rec go acc = function
         | [] -> acc
-        | [ last ] -> (last, first) :: acc
-        | a :: b :: xs -> go ((a, b) :: acc) (b :: xs)
+        | [ last ] -> Segment.v last first :: acc
+        | a :: b :: xs -> go (Segment.v a b :: acc) (b :: xs)
       in
       go [] pts
 
-let nearest_point_segment pt (p0, p1) =
+let nearest_point_segment pt s =
+  let p0, p1 = Segment.to_tuple s in
   let l2 = Vec.(norm2 (p0 - p1)) in
   if l2 = 0.0 then p0
   else
@@ -118,17 +108,20 @@ let nearest_point_segment pt (p0, p1) =
 let float_equal a b = abs_float (a -. b) < 0.01
 
 let nearest_points pt = function
-  | Circle (center, radius) ->
+  | Circle c ->
+      let center = Circle.center c and radius = Circle.radius c in
       let d = Vec.(unit (pt - center)) in
       [ (Vec.(center + (radius * d)), d) ]
-  | Segment (p0, p1) ->
-      let pt = nearest_point_segment pt (p0, p1) in
+  | Segment s ->
+      let p0, p1 = Segment.to_tuple s in
+      let pt = nearest_point_segment pt s in
       [ (pt, Vec.(unit @@ ortho (p0 - p1))) ]
   | Polygon pts -> (
       match segments_of_polygon pts with
       | [] -> invalid_arg "empty polygon"
       | first :: ss ->
-          let compute ((p0, p1) as segment) =
+          let compute segment =
+            let p0, p1 = Segment.to_tuple segment in
             let found = nearest_point_segment pt segment in
             let dist2 = Vec.(norm2 (pt - found)) in
             (dist2, [ (found, Vec.(unit @@ ortho (p0 - p1))) ])
@@ -149,7 +142,9 @@ let distance2 pt shape =
   | [] -> invalid_arg "distance2"
   | (npt, _) :: _ -> Vec.(norm2 (pt - npt))
 
-let intersection_segment_circle p0 p1 center radius =
+let intersection_segment_circle s c =
+  let p0, p1 = Segment.to_tuple s in
+  let center = Circle.center c and radius = Circle.radius c in
   let d = Vec.(p1 - p0) in
   let f = Vec.(p0 - center) in
   let a = Vec.dot d d in
@@ -165,7 +160,8 @@ let intersection_segment_circle p0 p1 center radius =
     let pt2 = if t2 >= 0. && t2 <= 1. then [ Vec.(p0 + (t2 * d)) ] else [] in
     pt1 @ pt2
 
-let segment_intersection (p0, p1) (q0, q1) =
+let segment_intersection p q =
+  let p0, p1 = Segment.to_tuple p and q0, q1 = Segment.to_tuple q in
   let p0_x, p0_y = Vec.to_tuple p0 in
   let p1_x, p1_y = Vec.to_tuple p1 in
   let p2_x, p2_y = Vec.to_tuple q0 in
@@ -190,56 +186,28 @@ let segment_intersection (p0, p1) (q0, q1) =
 
 let rec intersections a b =
   match (a, b) with
-  | Segment (p0, p1), Circle (center, radius)
-  | Circle (center, radius), Segment (p0, p1) ->
-      intersection_segment_circle p0 p1 center radius
-  | Segment (p0, p1), Segment (q0, q1) -> (
-      match segment_intersection (p0, p1) (q0, q1) with
-      | None -> []
-      | Some pt -> [ pt ])
-  | Circle (c0, r0), Circle (c1, r1) ->
-      let dist2 = Vec.(norm2 (c1 - c0)) in
-      if dist2 >= square (r0 +. r1) || dist2 <= square (r0 -. r1) then []
-      else
-        let d = sqrt dist2 in
-        let l = (square r0 -. square r1 +. dist2) /. (2.0 *. d) in
-        let h = sqrt (square r0 -. square l) in
-        let x1, y1 = Vec.to_tuple c0 in
-        let x2, y2 = Vec.to_tuple c1 in
-        let ld = l /. d in
-        let hd = h /. d in
-        let base_x = (ld *. (x2 -. x1)) +. x1 in
-        let base_y = (ld *. (y2 -. y1)) +. y1 in
-        if hd = 0.0 then [ Point.v base_x base_y ]
-        else
-          let px = hd *. (y2 -. y1) in
-          let py = hd *. (x2 -. x1) in
-          [
-            Point.v (base_x +. px) (base_y -. py);
-            Point.v (base_x -. px) (base_y +. py);
-          ]
+  | Segment s, Circle c | Circle c, Segment s -> intersection_segment_circle s c
+  | Segment p, Segment q -> (
+      match segment_intersection p q with None -> [] | Some pt -> [ pt ])
+  | Circle c, Circle c' -> Circle.intersection c c'
   | Polygon pts, other | other, Polygon pts ->
       List.concat_map
-        (fun (p0, p1) -> intersections (Segment (p0, p1)) other)
+        (fun s -> intersections (Segment s) other)
         (segments_of_polygon pts)
 
 let intersects a b =
   match (a, b) with
-  | Circle (c0, r0), Circle (c1, r1) ->
-      let dist2 = Vec.(norm2 (c1 - c0)) in
-      let r2 = square (r0 +. r1) in
-      dist2 < r2
+  | Circle c, Circle c' -> Circle.intersects c c'
   | _ -> intersections a b <> []
 
 let mem pt = function
-  | Circle (center, radius) ->
-      let dist2 = Vec.(norm2 (center - pt)) in
-      dist2 <= radius * radius
+  | Circle c -> Circle.mem c pt
   | Segment _ -> false
   | Polygon pts ->
       let x, y = Vec.to_tuple pt in
       List.fold_left
-        (fun inside (p0, p1) ->
+        (fun inside s ->
+          let p0, p1 = Segment.to_tuple s in
           let vx0, vy0 = Vec.to_tuple p0 in
           let vx1, vy1 = Vec.to_tuple p1 in
           if
@@ -249,7 +217,8 @@ let mem pt = function
           else inside)
         false (segments_of_polygon pts)
 
-let separation_axis_circle center radius shape =
+let separation_axis_circle c shape =
+  let center = Circle.center c and radius = Circle.radius c in
   let pt, _ = List.hd @@ nearest_points center shape in
   let axis = Vec.(center - pt) in
   let dist2 = Vec.(norm2 axis) in
@@ -274,7 +243,8 @@ let project axis = function
 let separation_axis_polygon a b =
   let rec go opt_best = function
     | [] -> opt_best
-    | (p0, p1) :: rest -> (
+    | seg :: rest -> (
+        let p0, p1 = Segment.to_tuple seg in
         let axis = Vec.(unit @@ ortho (p0 - p1)) in
         let amin, amax = project axis a in
         let bmin, bmax = project axis b in
@@ -295,15 +265,21 @@ let separation_axis_polygon a b =
 
 let separation_axis a b =
   match (a, b) with
-  | Circle (center, radius), shape -> separation_axis_circle center radius shape
-  | shape, Circle (center, radius) -> (
-      match separation_axis_circle center radius shape with
+  | Circle c, shape -> separation_axis_circle c shape
+  | shape, Circle c -> (
+      match separation_axis_circle c shape with
       | None -> None
       | Some n -> Some Vec.(-1.0 * n))
   | Polygon a, Polygon b -> separation_axis_polygon a b
-  | Segment (a0, a1), Polygon b -> separation_axis_polygon [ a0; a1 ] b
-  | Polygon a, Segment (b0, b1) -> separation_axis_polygon a [ b0; b1 ]
-  | Segment (a0, a1), Segment (b0, b1) ->
+  | Segment s, Polygon b ->
+      let a0, a1 = Segment.to_tuple s in
+      separation_axis_polygon [ a0; a1 ] b
+  | Polygon a, Segment s ->
+      let b0, b1 = Segment.to_tuple s in
+      separation_axis_polygon a [ b0; b1 ]
+  | Segment s, Segment s' ->
+      let a0, a1 = Segment.to_tuple s in
+      let b0, b1 = Segment.to_tuple s' in
       separation_axis_polygon [ a0; a1 ] [ b0; b1 ]
 
 let separation_axis a b =
@@ -344,10 +320,12 @@ let contact_points_rectangle pts rect =
 
 let rec contact_points a b =
   match (a, b) with
-  | Circle (a, _ra), Circle (b, _rb) ->
+  | Circle c, Circle c' ->
+      let a = Circle.center c and b = Circle.center c' in
       let dist = Vec.(norm (a - b)) in
       (dist, Set_v2.singleton Vec.(a + (0.5 * (a - b))))
-  | Polygon a, Circle (b, _rb) | Circle (b, _rb), Polygon a ->
+  | Polygon a, Circle c | Circle c, Polygon a ->
+      let b = Circle.center c in
       let a, _ = List.hd @@ nearest_points b (Polygon a) in
       let dist = Vec.(norm (a - b)) in
       (dist, Set_v2.singleton a)
@@ -355,8 +333,12 @@ let rec contact_points a b =
       let fst = contact_points_rectangle a_pts b in
       let snd = contact_points_rectangle b_pts a in
       best_distance fst snd
-  | Segment (a0, a1), b -> contact_points (Polygon [ a0; a1 ]) b
-  | a, Segment (b0, b1) -> contact_points a (Polygon [ b0; b1 ])
+  | Segment seg, b ->
+      let a0, a1 = Segment.to_tuple seg in
+      contact_points (Polygon [ a0; a1 ]) b
+  | a, Segment seg ->
+      let b0, b1 = Segment.to_tuple seg in
+      contact_points a (Polygon [ b0; b1 ])
 
 let contact_points a b =
   let dist, lst = contact_points a b in
