@@ -69,5 +69,3 @@ let wheel_delta t = t.wheel_delta
 
 let reset_wheel t =
   { t with keypressed = remove `wheel t.keypressed; wheel_delta = 0. }
-
-

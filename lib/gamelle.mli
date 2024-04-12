@@ -1,6 +1,4 @@
-
 type io = Gamelle_common.io
-
 
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
 

@@ -7,4 +7,4 @@ module Delayed = Delayed
 
 type io = Io.t
 
-module Geometry=Geometry
+module Geometry = Geometry

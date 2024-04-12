@@ -121,10 +121,12 @@ let draw_background ~io () =
 
 let draw_grid ~io () =
   let color = Color.black in
-  draw_line ~io ~color (Segment.v (Point.v cell_size 0.) (Point.v cell_size size)) ;
+  draw_line ~io ~color
+    (Segment.v (Point.v cell_size 0.) (Point.v cell_size size)) ;
   draw_line ~io ~color
     (Segment.v (Point.v (cell_size *. 2.) 0.) (Point.v (cell_size *. 2.) size)) ;
-  draw_line ~io ~color (Segment.v (Point.v 0. cell_size) (Point.v size cell_size)) ;
+  draw_line ~io ~color
+    (Segment.v (Point.v 0. cell_size) (Point.v size cell_size)) ;
   draw_line ~io ~color
     (Segment.v (Point.v 0. (cell_size *. 2.)) (Point.v size (cell_size *. 2.)))
 

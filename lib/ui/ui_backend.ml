@@ -2,7 +2,6 @@ open Gamelle_common
 open Geometry
 open Gamelle_backend
 
-
 type id = { loc_stack : string list; _hint : int option }
 type dir = V | H
 type alignment = Start | End | Center | Fill

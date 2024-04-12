@@ -2,7 +2,10 @@ open Gamelle_backend
 open Gamelle_common
 open Geometry
 
-type t = Segment of point * point | Circle of point * float | Polygon of point list
+type t =
+  | Segment of point * point
+  | Circle of point * float
+  | Polygon of point list
 
 let segment p0 p1 = Segment (p0, p1)
 let circle center radius = Circle (center, radius)

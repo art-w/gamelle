@@ -62,10 +62,7 @@ let () =
             label [%ui]
               (Printf.sprintf "The slider value is %f"
                  (slider [%ui] { w = 200.; min = 10.; max = 20. }));
-            let v =
-              radio [%ui]
-                [ (`A, "Select A"); (`B, "Select B")]
-            in
+            let v = radio [%ui] [ (`A, "Select A"); (`B, "Select B") ] in
             match v with
             | None -> label [%ui] "Nothing is selected"
             | Some `A -> label [%ui] "A is selected"

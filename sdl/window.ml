@@ -1,5 +1,6 @@
 open Common
 open Gamelle_common.Geometry
+
 let set_size s =
   let w = s |> Size.w |> int_of_float and h = s |> Size.h |> int_of_float in
   Sdl.set_window_size (Option.get !Global.window) ~w ~h

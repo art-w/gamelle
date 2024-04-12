@@ -1,6 +1,7 @@
 open Gamelle_backend
 open Gamelle_common
 open Geometry
+
 let text_area_size ~io ?(width = Float.infinity) ?(interline = -8.) ?font ?size
     text =
   let pos = Vec.zero in
@@ -24,7 +25,8 @@ let text_area_size ~io ?(width = Float.infinity) ?(interline = -8.) ?font ?size
             let size = text_size char in
             let w = Size.w size in
             let cpos =
-              if w +. Point.x cpos >= limx then Point.v startx (Point.y cpos +. hline)
+              if w +. Point.x cpos >= limx then
+                Point.v startx (Point.y cpos +. hline)
               else cpos
             in
             udpate_cpos maxw Vec.(cpos + v w 0.))
@@ -68,7 +70,8 @@ let draw_text ~io ?(width = Float.infinity) ?(interline = -8.) ?font ~color
             let size = text_size char in
             let w = Size.w size in
             let cpos =
-              if w +. Point.x cpos >= limx then Point.v startx (Point.y cpos +. hline)
+              if w +. Point.x cpos >= limx then
+                Point.v startx (Point.y cpos +. hline)
               else cpos
             in
             draw_string char cpos;

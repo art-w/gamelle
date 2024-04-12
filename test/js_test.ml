@@ -86,7 +86,8 @@ let update ~io { x; y; vx; vy; _ } =
              @@ (fill_rect ~color:blue (Box.v (Point.v 0. 0.) (Size.v 75. 59.))
                 & draw_rect ~color:red (Box.v (Point.v 0. 0.) (Size.v 75. 59.))
                 & draw img (Point.v 0. 0.)
-                & draw_line ~color:red (Segment.v (Point.v 0. 0.) (Point.v 75. 59.))
+                & draw_line ~color:red
+                    (Segment.v (Point.v 0. 0.) (Point.v 75. 59.))
                 & translate (Vec.v 5. 5.)
                     (fill_poly ~color:yellow
                        [ Point.v 20. 0.; Point.v 30. 30.; Point.v 15. 40. ])

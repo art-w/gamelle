@@ -7,6 +7,5 @@ module Shape = Shape
 module Physics = Physics
 module View = View
 module Transform = Gamelle_common.Transform
-
 include Gamelle_common.Geometry
 module Event = Gamelle_common.Io.Event
