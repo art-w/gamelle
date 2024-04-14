@@ -20,6 +20,8 @@ let window ?(debug = false) ~io pos f =
   let id = pos in
   let ui = { io; id; renderers = []; debug_render = Fun.id; loc_stack = [] } in
   if not (Hashtbl.mem state id) then Hashtbl.add state id (new_state ());
+  let state = ui_state ~ui in
+   Hashtbl.reset state.used_ids;
   let r = f ui in
   let dir = V in
   let children =

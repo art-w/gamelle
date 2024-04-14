@@ -81,6 +81,16 @@ let rec insert e li =
 
 let insert_padding ~dir rs = insert (padding_elt ~dir) rs
 
+exception IdUsedTwice of string
+
+let error_id_used_twice (id : id) =
+  raise (IdUsedTwice (String.concat " " id.loc_stack))
+
+let check_id_used_once ~ui id =
+  let ui_state = ui_state ~ui in
+  if Hashtbl.mem ui_state.used_ids id then error_id_used_twice id
+  else Hashtbl.add ui_state.used_ids id ()
+
 let elt ~(construct_state : 'state -> state) ~destruct_state
     ~(default : 'params -> 'state) ?(weight = 1.)
     ~(size : ts:(string -> size) -> 'params -> size)
@@ -90,10 +100,12 @@ let elt ~(construct_state : 'state -> state) ~destruct_state
      ?(render = render) params ->
   let default = construct_state (default params) in
   let id = { loc_stack = loc :: ui.loc_stack; _hint = id } in
+  let ui_state = ui_state ~ui in
+  check_id_used_once ~ui id;
   let box = query_layout ~ui ~id in
   let size = size ~ts:(ui_text_size ~ui) params in
   let box = apply_style style box size in
-  let tbl : state tbl = (ui_state ~ui).state in
+  let tbl : state tbl = ui_state.state in
   let prev_state = destruct_state (find ~default tbl id) in
   let state = update ~io:ui.io params prev_state box in
   Hashtbl.replace tbl id (construct_state state);
@@ -115,10 +127,12 @@ let node ~construct_state ~children_io ?(weight = 1.) ~destruct_state ~dir
  fun (ui, loc) ?id ?(style = default_style) ?(size = size) ?(weight = weight)
      ?(render = render) params ->
   let id = { loc_stack = loc :: ui.loc_stack; _hint = id } in
+  let ui_state = ui_state ~ui in
+  check_id_used_once ~ui id;
   let _ = style in
   let box = query_layout ~ui ~id in
   debug_box ~ui ~color:Color.blue box;
-  let tbl = (ui_state ~ui).state in
+  let tbl = ui_state.state in
   let default = construct_state (default params) in
   let prev_state = destruct_state (find ~default tbl id) in
   let children_io = children_io ~io:ui.io box in

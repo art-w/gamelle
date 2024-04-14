@@ -71,9 +71,9 @@ type 'a vscroll_params = { height : float; f : unit -> 'a }
 exception IdTypeMismatch
 
 type state = ..
-type state_layout = { state : state tbl; layout : box tbl }
+type state_layout = { state : state tbl; layout : box tbl ; used_ids : unit tbl}
 
-let new_state () = { state = new_tbl (); layout = new_tbl () }
+let new_state () = { state = new_tbl (); layout = new_tbl (); used_ids = new_tbl ()  }
 let state : (point, state_layout) Hashtbl.t = Hashtbl.create 256
 let ui_state ~ui = Hashtbl.find state ui.id
 
