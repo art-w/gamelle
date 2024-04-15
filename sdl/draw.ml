@@ -148,7 +148,7 @@ let draw_circle ~io ~color circle =
   let& () =
     let renderer = render () in
     draw_clip ~io renderer (fun () ->
-        Gfx.circle_rgba renderer ~x ~y ~rad:radius ~r ~g ~b ~a)
+        Gfx.aacircle_rgba renderer ~x ~y ~rad:radius ~r ~g ~b ~a)
   in
   ()
 
@@ -162,7 +162,10 @@ let fill_circle ~io ~color circle =
   let& () =
     let renderer = render () in
     draw_clip ~io renderer (fun () ->
-        Gfx.filled_circle_rgba (render ()) ~x ~y ~rad:radius ~r ~g ~b ~a)
+        let* () =
+          Gfx.filled_circle_rgba renderer ~x ~y ~rad:radius ~r ~g ~b ~a
+        in
+        Gfx.aacircle_rgba renderer ~x ~y ~rad:radius ~r ~g ~b ~a)
   in
   ()
 
