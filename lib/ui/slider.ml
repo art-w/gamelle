@@ -1,6 +1,5 @@
 open Gamelle_common
-open Geometry
-open Gamelle_backend
+open Draw_geometry
 open Ui_backend
 open Widget_builder
 
@@ -21,12 +20,12 @@ let render ~io { w = _; min; max } state box =
   let w = Box.w box -. (2. *. padding) in
   let sval = state.v in
   let line = Box.v_mid (Box.mid box) (Size.v w 4.) in
-  fill_rect ~io ~color:lowlight line;
+  Box.fill ~io ~color:lowlight line;
   let pos =
     radius +. ((sval -. min) *. (w -. (2. *. radius)) /. (max -. min))
   in
-  fill_rect ~io ~color:highlight (Box.v (Box.o line) (Size.v pos 4.));
-  fill_circle ~io ~color:highlight
+  Box.fill ~io ~color:highlight (Box.v (Box.o line) (Size.v pos 4.));
+  Circle.fill ~io ~color:highlight
     (Circle.v (Point.v (Box.minx line +. pos) (Box.midy line)) radius)
 
 let update ~io { w = _; min; max } state box =

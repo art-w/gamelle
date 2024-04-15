@@ -1,5 +1,4 @@
-open Gamelle_common.Geometry
-open Gamelle_backend
+open Draw_geometry
 include Ui_backend
 include Widget_builder
 
@@ -21,7 +20,7 @@ let window ?(debug = false) ~io pos f =
   let ui = { io; id; renderers = []; debug_render = Fun.id; loc_stack = [] } in
   if not (Hashtbl.mem state id) then Hashtbl.add state id (new_state ());
   let state = ui_state ~ui in
-   Hashtbl.reset state.used_ids;
+  Hashtbl.reset state.used_ids;
   let r = f ui in
   let dir = V in
   let children =
@@ -41,8 +40,8 @@ let window ?(debug = false) ~io pos f =
   let end_corner = Vec.(pos + size) in
   let box = Box.v_corners pos end_corner in
   debug_box ~ui ~color:Color.green box;
-  fill_rect ~io ~color:bg box;
-  draw_rect ~io ~color:fg box;
+  Box.fill ~io ~color:bg box;
+  Box.draw ~io ~color:fg box;
   render ~ui box
     (node_renderer ~ui ~dir:H ~weight:1. ~children_offset:Vec.zero ~children
        ~children_io:io ~size ~size_for_self:Size.zero (fun ~io:_ _ -> ()));

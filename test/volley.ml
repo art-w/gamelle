@@ -99,7 +99,7 @@ let () =
   @@ fun ~io ({ player1; player2; ball; _ } as state) ->
   let io = View.translated (Vec.v 0.0 500.0) io in
   Window.set_size (Size.v 1010. 1020.);
-  fill_rect ~io ~color:Color.black (Window.box ());
+  Box.fill ~io ~color:Color.black (Window.box ());
   if Event.is_pressed ~io `escape then raise Exit
   else if Event.is_down ~io (`char 'r') then initial_state
   else if Vec.y (Physics.center ball) > 440.0 then

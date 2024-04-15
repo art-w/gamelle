@@ -69,6 +69,6 @@ let () =
             | Some `B -> label [%ui] "B is selected"
             | Some `C -> label [%ui] "C is selected"))
   in
-  draw_line ~io ~color:Color.red (Segment.v Vec.zero (Vec.v 200. 0.));
+  Segment.draw ~io ~color:Color.red (Segment.v Vec.zero (Vec.v 200. 0.));
   (* draw_text ~io ~color:Color.red ~size:20 "aaaa\nbbb" Vec.zero; *)
   box

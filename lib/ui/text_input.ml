@@ -1,7 +1,5 @@
 open Gamelle_common
-open Geometry
-open Gamelle_backend
-open Gamelle_extras
+open Draw_geometry
 open Ui_backend
 open Widget_builder
 
@@ -38,17 +36,17 @@ let size ~ts width =
   let text_size = Size.(v width (h (ts "a"))) in
   Vec.(text_size + (2. * padding_xy))
 
-let text_length ~io text = Size.w (text_size ~io ~size:font_size text)
+let text_length ~io text = Size.w (Text.size ~io ~size:font_size text)
 let cursor_offset ~io text cursor = text_length ~io (String.sub text 0 cursor)
 
 let render ~io _params
     { text; offset; cursor; focused; arrow_key = _; char_key = _ } box =
-  fill_rect ~io ~color:bg' box;
-  draw_rect ~io ~color:(if focused then highlight else fg) box;
+  Box.fill ~io ~color:bg' box;
+  Box.draw ~io ~color:(if focused then highlight else fg) box;
   let io = View.clipped box io in
   let nsize = Vec.(Box.size box - (2. * padding_xy)) in
   let box = Box.(v_mid (mid box) nsize) in
-  draw_string ~io ~color:fg ~size:font_size text Vec.(Box.o box + v offset 0.);
+  Text.draw ~io ~color:fg ~size:font_size text Vec.(Box.o box + v offset 0.);
   let cursor_offset = cursor_offset ~io text cursor in
   let cursor_pos = cursor_offset +. offset in
   let cursor_seg =
@@ -56,9 +54,9 @@ let render ~io _params
       (Point.v (Box.minx box +. cursor_pos) (Box.miny box))
       (Point.v
          (Box.minx box +. cursor_pos)
-         (Box.miny box +. Size.h (text_size ~io ~size:font_size "a")))
+         (Box.miny box +. Size.h (Text.size ~io ~size:font_size "a")))
   in
-  if focused then draw_line ~io ~color:highlight cursor_seg
+  if focused then Segment.draw ~io ~color:highlight cursor_seg
 
 let find_cursor_click ~io text x =
   let rec loop prev_w i =
@@ -69,9 +67,6 @@ let find_cursor_click ~io text x =
       if w > x then if w -. x < x -. prev_w then i else i - 1 else loop w (i + 1)
   in
   loop 0. 0
-
-let is_pressed_rythm ~io key =
-  Event.is_down ~io key || (rythm 5 && Event.is_pressed ~io key)
 
 let slow_frames = 60
 let slow_frequency = 20

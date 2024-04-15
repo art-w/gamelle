@@ -1,5 +1,5 @@
 open Gamelle_common
-open Geometry
+open Draw_geometry
 
 type t
 type cap = t * string

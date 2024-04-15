@@ -1,6 +1,5 @@
 open Gamelle_common
-open Geometry
-open Gamelle_backend
+open Draw_geometry
 
 type id = { loc_stack : string list; _hint : int option }
 type dir = V | H
@@ -71,9 +70,11 @@ type 'a vscroll_params = { height : float; f : unit -> 'a }
 exception IdTypeMismatch
 
 type state = ..
-type state_layout = { state : state tbl; layout : box tbl ; used_ids : unit tbl}
+type state_layout = { state : state tbl; layout : box tbl; used_ids : unit tbl }
 
-let new_state () = { state = new_tbl (); layout = new_tbl (); used_ids = new_tbl ()  }
+let new_state () =
+  { state = new_tbl (); layout = new_tbl (); used_ids = new_tbl () }
+
 let state : (point, state_layout) Hashtbl.t = Hashtbl.create 256
 let ui_state ~ui = Hashtbl.find state ui.id
 
@@ -127,7 +128,7 @@ let render_node ~ui ?id ~dir ~weight ~children_offset ~children ~children_io
     :: ui.renderers *)
 
 let debug_box ~ui ~color box =
-  debug_render ~ui (fun io -> draw_rect ~io ~color box)
+  debug_render ~ui (fun io -> Box.draw ~io ~color box)
 
 let renderer_size ({ size; _ } : renderer) = size
 
@@ -215,7 +216,7 @@ let render_node ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
     (node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
        ~children ~size_for_self renderer)
 
-let io_text_size ~io = text_size ~io ~size:font_size
+let io_text_size ~io = Text.size ~io ~size:font_size
 let ui_text_size ~ui = io_text_size ~io:ui.io
 
 let clicked_outside ~io box =
@@ -225,9 +226,9 @@ let is_clicked ~io box =
   Event.is_down ~io `click_left && Box.mem (Event.mouse_pos ~io) box
 
 let centered_text ~io ~color ?font ?size text box =
-  let text_size = text_size ~io ?font ?size text in
+  let text_size = Text.size ~io ?font ?size text in
   let pos = Box.(o (v_mid (mid box) text_size)) in
-  draw_string ~io ~color ?font ?size text pos
+  Text.draw ~io ~color ?font ?size text pos
 
 let nest_loc (ui, loc) f =
   ui.loc_stack <- loc :: ui.loc_stack;

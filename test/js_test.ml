@@ -70,30 +70,30 @@ let update ~io { x; y; vx; vy; _ } =
   let vy = vy *. 0.9 in
 
   Window.set_size (Size.v 800. 800.);
-  fill_rect ~io ~color:black (Window.box ());
+  Box.fill ~io ~color:black (Window.box ());
   draw_string ~io ~color:Color.white ~size:30 "Hello World!" Vec.zero;
   draw_string ~io:(View.scaled 2.0 io) ~color:Color.white ~size:30
     "Hello World!" Vec.zero;
   View.(
     translate (Vec.v mx my)
-      (fill_circle ~color:red (Circle.v (Point.v 0.0 0.0) 10.0))
+      (Circle.fill ~color:red (Circle.v (Point.v 0.0 0.0) 10.0))
     & translate (Vec.v x y)
         (scale 3.0
-           (draw_rect ~color:yellow (Box.v (Point.v 0. 0.) (Size.v 100.0 100.0))
+           (Box.draw ~color:yellow (Box.v (Point.v 0. 0.) (Size.v 100.0 100.0))
            & translate (Vec.v (75. /. 2.) (59. /. 2.))
              @@ rotate (1.0 *. clock ())
              @@ translate (Vec.v (-75. /. 2.) (-59. /. 2.))
-             @@ (fill_rect ~color:blue (Box.v (Point.v 0. 0.) (Size.v 75. 59.))
-                & draw_rect ~color:red (Box.v (Point.v 0. 0.) (Size.v 75. 59.))
+             @@ (Box.fill ~color:blue (Box.v (Point.v 0. 0.) (Size.v 75. 59.))
+                & Box.draw ~color:red (Box.v (Point.v 0. 0.) (Size.v 75. 59.))
                 & draw img (Point.v 0. 0.)
-                & draw_line ~color:red
+                & Segment.draw ~color:red
                     (Segment.v (Point.v 0. 0.) (Point.v 75. 59.))
                 & translate (Vec.v 5. 5.)
                     (fill_poly ~color:yellow
                        [ Point.v 20. 0.; Point.v 30. 30.; Point.v 15. 40. ])
                 & draw_poly ~color:green
                     [ Point.v 20. 0.; Point.v 30. 30.; Point.v 15. 40. ]
-                & draw_circle ~color:green
+                & Circle.draw ~color:green
                     (Circle.v (Point.v (75.0 /. 2.) (59.0 /. 2.)) 10.)))))
     ~io;
   { x; y; vx; vy; mx; my }

@@ -117,18 +117,18 @@ let size = cell_size *. 3.
 
 let draw_background ~io () =
   let color = Color.white in
-  fill_rect ~io ~color (Box.v (Point.v 0. 0.) (Size.v size size))
+  Box.fill ~io ~color (Box.v (Point.v 0. 0.) (Size.v size size))
 
 let draw_grid ~io () =
   let color = Color.black in
-  draw_line ~io ~color
-    (Segment.v (Point.v cell_size 0.) (Point.v cell_size size)) ;
-  draw_line ~io ~color
-    (Segment.v (Point.v (cell_size *. 2.) 0.) (Point.v (cell_size *. 2.) size)) ;
-  draw_line ~io ~color
-    (Segment.v (Point.v 0. cell_size) (Point.v size cell_size)) ;
-  draw_line ~io ~color
-    (Segment.v (Point.v 0. (cell_size *. 2.)) (Point.v size (cell_size *. 2.)))
+  Segment.(draw ~io ~color (v (Point.v cell_size 0.) (Point.v cell_size size))) ;
+  Segment.(
+    draw ~io ~color
+      (v (Point.v (cell_size *. 2.) 0.) (Point.v (cell_size *. 2.) size)) ) ;
+  Segment.(draw ~io ~color (v (Point.v 0. cell_size) (Point.v size cell_size))) ;
+  Segment.(
+    draw ~io ~color
+      (v (Point.v 0. (cell_size *. 2.)) (Point.v size (cell_size *. 2.))) )
 
 let draw_cell ~io cell p =
   match cell with

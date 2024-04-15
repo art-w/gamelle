@@ -123,9 +123,9 @@ let tick state ~player_left_speed ~player_right_speed =
 
 let color = Color.white
 
-let draw_background ~io = fill_rect ~io ~color:Color.black box_game
+let draw_background ~io = Box.fill ~io ~color:Color.black box_game
 
-let draw_court ~io = draw_rect ~io ~color court
+let draw_court ~io = Box.draw ~io ~color court
 
 let draw_score ~io ~state =
   let { player_left= {score= score_left; _}
@@ -140,13 +140,13 @@ let draw_score ~io ~state =
   draw_string ~io ~color ~size:18 score_right
     (Vec.v (Box.midx box_game +. 10.) (Box.oy court -. 22.))
 
-let draw_ball ~io {ball_pos; _} = fill_circle ~io ~color (Circle.v ball_pos 4.)
+let draw_ball ~io {ball_pos; _} = Circle.(fill ~io ~color (v ball_pos 4.))
 
 let draw_players ~io state =
   let player_left = player_segment ~side:Left state
   and player_right = player_segment ~side:Right state in
-  draw_line ~io ~color player_left ;
-  draw_line ~io ~color player_right
+  Segment.draw ~io ~color player_left ;
+  Segment.draw ~io ~color player_right
 
 let update ~io state =
   let io = View.drawing_box box_game io in

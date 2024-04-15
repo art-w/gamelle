@@ -1,6 +1,4 @@
-open Gamelle_backend
-open Gamelle_common
-open Geometry
+open Draw_geometry
 open Ui_backend
 open Widget_builder
 
@@ -26,10 +24,10 @@ let render ~io text is_checked box =
   let check'box' =
     Box.(v Vec.(o box + padding_xy) Size.(v check'box'_size check'box'_size))
   in
-  fill_rect ~io ~color:bg' box;
-  draw_rect ~io ~color:fg box;
-  fill_rect ~io ~color:bg check'box';
-  draw_rect ~io ~color:fg check'box';
+  Box.fill ~io ~color:bg' box;
+  Box.draw ~io ~color:fg box;
+  Box.fill ~io ~color:bg check'box';
+  Box.draw ~io ~color:fg check'box';
   (if is_checked then
      let ticked'box' =
        Box.(
@@ -37,8 +35,8 @@ let render ~io text is_checked box =
            Vec.(o check'box' + padding_xy)
            Vec.(Box.size check'box' - (2. * padding_xy)))
      in
-     fill_rect ~io ~color:highlight ticked'box');
-  draw_string ~io ~color:fg ~size:font_size text
+     Box.fill ~io ~color:highlight ticked'box');
+  Text.draw ~io ~color:fg ~size:font_size text
     Vec.(pos + padding_x + v check'box'_size 0. + padding_x)
 
 let update ~io _text previous_is_checked box =

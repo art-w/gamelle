@@ -1,6 +1,6 @@
 open Gamelle_common
 open Ui_backend
-open Geometry
+open Draw_geometry
 
 type ('state, 'params, 'r) elt =
   t * string ->

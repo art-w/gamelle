@@ -3,7 +3,50 @@ type io = Gamelle_common.io
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
 
 open Gamelle_common
-include module type of Geometry
+
+module Point : sig
+  include module type of Geometry.Point
+end
+
+module Vec : sig
+  include module type of Geometry.Vec
+end
+
+module Color : sig
+  include module type of Geometry.Color
+end
+
+module Segment : sig
+  include module type of Geometry.Segment
+
+  val draw : io:io -> color:Color.t -> t -> unit
+end
+
+module Circle : sig
+  include module type of Geometry.Circle
+
+  val draw : io:io -> color:Color.t -> t -> unit
+  val fill : io:io -> color:Color.t -> t -> unit
+end
+
+module Box : sig
+  include module type of Geometry.Box
+
+  val draw : io:io -> color:Color.t -> t -> unit
+  val fill : io:io -> color:Color.t -> t -> unit
+end
+
+module Size : module type of Geometry.Size
+module Size1 : module type of Geometry.Size1
+
+type color = Geometry.color
+type point = Geometry.point
+type vec = Geometry.vec
+type segment = Geometry.segment
+type circle = Geometry.circle
+type box = Geometry.box
+type size = Geometry.size
+
 module Ui : module type of Ui
 
 module Bitmap : sig
@@ -66,13 +109,8 @@ end
 val clock : unit -> float
 val dt : unit -> float
 val draw : io:io -> Bitmap.t -> point -> unit
-val draw_line : io:io -> color:Color.t -> Segment.t -> unit
-val draw_rect : io:io -> color:Color.t -> box -> unit
-val fill_rect : io:io -> color:Color.t -> box -> unit
 val draw_poly : io:io -> color:Color.t -> point list -> unit
 val fill_poly : io:io -> color:Color.t -> point list -> unit
-val draw_circle : io:io -> color:Color.t -> Circle.t -> unit
-val fill_circle : io:io -> color:Color.t -> Circle.t -> unit
 val show_cursor : bool -> unit
 
 val draw_string :

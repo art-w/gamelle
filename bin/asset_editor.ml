@@ -41,20 +41,20 @@ let main ~io st =
     | Some fst_pos, false ->
         { st with click = None; rects = (fst_pos, st.mouse) :: st.rects }
   in
-  fill_rect ~io ~color:Color.black (Box.v (Point.v 0. 0.) (Point.v 500. 500.));
+  Box.fill ~io ~color:Color.black (Box.v (Point.v 0. 0.) (Point.v 500. 500.));
   show_cursor true;
   let io = View.scaled st.scale io in
   draw ~io st.bmp (Point.v 0. 0.);
   Option.iter
     (fun pos ->
       let rect = compute_rect (pos, st.mouse) in
-      draw_rect ~io ~color:Color.green rect)
+      Box.draw ~io ~color:Color.green rect)
     st.click;
   let pale_green = Color.(with_a green 0.2) in
   List.iter
     (fun poss ->
       let rect = compute_rect poss in
-      fill_rect ~io ~color:pale_green rect)
+      Box.fill ~io ~color:pale_green rect)
     st.rects;
   st
 

@@ -1,6 +1,5 @@
 open Gamelle_common
-open Geometry
-open Gamelle_backend
+open Draw_geometry
 open Ui_backend
 open Widget_builder
 
@@ -36,9 +35,9 @@ let render ~io { height = _; f = _ } state box =
          ((offset *. height /. state.real_height) +. Box.miny box))
       (Size.v scroll_bar_width scroll_bar_height)
   in
-  draw_rect ~io ~color:fg box;
-  fill_rect ~io ~color:lowlight scroll_rail_box;
-  fill_rect ~io ~color:highlight scroll_bar_box
+  Box.draw ~io ~color:fg box;
+  Box.fill ~io ~color:lowlight scroll_rail_box;
+  Box.fill ~io ~color:highlight scroll_bar_box
 
 let update ~io ~children_size box state { height = _; f = _ } =
   let { size; offset; grasped; real_height = _ } = state in
