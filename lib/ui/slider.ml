@@ -38,8 +38,7 @@ let update ~io { w = _; min; max } state box =
   let v =
     if grasped then
       Float.max min @@ Float.min max
-      @@ (Vec.x (Event.mouse_pos ~io) -. Box.minx box)
-         *. (max -. min) /. w
+      @@ ((Vec.x (Event.mouse_pos ~io) -. Box.minx box) *. (max -. min) /. w)
          +. min
     else v
   in
