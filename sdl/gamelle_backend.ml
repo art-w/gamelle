@@ -39,6 +39,8 @@ let run () =
     Tsdl_mixer.Mixer.open_audio 44_100 Tsdl_mixer.Mixer.default_format 2 2048
   in
 
+  ignore @@ Tsdl_mixer.Mixer.allocate_channels 256;
+
   let& window =
     Sdl.create_window "Test" ~w:640 ~h:480 Sdl.Window.(windowed + resizable)
   in
@@ -69,6 +71,7 @@ let run () =
       events := Events_sdl.update_mouse !events
     done;
     events := Events_backend.update_updown previous !events;
+
 
     mutex_protect lock (fun () ->
         match !current_run with
