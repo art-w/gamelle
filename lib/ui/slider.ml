@@ -29,6 +29,7 @@ let render ~io { w = _; min; max } state box =
     (Circle.v (Point.v (Box.minx line +. pos) (Box.midy line)) radius)
 
 let update ~io { w = _; min; max } state box =
+  let w = Box.w box -. (2. *. padding) in
   let { v; grasped } = state in
   let grasped =
     if grasped then not (View.clip_events false ~io @@ Event.is_up `click_left)
@@ -38,7 +39,7 @@ let update ~io { w = _; min; max } state box =
     if grasped then
       Float.max min @@ Float.min max
       @@ (Vec.x (Event.mouse_pos ~io) -. Box.minx box)
-         *. (max -. min) /. Box.w box
+         *. (max -. min) /. w
          +. min
     else v
   in
