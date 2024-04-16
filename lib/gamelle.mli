@@ -1,52 +1,8 @@
-type io = Gamelle_common.io
+type io = Gamelle_backend.io
 
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
 
-open Gamelle_common
-
-module Point : sig
-  include module type of Geometry.Point
-end
-
-module Vec : sig
-  include module type of Geometry.Vec
-end
-
-module Color : sig
-  include module type of Geometry.Color
-end
-
-module Segment : sig
-  include module type of Geometry.Segment
-
-  val draw : io:io -> color:Color.t -> t -> unit
-end
-
-module Circle : sig
-  include module type of Geometry.Circle
-
-  val draw : io:io -> color:Color.t -> t -> unit
-  val fill : io:io -> color:Color.t -> t -> unit
-end
-
-module Box : sig
-  include module type of Geometry.Box
-
-  val draw : io:io -> color:Color.t -> t -> unit
-  val fill : io:io -> color:Color.t -> t -> unit
-end
-
-module Size : module type of Geometry.Size
-module Size1 : module type of Geometry.Size1
-
-type color = Geometry.color
-type point = Geometry.point
-type vec = Geometry.vec
-type segment = Geometry.segment
-type circle = Geometry.circle
-type box = Geometry.box
-type size = Geometry.size
-
+include module type of Draw_geometry
 module Ui : module type of Ui
 
 module Bitmap : sig
@@ -111,7 +67,7 @@ val dt : unit -> float
 val draw : io:io -> Bitmap.t -> point -> unit
 val draw_poly : io:io -> color:Color.t -> point list -> unit
 val fill_poly : io:io -> color:Color.t -> point list -> unit
-val show_cursor : bool -> unit
+val show_cursor : io:io -> bool -> unit
 
 val draw_string :
   io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> string -> point -> unit
@@ -143,9 +99,9 @@ module Event : sig
 end
 
 module Window : sig
-  val set_size : size -> unit
-  val size : unit -> size
-  val box : unit -> box
+  val set_size : io:io -> size -> unit
+  val size : io:io -> size
+  val box : io:io -> box
 end
 
 (* *)

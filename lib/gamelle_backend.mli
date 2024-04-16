@@ -1,6 +1,9 @@
 open Gamelle_common
 open Geometry
 
+type io_backend
+type io = io_backend Gamelle_common.abstract_io
+
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
 
 module Bitmap : sig
@@ -41,7 +44,7 @@ val draw_poly : io:io -> color:Color.t -> point list -> unit
 val fill_poly : io:io -> color:Color.t -> point list -> unit
 val draw_circle : io:io -> color:Color.t -> Circle.t -> unit
 val fill_circle : io:io -> color:Color.t -> Circle.t -> unit
-val show_cursor : bool -> unit
+val show_cursor : io:io -> bool -> unit
 
 val draw_string :
   io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> string -> point -> unit
@@ -49,9 +52,9 @@ val draw_string :
 val text_size : io:io -> ?font:Font.t -> ?size:int -> string -> size
 
 module Window : sig
-  val set_size : size -> unit
-  val size : unit -> size
-  val box : unit -> box
+  val set_size : io:io -> size -> unit
+  val size : io:io -> size
+  val box : io:io -> box
 end
 
 (* *)

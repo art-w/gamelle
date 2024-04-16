@@ -2,9 +2,9 @@ module Sdl = Tsdl.Sdl
 module Tsdl_image = Tsdl_image.Image
 module Tsdl_ttf = Tsdl_ttf.Ttf
 
-let global_render : Sdl.renderer option ref = ref None
-let set_render r = global_render := Some r
-let render () = Option.get !global_render
+type io_backend = { window : Sdl.window; renderer : Sdl.renderer }
+type io = io_backend Gamelle_common.abstract_io
+
 let start_time = ref 0.0
 let now = ref 0.0
 let now_prev = ref 0.0

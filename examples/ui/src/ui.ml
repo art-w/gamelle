@@ -7,7 +7,7 @@ type k' = k
 let () =
   Gamelle.run Box.zero @@ fun ~io box ->
   if Event.is_pressed ~io `escape then raise Exit;
-  show_cursor true;
+  show_cursor ~io true;
   let io = View.drawing_box box io in
   let box =
     snd

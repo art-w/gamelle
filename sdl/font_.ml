@@ -1,17 +1,15 @@
 open Common
-module Geometry = Gamelle_common.Geometry
-module Io = Gamelle_common.Io
-module Delayed = Gamelle_common.Delayed
+open Gamelle_common
 module Ttf = Tsdl_ttf
 
 type s = { buffer : Sdl_buffer.t; sizes : (int, Ttf.font) Hashtbl.t }
-type t = s Delayed.t
+type t = (io, s) Delayed.t
 
 let load binstring =
   Delayed.make @@ fun ~io ->
   { buffer = Sdl_buffer.load ~io binstring; sizes = Hashtbl.create 16 }
 
-let default = load Gamelle_common.Font.default
+let default : t = load Gamelle_common.Font.default
 
 let get ~io font size =
   let font = Delayed.force ~io font in
@@ -19,7 +17,7 @@ let get ~io font size =
   | font -> font
   | exception Not_found ->
       let& ft = Ttf.open_font_rw (Sdl_buffer.get font.buffer) 0 size in
-      Io.clean ~io (fun () ->
+      clean_io ~io (fun () ->
           Hashtbl.remove font.sizes size;
           Ttf.close_font ft);
       Hashtbl.replace font.sizes size ft;
@@ -33,7 +31,7 @@ let draw ~color font size text =
   let& bmp =
     Ttf.render_utf8_blended font text (Tsdl.Sdl.Color.create ~r ~g ~b ~a)
   in
-  Bitmap.of_texture bmp
+  Bitmap.of_texture ~io bmp
 
 let text_size font size text =
   Delayed.make @@ fun ~io ->

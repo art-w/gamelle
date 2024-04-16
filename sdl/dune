@@ -7,7 +7,6 @@
   draw
   events_sdl
   font_
-  global
   sdl_buffer
   sound
   window)

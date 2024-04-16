@@ -160,6 +160,8 @@ let draw_board ~io
   draw_cell ~io center_bottom (Point.v cell_size (cell_size *. 2.)) ;
   draw_cell ~io right_bottom (Point.v (cell_size *. 2.) (cell_size *. 2.))
 
+let failsound = Sound.load Assets.confirm1
+
 let () =
   run state
   @@ fun ~io state ->
@@ -171,12 +173,13 @@ let () =
     | Some Cross ->
         print_endline "Cross won" ; exit 0
     | None ->
-        if Event.is_up ~io `click_left then
+        if Event.is_pressed ~io `click_left then
           let x, y = Vec.to_tuple @@ Event.mouse_pos ~io in
           (* first column *)
           let cell_x = Int.of_float (floor x /. 64.)
           and cell_y = Int.of_float (floor (y /. 64.)) in
-          if cell_x < 0 || cell_x >= 3 || cell_y < 0 || cell_y >= 3 then state
+          if cell_x < 0 || cell_x >= 3 || cell_y < 0 || cell_y >= 3 then (
+            Sound.play ~io failsound ; state )
           else if Option.is_some (cell_of_coord board cell_x cell_y) then state
           else
             let board =
@@ -186,7 +189,7 @@ let () =
             {player; board}
         else state
   in
-  show_cursor true ;
+  show_cursor ~io true ;
   draw_background ~io () ;
   draw_board ~io state.board ;
   draw_grid ~io () ;

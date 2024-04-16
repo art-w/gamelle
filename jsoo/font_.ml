@@ -1,5 +1,5 @@
 open Brr
-open Globals
+open Jsoo
 open Gamelle_common
 open Geometry
 
@@ -37,20 +37,20 @@ let default = load Gamelle_common.Font.default
 let default_size = Gamelle_common.Font.default_size
 
 let draw_at ~io (lazy font_name) ~size text (x, y) =
-  C.set_font (render ())
+  C.set_font io.backend.ctx
     (Jstr.of_string (string_of_int size ^ "px " ^ font_name));
   let text = Jstr.of_string text in
-  let metrics = C.measure_text (render ()) text in
-  let ctx = render () in
+  let metrics = C.measure_text io.backend.ctx text in
+  let ctx = io.backend.ctx in
   Clip.draw_clip ~io ctx (fun () ->
       C.fill_text ctx text ~x
         ~y:(y +. C.Text_metrics.font_bounding_box_ascent metrics))
 
-let text_size (lazy font_name) ~size text =
-  C.set_font (render ())
+let text_size ~io (lazy font_name) ~size text =
+  C.set_font io.backend.ctx
     (Jstr.of_string (string_of_int size ^ "px " ^ font_name));
   let text = Jstr.of_string text in
-  let metrics = C.measure_text (render ()) text in
+  let metrics = C.measure_text io.backend.ctx text in
   let w = C.Text_metrics.width metrics in
   let h =
     C.Text_metrics.font_bounding_box_ascent metrics

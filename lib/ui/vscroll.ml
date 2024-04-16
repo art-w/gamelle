@@ -1,4 +1,3 @@
-open Gamelle_common
 open Draw_geometry
 open Ui_backend
 open Widget_builder

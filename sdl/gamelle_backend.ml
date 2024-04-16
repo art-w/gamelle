@@ -1,4 +1,4 @@
-open Common
+include Common
 module Geometry = Gamelle_common.Geometry
 module Bitmap = Bitmap
 module Font = Font_
@@ -39,16 +39,16 @@ let run () =
     Tsdl_mixer.Mixer.open_audio 44_100 Tsdl_mixer.Mixer.default_format 2 2048
   in
 
-  ignore @@ Tsdl_mixer.Mixer.allocate_channels 256;
+  ignore @@ Tsdl_mixer.Mixer.allocate_channels Gamelle_common.max_sounds;
 
   let& window =
     Sdl.create_window "Test" ~w:640 ~h:480 Sdl.Window.(windowed + resizable)
   in
-  Global.window := Some window;
   let& renderer =
     Sdl.create_renderer ~flags:Sdl.Renderer.(accelerated + presentvsync) window
   in
-  Common.set_render renderer;
+
+  let backend = { window; renderer } in
 
   let& _ = Sdl.show_cursor false in
 
@@ -72,14 +72,13 @@ let run () =
     done;
     events := Events_backend.update_updown previous !events;
 
-
     mutex_protect lock (fun () ->
         match !current_run with
         | No_run -> invalid_arg "No game currently running"
         | Run { state; update; clean } ->
             let& () = Sdl.render_clear renderer in
-            let io = { (Io.make ()) with event = !events } in
-            fill_rect ~io ~color:Geometry.Color.black (Window.box ());
+            let io = { (make_io backend) with event = !events } in
+            fill_rect ~io ~color:Geometry.Color.black (Window.box ~io);
             let state = update ~io state in
             let clean = List.rev_append !(io.clean) clean in
             current_run := Run { state; update; clean });
@@ -120,5 +119,3 @@ let run state update =
   | Run { clean; _ } ->
       List.iter (fun fn -> fn ()) clean;
       Mutex.unlock lock
-
-module Event = Gamelle_common.Io.Event

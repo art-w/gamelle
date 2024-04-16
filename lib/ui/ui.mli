@@ -1,4 +1,4 @@
-open Gamelle_common
+open Gamelle_backend
 open Draw_geometry
 
 type t

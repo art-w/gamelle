@@ -4,7 +4,7 @@ open Brr_canvas
 module C = C2d
 
 let draw_clip ~io ctx f =
-  let clip = io.Io.clip in
+  let clip = io.clip in
   Option.iter
     (fun clip ->
       C.save ctx;

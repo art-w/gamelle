@@ -42,7 +42,7 @@ let main ~io st =
         { st with click = None; rects = (fst_pos, st.mouse) :: st.rects }
   in
   Box.fill ~io ~color:Color.black (Box.v (Point.v 0. 0.) (Point.v 500. 500.));
-  show_cursor true;
+  show_cursor ~io true;
   let io = View.scaled st.scale io in
   draw ~io st.bmp (Point.v 0. 0.);
   Option.iter

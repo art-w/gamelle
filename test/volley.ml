@@ -98,8 +98,8 @@ let () =
   Gamelle.run initial_state
   @@ fun ~io ({ player1; player2; ball; _ } as state) ->
   let io = View.translated (Vec.v 0.0 500.0) io in
-  Window.set_size (Size.v 1010. 1020.);
-  Box.fill ~io ~color:Color.black (Window.box ());
+  Window.set_size ~io (Size.v 1010. 1020.);
+  Box.fill ~io ~color:Color.black (Window.box ~io);
   if Event.is_pressed ~io `escape then raise Exit
   else if Event.is_down ~io (`char 'r') then initial_state
   else if Vec.y (Physics.center ball) > 440.0 then

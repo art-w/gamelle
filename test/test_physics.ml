@@ -21,7 +21,7 @@ let random_size2 () = Size.v (2.0 *. random_size1 ()) (2.0 *. random_size1 ())
 
 let () =
   run world @@ fun ~io world ->
-  show_cursor true;
+  show_cursor ~io true;
   if Event.is_up ~io `escape then raise Exit;
   let world =
     if Event.is_down ~io `click_left then

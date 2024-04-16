@@ -45,7 +45,7 @@ let update ~io { x; y; vx; vy; _ } =
 
   if Event.is_down ~io `click_left then (
     cursor := not !cursor;
-    show_cursor !cursor;
+    show_cursor ~io !cursor;
     Sound.play ~io Assets.stick);
 
   let vx, vy =
@@ -69,8 +69,8 @@ let update ~io { x; y; vx; vy; _ } =
   let vx = vx *. 0.9 in
   let vy = vy *. 0.9 in
 
-  Window.set_size (Size.v 800. 800.);
-  Box.fill ~io ~color:black (Window.box ());
+  Window.set_size ~io (Size.v 800. 800.);
+  Box.fill ~io ~color:black (Window.box ~io);
   draw_string ~io ~color:Color.white ~size:30 "Hello World!" Vec.zero;
   draw_string ~io:(View.scaled 2.0 io) ~color:Color.white ~size:30
     "Hello World!" Vec.zero;

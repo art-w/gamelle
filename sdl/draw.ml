@@ -2,31 +2,28 @@ open Common
 open Gamelle_common
 open Geometry
 module Gfx = Tsdl_gfx.Gfx
-module Io = Gamelle_common.Io
 module Delayed = Gamelle_common.Delayed
 
-type io = Io.t
-
-let set_color c =
+let set_color ~io c =
   let r, g, b, a = Color.to_srgbi c in
   let a = int_of_float (a *. 255.) in
   (* Format.printf "%i %i %i %i@." r g b a ; *)
-  let& () = Sdl.set_render_draw_color (render ()) r g b a in
+  let& () = Sdl.set_render_draw_color io.backend.renderer r g b a in
   ()
 
 let tau = 8.0 *. atan 1.0
 let point_zero = Sdl.Point.create ~x:0 ~y:0
 
 let project ~io p =
-  let x, y = Vec.to_tuple (Io.project ~io p) in
+  let x, y = Vec.to_tuple (Transform.project io.view p) in
   (int x, int y)
 
 let draw_clip ~io renderer f =
-  let clip = io.Io.clip in
+  let clip = io.clip in
   let* () =
     Option.map
       (fun clip ->
-        let clip = Box.translate clip io.Io.centering_translation in
+        let clip = Box.translate clip io.centering_translation in
         let clip_rect =
           Sdl.Rect.create
             ~x:((int @@ Box.minx clip) + 1)
@@ -43,7 +40,7 @@ let draw_clip ~io renderer f =
   let r = f () in
   let* () =
     if Option.is_some clip then
-      let win = Window.box () in
+      let win = Window.box ~io in
       let clip_rect =
         Sdl.Rect.create
           ~x:(int @@ Box.minx win)
@@ -58,7 +55,7 @@ let draw_clip ~io renderer f =
 
 let draw ~io bmp p =
   let bmp = Delayed.force ~io bmp in
-  let scale = io.Io.view.scale in
+  let scale = io.view.scale in
   let x, y = project ~io p in
   let w, h = Bitmap.size bmp in
   let src = Sdl.Rect.create ~x:0 ~y:0 ~w ~h in
@@ -70,9 +67,9 @@ let draw ~io bmp p =
   in
 
   let open Bitmap in
-  let angle = io.Io.view.rotate *. 360.0 /. tau in
+  let angle = io.view.rotate *. 360.0 /. tau in
   let& () =
-    let renderer = render () in
+    let renderer = io.backend.renderer in
     draw_clip ~io renderer (fun () ->
         Sdl.render_copy_ex ~src ~dst renderer bmp.bmp angle (Some point_zero)
           Sdl.Flip.none)
@@ -91,12 +88,12 @@ let text_size ~io ?(font = Font_.default) ?(size = Font.default_size) text =
 
 let draw_line ~io ~color segment =
   let p, p' = Segment.to_tuple segment in
-  set_color color;
+  set_color ~io color;
   let x0, y0 = project ~io p in
   let x1, y1 = project ~io p' in
 
   let& () =
-    let renderer = render () in
+    let renderer = io.backend.renderer in
     draw_clip ~io renderer (fun () -> Sdl.render_draw_line renderer x0 y0 x1 y1)
   in
   ()
@@ -108,29 +105,29 @@ let draw_rect ~io ~color rect =
   draw_line ~io ~color (Box.right rect)
 
 let draw_poly ~io ~color arr =
-  set_color color;
+  set_color ~io color;
   let arr = List.map (project ~io) arr in
-  let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
+  let& r, g, b, a = Sdl.get_render_draw_color io.backend.renderer in
   let& () =
-    let renderer = render () in
+    let renderer = io.backend.renderer in
     draw_clip ~io renderer (fun () ->
         Gfx.polygon_rgba renderer ~ps:arr ~r ~g ~b ~a)
   in
   ()
 
 let fill_poly ~io ~color arr =
-  set_color color;
+  set_color ~io color;
   let arr = List.map (project ~io) arr in
-  let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
+  let& r, g, b, a = Sdl.get_render_draw_color io.backend.renderer in
   let& () =
-    let renderer = render () in
+    let renderer = io.backend.renderer in
     draw_clip ~io renderer (fun () ->
         Gfx.filled_polygon_rgba renderer ~ps:arr ~r ~g ~b ~a)
   in
   ()
 
 let fill_rect ~io ~color rect =
-  set_color color;
+  set_color ~io color;
   let p0 = Box.tl_pt rect
   and p1 = Box.tr_pt rect
   and p2 = Box.br_pt rect
@@ -141,12 +138,12 @@ let fill_rect ~io ~color rect =
 let draw_circle ~io ~color circle =
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  set_color color;
+  set_color ~io color;
   let x, y = project ~io center in
-  let radius = int (io.Io.view.scale *. radius) in
-  let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
+  let radius = int (io.view.scale *. radius) in
+  let& r, g, b, a = Sdl.get_render_draw_color io.backend.renderer in
   let& () =
-    let renderer = render () in
+    let renderer = io.backend.renderer in
     draw_clip ~io renderer (fun () ->
         Gfx.aacircle_rgba renderer ~x ~y ~rad:radius ~r ~g ~b ~a)
   in
@@ -155,12 +152,12 @@ let draw_circle ~io ~color circle =
 let fill_circle ~io ~color circle =
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  set_color color;
+  set_color ~io color;
   let x, y = project ~io center in
-  let radius = int (io.Io.view.scale *. radius) in
-  let& r, g, b, a = Sdl.get_render_draw_color (render ()) in
+  let radius = int (io.view.scale *. radius) in
+  let& r, g, b, a = Sdl.get_render_draw_color io.backend.renderer in
   let& () =
-    let renderer = render () in
+    let renderer = io.backend.renderer in
     draw_clip ~io renderer (fun () ->
         let* () =
           Gfx.filled_circle_rgba renderer ~x ~y ~rad:radius ~r ~g ~b ~a
@@ -169,6 +166,6 @@ let fill_circle ~io ~color circle =
   in
   ()
 
-let show_cursor b =
+let show_cursor ~io:_ b =
   let& _ = Sdl.show_cursor b in
   ()
