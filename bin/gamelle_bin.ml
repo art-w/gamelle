@@ -81,7 +81,7 @@ let extension_loader ~sysname ~basename ~ext =
         in
         Some (Parts (raw, "Gamelle.Bitmap.sub", parts))
       else Some (Raw raw)
-  | _, "Mp3" -> Some (Raw "Gamelle.Sound.load")
+  | _, ("Mp3" | "Wav") -> Some (Raw "Gamelle.Sound.load")
   | "assets", _ | "dune", "No_ext" | _, "Parts" -> None
   | _ -> Some (Raw "Fun.id")
 
