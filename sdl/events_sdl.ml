@@ -48,14 +48,12 @@ let update t e =
   | _ when typ = Sdl.Event.key_down -> (
       let key = key_of_event e in
       match key with
-      | Some key ->
-          { t with keypressed = insert key t.keypressed }
+      | Some key -> { t with keypressed = insert key t.keypressed }
       | None -> t)
   | _ when typ = Sdl.Event.key_up -> (
       let key = key_of_event e in
       match key with
-      | Some key ->
-          { t with keypressed = remove key t.keypressed }
+      | Some key -> { t with keypressed = remove key t.keypressed }
       | None -> t)
   | _ when typ = Sdl.Event.mouse_wheel -> (
       let wheel_delta = Sdl.Event.(get e mouse_wheel_y) in
