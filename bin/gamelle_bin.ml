@@ -1,6 +1,7 @@
 open Cmdliner
 
 let is_regular_file f = Sys.file_exists f && not (Sys.is_directory f)
+let is_directory f = Sys.file_exists f && Sys.is_directory f
 
 let mkdir_for ~root name =
   let parts = String.split_on_char '/' name in
@@ -85,21 +86,6 @@ let extension_loader ~sysname ~basename ~ext =
   | "assets", _ | "dune", "No_ext" | _, "Parts" -> None
   | _ -> Some (Raw "Fun.id")
 
-let output_file (full_name, basename, loader) =
-  if is_regular_file full_name then (
-    Format.printf "@.  (** Generated from %s *)@." basename;
-    match loader with
-    | Raw loader ->
-        Format.printf "  let %s = %s %S@." basename loader
-          (file_contents full_name)
-    | Parts (loader, extract, parts) ->
-        Format.printf "  let %s =\n" basename;
-        Format.printf "    let raw = %s %S in\n" loader
-          (file_contents full_name);
-        Format.printf "    [|\n";
-        List.iter (Format.printf "      %s raw %s;\n" extract) parts;
-        Format.printf "    |]@.")
-
 let split_file_ext filename =
   let name = normalize_name @@ Filename.remove_extension filename in
   let raw_ext = Filename.extension filename in
@@ -119,7 +105,32 @@ module StringMap = Map.Make (struct
   let compare = compare
 end)
 
-let gen_ml files cwd =
+let list_files k =
+  let cwd = Sys.getcwd () in
+  Format.printf "(* %S *)@." cwd;
+  k (Sys.readdir cwd) cwd
+
+let rec output_file (full_name, basename, loader) =
+  if is_directory full_name then (
+    Format.printf "@.  (** Generated from %s *)\nmodule %s = struct@." basename
+      (String.capitalize_ascii basename);
+    gen_ml (Sys.readdir full_name) full_name;
+    Format.printf "\nend\n")
+  else if is_regular_file full_name then (
+    Format.printf "@.  (** Generated from %s *)@." basename;
+    match loader with
+    | Raw loader ->
+        Format.printf "  let %s = %s %S@." basename loader
+          (file_contents full_name)
+    | Parts (loader, extract, parts) ->
+        Format.printf "  let %s =\n" basename;
+        Format.printf "    let raw = %s %S in\n" loader
+          (file_contents full_name);
+        Format.printf "    [|\n";
+        List.iter (Format.printf "      %s raw %s;\n" extract) parts;
+        Format.printf "    |]@.")
+
+and gen_ml files cwd =
   let files =
     Array.fold_left
       (fun map sysname ->
@@ -141,11 +152,6 @@ let gen_ml files cwd =
       List.iter output_file files;
       Format.printf "end@.include %s@." ext)
     files
-
-let list_files k =
-  let cwd = Sys.getcwd () in
-  Format.printf "(* %S *)@." cwd;
-  k (Sys.readdir cwd) cwd
 
 module Assets = struct
   let cmd_edit =

@@ -160,7 +160,7 @@ let draw_board ~io
   draw_cell ~io center_bottom (Point.v cell_size (cell_size *. 2.)) ;
   draw_cell ~io right_bottom (Point.v (cell_size *. 2.) (cell_size *. 2.))
 
-let failsound = Assets.confirm1
+let failsound = Assets.Audio.confirm1
 
 let () =
   run state
