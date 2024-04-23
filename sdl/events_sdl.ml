@@ -19,6 +19,8 @@ let key_of_keycode kc =
   | _ when kc = Sdl.K.rshift -> Some `shift
   | _ when kc = Sdl.K.space -> Some `space
   | _ when kc = Sdl.K.tab -> Some `tab
+  (* `char _ events are produced by SdlTextInput events not keypresses. This is
+     the only clean way to handle shift key and various layouts *)
   (*| _ when kc >= 0 && kc <= 127 ->
       Some (`char (Char.chr ( kc )))*)
   | _ -> None
