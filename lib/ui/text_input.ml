@@ -11,6 +11,7 @@ type state = {
   focused : bool;
   arrow_key : (int * [ `left | `right ]) option;
   char_key : (int * char) option;
+  backspace_key : int option;
 }
 
 type return = string
@@ -23,8 +24,31 @@ let default _ =
     cursor = 0;
     focused = false;
     arrow_key = None;
+    backspace_key = None;
     char_key = None;
   }
+
+(*
+
+let rec v1 = body1
+and v2 = body2
+
+---
+body2
+---
+( let rec v1 = body1 in
+  and v2 = body2 in
+  v2
+)
+---
+let module M = struct
+  let rec v1 = body1
+  and v2 = body2
+end
+in
+M.v2
+
+  *)
 
 let construct_state s = Text_input s
 
@@ -38,8 +62,19 @@ let size ~ts width =
 let text_length ~io text = Size.w (Text.size ~io ~size:font_size text)
 let cursor_offset ~io text cursor = text_length ~io (String.sub text 0 cursor)
 
+let delete_char i text =
+  String.sub text 0 i ^ String.sub text (i + 1) (String.length text - (i + 1))
+
 let render ~io _params
-    { text; offset; cursor; focused; arrow_key = _; char_key = _ } box =
+    {
+      text;
+      offset;
+      cursor;
+      focused;
+      arrow_key = _;
+      char_key = _;
+      backspace_key = _;
+    } box =
   Box.fill ~io ~color:bg' box;
   Box.draw ~io ~color:(if focused then highlight else fg) box;
   let io = View.clipped box io in
@@ -71,8 +106,8 @@ let slow_frames = 60
 let slow_frequency = 20
 let fast_frequency = 3
 
-let update ~io _param { text; offset; cursor; focused; arrow_key; char_key } box
-    =
+let update ~io _param
+    { text; offset; cursor; focused; arrow_key; char_key; backspace_key } box =
   let nsize = Vec.(Box.size box - (2. * padding_xy)) in
   let box = Box.(v_mid (mid box) nsize) in
   let width = max (Box.w box) 0. in
@@ -80,6 +115,7 @@ let update ~io _param { text; offset; cursor; focused; arrow_key; char_key } box
     Option.map (fun (frames, dir) -> (frames + 1, dir)) arrow_key
   in
   let char_key = Option.map (fun (n, c) -> (n + 1, c)) char_key in
+  let backspace_key = Option.map (( + ) 1) backspace_key in
   let arrow_key =
     if Event.is_down ~io `arrow_left then Some (0, `left)
     else if Event.is_down ~io `arrow_right then Some (0, `right)
@@ -87,11 +123,17 @@ let update ~io _param { text; offset; cursor; focused; arrow_key; char_key } box
       None
     else arrow_key
   in
+  let backspace_key =
+    if Event.is_down ~io `backspace then Some 0
+    else if Event.is_up ~io `backspace then None
+    else backspace_key
+  in
   let module Chars = Event.Chars in
   let char_key =
     let char_down = Event.down_chars ~io |> Chars.choose_opt in
     match char_down with
-    | Some c -> Some (0, c)
+    | Some c ->
+      Some (0, c)
     | None -> (
         match char_key with
         | Some (_, c) when Chars.mem c (Event.up_chars ~io) -> None
@@ -136,6 +178,21 @@ let update ~io _param { text; offset; cursor; focused; arrow_key; char_key } box
           ^ String.of_seq (Seq.return char)
           ^ String.sub text cursor (String.length text - cursor) )
   in
+  let cursor, text =
+    match backspace_key with
+    | None -> (cursor, text)
+    | Some 0 when cursor > 0 ->
+        let cursor = cursor - 1 in
+        (cursor, delete_char cursor text)
+    | Some n when cursor > 0 && n < slow_frames && n mod slow_frequency = 0 ->
+        let cursor = cursor - 1 in
+        (cursor, delete_char cursor text)
+    | Some n when cursor > 0 && n >= slow_frames && n mod fast_frequency = 0 ->
+        let cursor = cursor - 1 in
+        (cursor, delete_char cursor text)
+    | _ -> (cursor, text)
+  in
+
   let cursor_pos = cursor_offset ~io text cursor +. offset in
   let offset =
     if cursor_pos < 0. then offset +. text_length ~io (String.sub text cursor 1)
@@ -145,7 +202,7 @@ let update ~io _param { text; offset; cursor; focused; arrow_key; char_key } box
       offset -. char_len
     else offset
   in
-  { text; offset; cursor; focused; arrow_key; char_key }
+  { text; offset; cursor; focused; arrow_key; char_key; backspace_key }
 
 let result _ { text; _ } = text
 

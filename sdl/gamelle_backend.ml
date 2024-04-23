@@ -26,6 +26,7 @@ let current_run = ref No_run
 
 let run () =
   let& () = Sdl.init Sdl.Init.(video + audio) in
+  Sdl.start_text_input ();
   let _ = Tsdl_image.init Tsdl_image.Init.(jpg + png) in
   let& _ = Tsdl_mixer.Mixer.init Tsdl_mixer.Mixer.Init.(ogg + mp3) in
   let& _ = Ttf.init () in

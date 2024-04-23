@@ -3,19 +3,29 @@ open Gamelle_common.Events_backend
 
 let key_of_keycode kc =
   match () with
-  | _ when kc = Sdl.K.escape -> Some `escape
-  | _ when kc = Sdl.K.lctrl -> Some `control_left
-  | _ when kc = Sdl.K.rctrl -> Some `control_right
+  | _ when kc = Sdl.K.lalt -> Some `alt
+  | _ when kc = Sdl.K.ralt -> Some `alt_gr
+
+  | _ when kc = Sdl.K.down -> Some `arrow_down
   | _ when kc = Sdl.K.left -> Some `arrow_left
   | _ when kc = Sdl.K.right -> Some `arrow_right
   | _ when kc = Sdl.K.up -> Some `arrow_up
-  | _ when kc = Sdl.K.down -> Some `arrow_down
-  | _ when kc >= Sdl.K.a && kc <= Sdl.K.z ->
-      Some (`char (Char.chr (Char.code 'a' + kc - Sdl.K.a)))
+  | _ when kc = Sdl.K.backspace -> Some `backspace
+  | _ when kc = Sdl.K.lctrl -> Some `control_left
+  | _ when kc = Sdl.K.rctrl -> Some `control_right
+  | _ when kc = Sdl.K.delete -> Some `delete
+  | _ when kc = Sdl.K.escape -> Some `escape
+  (* todo : meta key *)
+  | _ when kc = Sdl.K.lshift -> Some `shift
+  | _ when kc = Sdl.K.rshift -> Some `shift
+  | _ when kc = Sdl.K.space -> Some `space
+  | _ when kc = Sdl.K.tab -> Some `tab
+  | _ when kc >= 0 && kc <= 127 ->
+      Some (`char (Char.chr ( kc )))
   | _ -> None
 
-let key_of_event e = key_of_keycode (Sdl.Event.get e Sdl.Event.keyboard_keycode)
-
+let key_of_event e =
+  key_of_keycode (Sdl.Event.get e Sdl.Event.keyboard_keycode)
 let update t e =
   let typ = Sdl.Event.get e Sdl.Event.typ in
   match () with
@@ -25,23 +35,23 @@ let update t e =
       let key = key_of_event e in
       match key with
       | Some key ->
-          let down_chars =
+          let pressed_chars =
             match key with
             | `char c -> Chars.add c t.pressed_chars
             | _ -> t.pressed_chars
           in
-          { t with keypressed = insert key t.keypressed; down_chars }
+          { t with keypressed = insert key t.keypressed; pressed_chars }
       | None -> t)
   | _ when typ = Sdl.Event.key_up -> (
       let key = key_of_event e in
       match key with
       | Some key ->
-          let up_chars =
+          let pressed_chars =
             match key with
             | `char c -> Chars.remove c t.pressed_chars
             | _ -> t.pressed_chars
           in
-          { t with keypressed = remove key t.keypressed; up_chars }
+          { t with keypressed = remove key t.keypressed; pressed_chars }
       | None -> t)
   | _ when typ = Sdl.Event.mouse_wheel -> (
       let wheel_delta = Sdl.Event.(get e mouse_wheel_y) in

@@ -87,6 +87,14 @@ module Event : sig
     | `arrow_right
     | `arrow_up
     | `arrow_down
+    | `backspace
+    | `shift
+    | `space
+    | `alt
+    | `alt_gr
+    | `tab
+    | `delete
+    | `meta
     | `char of char
     | `click_left
     | `click_right

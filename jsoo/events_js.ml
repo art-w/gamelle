@@ -8,40 +8,52 @@ let new_frame () =
   current := update_updown !previous !current;
   previous := !current
 
-let key_of_keycode kc =
+let keys_of_string kc =
   match Jstr.to_string kc with
-  | "ArrowLeft" -> `arrow_left
-  | "ArrowRight" -> `arrow_right
-  | "ArrowUp" -> `arrow_up
-  | "ArrowDown" -> `arrow_down
-  | "Escape" -> `escape
-  | "ControlLeft" -> `control_left
-  | "ControlRight" -> `control_right
-  | key when String.length key = 4 && String.starts_with ~prefix:"Key" key ->
-      let lt = key.[3] in
-      `char (Char.lowercase_ascii lt)
+  | "ArrowLeft" -> [ `arrow_left ]
+  | "ArrowRight" -> [ `arrow_right ]
+  | "ArrowUp" -> [ `arrow_up ]
+  | "ArrowDown" -> [ `arrow_down ]
+  | "Escape" -> [ `escape ]
+  | "ControlLeft" -> [ `control_left ]
+  | "ControlRight" -> [ `control_right ]
+  | "Meta" -> [ `meta ]
+  | "Alt" -> [ `alt ]
+  | "AltGraph" -> [ `alt_gr ]
+  | "Backspace" -> [ `backspace ]
+  | "Shift" -> [ `shift ]
+  | " " -> [ `space; `char ' ' ]
+  | "Tab" -> [ `tab ]
+  | key when String.length key = 1 ->
+      let lt = key.[0] in
+      [ `char (Char.lowercase_ascii lt) ]
   | kc ->
       Console.(log [ "TODO key:"; kc ]);
-      `unknown_key
+      [ `unknown_key ]
 
-let key_of_event e = key_of_keycode (Ev.Keyboard.code e)
+let keys_of_event e = keys_of_string (Ev.Keyboard.key e)
 
 let update ~status t e =
-  let key = key_of_event e in
+  let keys = keys_of_event e in
   let chars =
-    match key with `char c -> Chars.singleton c | _ -> Chars.empty
+    keys
+    |> List.filter_map (fun key ->
+           match key with `char c -> Some c | _ -> None)
+    |> Chars.of_list
   in
+  let keys = Keys.of_list keys in
+
   match status with
   | `Up ->
       {
         t with
-        keypressed = remove key t.keypressed;
+        keypressed = Keys.diff t.keypressed keys;
         pressed_chars = Chars.diff t.pressed_chars chars;
       }
   | `Down ->
       {
         t with
-        keypressed = insert key t.keypressed;
+        keypressed = Keys.union keys t.keypressed;
         pressed_chars = Chars.union t.pressed_chars chars;
       }
 

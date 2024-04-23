@@ -1,17 +1,25 @@
 open Geometry
 
 type key =
-  [ `quit
-  | `escape
-  | `control_left
-  | `control_right
+  [ `alt
+  | `alt_gr
+  | `arrow_down
   | `arrow_left
   | `arrow_right
   | `arrow_up
-  | `arrow_down
+  | `backspace
   | `char of char
   | `click_left
   | `click_right
+  | `control_left
+  | `control_right
+  | `delete
+  | `escape
+  | `meta
+  | `quit
+  | `shift
+  | `space
+  | `tab
   | `wheel
   | `unknown_key ]
 
