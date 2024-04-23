@@ -4,8 +4,9 @@ open Jsoo
 open Brr_webaudio
 open Brr_io
 open Audio
+open Fut.Syntax
 
-type sound = Jstr.t
+type sound = (io, Audio.Buffer.t Fut.t) Delayed.t
 
 let dont_wait f = Fut.await f Fun.id
 
@@ -33,23 +34,27 @@ let blob_url binstring =
   in
   Jstr.of_string ("data:audio/wav;base64," ^ Jstr.to_string b64)
 
-let load binstring = blob_url binstring
+let load binstring =
+  let s = blob_url binstring in
+  Delayed.make (fun ~io ->
+      let audio_ctx = io.backend.audio in
+      let node_ctx = Context.as_base audio_ctx in
+      let req = Fetch.Request.v s in
+      let*? response = Fetch.request req in
+      let*? array_buffer =
+        response |> Fetch.Response.as_body |> Fetch.Body.array_buffer
+      in
+      let array_buffer = array_buffer |> Tarray.Buffer.to_jv in
+      array_buffer |> Audio.Buffer.of_jv
+      |> Context.Base.decode_audio_data node_ctx
+      |> Fut.map get_ok)
 
 let play ~io s =
   dont_wait
   @@
   let audio_ctx = io.backend.audio in
   let node_ctx = Context.as_base audio_ctx in
-  let req = Fetch.Request.v s in
-  let*? response = Fetch.request req in
-  let*? array_buffer =
-    response |> Fetch.Response.as_body |> Fetch.Body.array_buffer
-  in
-  let array_buffer = array_buffer |> Tarray.Buffer.to_jv in
-  let*? buffer =
-    array_buffer |> Audio.Buffer.of_jv
-    |> Context.Base.decode_audio_data node_ctx
-  in
+  let* buffer = Delayed.force ~io s in
   let src = Node.Buffer_source.create node_ctx in
   Node.Buffer_source.set_buffer src (Some buffer);
   let node = Node.Buffer_source.as_node src in
