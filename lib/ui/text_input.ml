@@ -9,24 +9,14 @@ type state = {
   offset : float;
   cursor : int;
   focused : bool;
-  arrow_key : (int * [ `left | `right ]) option;
-  char_key : (int * char) option;
-  backspace_key : int option;
+  pressed_key : (int * Event.key) option;
 }
 
 type return = string
 type Ui_backend.state += Text_input of state
 
 let default _ =
-  {
-    text = "";
-    offset = 0.;
-    cursor = 0;
-    focused = false;
-    arrow_key = None;
-    backspace_key = None;
-    char_key = None;
-  }
+  { text = ""; offset = 0.; cursor = 0; focused = false; pressed_key = None }
 
 (*
 
@@ -65,16 +55,7 @@ let cursor_offset ~io text cursor = text_length ~io (String.sub text 0 cursor)
 let delete_char i text =
   String.sub text 0 i ^ String.sub text (i + 1) (String.length text - (i + 1))
 
-let render ~io _params
-    {
-      text;
-      offset;
-      cursor;
-      focused;
-      arrow_key = _;
-      char_key = _;
-      backspace_key = _;
-    } box =
+let render ~io _params { text; offset; cursor; focused; pressed_key = _ } box =
   Box.fill ~io ~color:bg' box;
   Box.draw ~io ~color:(if focused then highlight else fg) box;
   let io = View.clipped box io in
@@ -106,38 +87,28 @@ let slow_frames = 60
 let slow_frequency = 20
 let fast_frequency = 3
 
-let update ~io _param
-    { text; offset; cursor; focused; arrow_key; char_key; backspace_key } box =
+let update ~io _param { text; offset; cursor; focused; pressed_key } box =
   let nsize = Vec.(Box.size box - (2. * padding_xy)) in
   let box = Box.(v_mid (mid box) nsize) in
   let width = max (Box.w box) 0. in
-  let arrow_key =
-    Option.map (fun (frames, dir) -> (frames + 1, dir)) arrow_key
+  let pressed_key =
+    match pressed_key with
+    | Some (_, key) when Event.is_up ~io key -> None
+    | k -> k
   in
-  let char_key = Option.map (fun (n, c) -> (n + 1, c)) char_key in
-  let backspace_key = Option.map (( + ) 1) backspace_key in
-  let arrow_key =
-    if Event.is_down ~io `arrow_left then Some (0, `left)
-    else if Event.is_down ~io `arrow_right then Some (0, `right)
-    else if Event.is_up ~io `arrow_left || Event.is_up ~io `arrow_right then
-      None
-    else arrow_key
+  let pressed_key =
+    Option.map (fun (frames, k) -> (frames + 1, k)) pressed_key
   in
-  let backspace_key =
-    if Event.is_down ~io `backspace then Some 0
-    else if Event.is_up ~io `backspace then None
-    else backspace_key
+  let pressed_key =
+    if Event.is_down ~io `arrow_left then Some (0, `arrow_left)
+    else if Event.is_down ~io `arrow_right then Some (0, `arrow_right)
+    else if Event.is_down ~io `backspace then Some (0, `backspace)
+    else pressed_key
   in
   let module Chars = Event.Chars in
-  let char_key =
+  let pressed_key =
     let char_down = Event.down_chars ~io |> Chars.choose_opt in
-    match char_down with
-    | Some c ->
-      Some (0, c)
-    | None -> (
-        match char_key with
-        | Some (_, c) when Chars.mem c (Event.up_chars ~io) -> None
-        | _ -> char_key)
+    match char_down with Some c -> Some (0, `char c) | None -> pressed_key
   in
   let cursor, focused =
     if is_clicked ~io box then
@@ -149,23 +120,25 @@ let update ~io _param
   let cursor =
     Int.max 0
       (Int.min (String.length text)
-         (match arrow_key with
+         (match pressed_key with
          | None -> cursor
-         | Some (0, dir) -> (
-             cursor + match dir with `left -> -1 | `right -> 1)
-         | Some (n, dir) when n < slow_frames && n mod slow_frequency = 0 -> (
-             cursor + match dir with `left -> -1 | `right -> 1)
-         | Some (n, dir) when n >= slow_frames && n mod fast_frequency = 0 -> (
-             cursor + match dir with `left -> -1 | `right -> 1)
+         | Some (0, ((`arrow_left | `arrow_right) as dir)) -> (
+             cursor + match dir with `arrow_left -> -1 | `arrow_right -> 1)
+         | Some (n, ((`arrow_left | `arrow_right) as dir))
+           when n < slow_frames && n mod slow_frequency = 0 -> (
+             cursor + match dir with `arrow_left -> -1 | `arrow_right -> 1)
+         | Some (n, ((`arrow_left | `arrow_right) as dir))
+           when n >= slow_frames && n mod fast_frequency = 0 -> (
+             cursor + match dir with `arrow_left -> -1 | `arrow_right -> 1)
          | _ -> cursor))
   in
   let char_to_add =
-    match char_key with
+    match pressed_key with
     | None -> None
-    | Some (0, char) -> Some char
-    | Some (n, char) when n < slow_frames && n mod slow_frequency = 0 ->
+    | Some (0, `char char) -> Some char
+    | Some (n, `char char) when n < slow_frames && n mod slow_frequency = 0 ->
         Some char
-    | Some (n, char) when n >= slow_frames && n mod fast_frequency = 0 ->
+    | Some (n, `char char) when n >= slow_frames && n mod fast_frequency = 0 ->
         Some char
     | _ -> None
   in
@@ -179,15 +152,17 @@ let update ~io _param
           ^ String.sub text cursor (String.length text - cursor) )
   in
   let cursor, text =
-    match backspace_key with
+    match pressed_key with
     | None -> (cursor, text)
-    | Some 0 when cursor > 0 ->
+    | Some (0, `backspace) when cursor > 0 ->
         let cursor = cursor - 1 in
         (cursor, delete_char cursor text)
-    | Some n when cursor > 0 && n < slow_frames && n mod slow_frequency = 0 ->
+    | Some (n, `backspace)
+      when cursor > 0 && n < slow_frames && n mod slow_frequency = 0 ->
         let cursor = cursor - 1 in
         (cursor, delete_char cursor text)
-    | Some n when cursor > 0 && n >= slow_frames && n mod fast_frequency = 0 ->
+    | Some (n, `backspace)
+      when cursor > 0 && n >= slow_frames && n mod fast_frequency = 0 ->
         let cursor = cursor - 1 in
         (cursor, delete_char cursor text)
     | _ -> (cursor, text)
@@ -202,7 +177,7 @@ let update ~io _param
       offset -. char_len
     else offset
   in
-  { text; offset; cursor; focused; arrow_key; char_key; backspace_key }
+  { text; offset; cursor; focused; pressed_key }
 
 let result _ { text; _ } = text
 
