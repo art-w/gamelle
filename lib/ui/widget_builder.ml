@@ -6,7 +6,7 @@ type ('state, 'params, 'r) elt =
   t * string ->
   ?id:int ->
   ?size:(ts:(string -> size) -> 'params -> size) ->
-  ?style:style ->
+  ?style:Style.t ->
   ?render:(io:io -> 'params -> 'state -> box -> unit) ->
   'params ->
   'r
@@ -14,7 +14,7 @@ type ('state, 'params, 'r) elt =
 type 'params inert_elt =
   t * string ->
   ?id:int ->
-  ?style:style ->
+  ?style:Style.t ->
   ?size:(ts:(string -> size) -> 'params -> size) ->
   ?render:(io:io -> 'params -> box -> unit) ->
   'params ->
@@ -23,7 +23,7 @@ type 'params inert_elt =
 type ('state, 'params, 'r) node =
   t * string ->
   ?id:int ->
-  ?style:style ->
+  ?style:Style.t ->
   ?size:(ts:(string -> size) -> children_size:size -> 'params -> size) ->
   ?render:(io:io -> 'params -> 'state -> box -> unit) ->
   'params ->
@@ -55,7 +55,7 @@ let padding_v_elt =
   {
     id = None;
     size = padding_y;
-    style = { default_style with growth = 0. };
+    style = { Style.default with growth = 0. };
     renderer = render_nothing;
   }
 
@@ -63,7 +63,7 @@ let padding_h_elt =
   {
     id = None;
     size = padding_x;
-    style = { default_style with growth = 0. };
+    style = { Style.default with growth = 0. };
     renderer = render_nothing;
   }
 
@@ -88,7 +88,7 @@ let check_id_used_once ~ui id =
   else Hashtbl.add ui_state.used_ids id ()
 
 let elt ~(construct_state : 'state -> state) ~destruct_state
-    ~(default : 'params -> 'state) ?(style = default_style)
+    ~(default : 'params -> 'state) ?(style = Style.default)
     ~(size : ts:(string -> size) -> 'params -> size)
     ~(render : io:io -> 'params -> 'state -> box -> unit) ~update ~result () :
     ('state, 'params, 'result) elt =

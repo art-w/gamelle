@@ -3,12 +3,10 @@ open Draw_geometry
 
 type id = { loc_stack : string list; _hint : int option }
 type dir = V | H
-type alignment = Start | End | Center | Fill
-type style = { growth : float; vertical : alignment; horizontal : alignment }
-
-let default_style = { growth = 1.; vertical = Center; horizontal = Fill }
 
 let apply_style style box size =
+  let open Style in
+
   let h =
     match style.vertical with
     | Center | Start | End -> Size.h size
@@ -38,7 +36,7 @@ let flip = function V -> H | H -> V
 type renderer = {
   id : id option;
   size : size;
-  style : style;
+  style : Style.t;
   renderer : io:io -> box -> unit;
 }
 

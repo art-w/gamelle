@@ -1,8 +1,14 @@
 open Draw_geometry
-include Ui_backend
-include Widget_builder
+open Ui_backend
+open Widget_builder
+
+type t = Ui_backend.t
+
+module Style = Style
 
 type cap = t * string
+
+let nest_loc = nest_loc
 
 let button cap ?id ?style text = Button.v cap ?id ?style text
 
@@ -48,12 +54,12 @@ let window ?(debug = false) ~io pos f =
     [
       padding_h_elt;
       nest ~ui ~children_io:io
-        ~style:{ default_style with growth = 0. }
+        ~style:{ Style.default with growth = 0. }
         ~dir:V
         [
           padding_v_elt;
           nest ~ui ~children_io:io
-            ~style:{ default_style with growth = 0. }
+            ~style:{ Style.default with growth = 0. }
             ~dir:V
             (insert_padding ~dir ui.renderers);
           padding_v_elt;
@@ -68,7 +74,7 @@ let window ?(debug = false) ~io pos f =
   Box.fill ~io ~color:bg box;
   Box.draw ~io ~color:fg box;
   render ~ui box
-    (node_renderer ~ui ~dir:H ~style:default_style ~children_offset:Vec.zero
+    (node_renderer ~ui ~dir:H ~style:Style.default ~children_offset:Vec.zero
        ~children ~children_io:io ~size ~size_for_self:Size.zero (fun ~io:_ _ ->
          ()));
   if debug then ui.debug_render ();

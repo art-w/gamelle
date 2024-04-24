@@ -80,7 +80,7 @@ let children_offset state = Vec.(zero - v 0. state.offset)
 let children_io ~io box = View.clipped_events true @@ View.clipped box io
 
 let v : type a. (_, a params, a) node =
- fun (ui, loc) ?id ?(style = default_style) ?(size = size) ?(render = render)
+ fun (ui, loc) ?id ?(style = Style.default) ?(size = size) ?(render = render)
      params ->
   node ~construct_state ~destruct_state ~dir:V ~default ~size ~size_for_self
     ~children_io ~children_offset ~render ~update ~result () (ui, loc) ?id

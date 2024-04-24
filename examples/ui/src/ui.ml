@@ -40,14 +40,14 @@ let () =
                           print_endline "button b pressed"));
                 if
                   button [%ui]
-                    ~style:{ growth = 1.; vertical = End; horizontal = Center }
+                    ~style:Style.(vertical End & horizontal Center)
                     "button 4"
                 then print_endline "button 4 pressed";
                 if button [%ui] "button 5" then print_endline "button 5 pressed");
 
             if
               checkbox [%ui]
-                ~style:{ growth = 1.; vertical = Center; horizontal = Center }
+                ~style:Style.(vertical Center & horizontal Center)
                 "This is a checkbox 🤓"
             then (
               ignore @@ checkbox [%ui] "Checkbox 2 !";
