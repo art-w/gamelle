@@ -8,14 +8,15 @@ type key =
   | `arrow_right
   | `arrow_up
   | `backspace
-  | `char of char
   | `click_left
   | `click_right
   | `control_left
   | `control_right
   | `delete
   | `escape
+  | `input_char of string
   | `meta
+  | `physical_char of char
   | `quit
   | `shift
   | `space
@@ -23,7 +24,7 @@ type key =
   | `wheel
   | `unknown_key ]
 
-module Chars = Set.Make (Char)
+module Strings = Set.Make (String)
 
 module Keys = Set.Make (struct
   type t = key
@@ -38,9 +39,9 @@ type t = {
   mouse_x : float;
   mouse_y : float;
   wheel_delta : float;
-  pressed_chars : Chars.t;
-  down_chars : Chars.t;
-  up_chars : Chars.t;
+  pressed_chars : Strings.t;
+  down_chars : Strings.t;
+  up_chars : Strings.t;
 }
 
 let mouse_pos t = Point.v t.mouse_x t.mouse_y
@@ -53,9 +54,9 @@ let default =
     mouse_x = 0.0;
     mouse_y = 0.0;
     wheel_delta = 0.;
-    pressed_chars = Chars.empty;
-    down_chars = Chars.empty;
-    up_chars = Chars.empty;
+    pressed_chars = Strings.empty;
+    down_chars = Strings.empty;
+    up_chars = Strings.empty;
   }
 
 let insert = Keys.add
@@ -69,8 +70,8 @@ let is_down t key = Keys.mem key t.keydown
 let update_updown previous t =
   let keyup = Keys.diff previous.keypressed t.keypressed in
   let keydown = Keys.diff t.keypressed previous.keypressed in
-  let up_chars = Chars.diff previous.pressed_chars t.pressed_chars in
-  let down_chars = Chars.diff t.pressed_chars previous.pressed_chars in
+  let up_chars = Strings.diff previous.pressed_chars t.pressed_chars in
+  let down_chars = Strings.diff t.pressed_chars previous.pressed_chars in
   { t with keyup; keydown; up_chars; down_chars }
 
 let wheel_delta t = t.wheel_delta

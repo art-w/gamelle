@@ -46,10 +46,22 @@ val draw_circle : io:io -> color:Color.t -> Circle.t -> unit
 val fill_circle : io:io -> color:Color.t -> Circle.t -> unit
 val show_cursor : io:io -> bool -> unit
 
-val draw_string :
-  io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> string -> point -> unit
+module Text : sig
+  type t
 
-val text_size : io:io -> ?font:Font.t -> ?size:int -> string -> size
+  val to_string : t -> string
+  val of_string : string -> t
+  val ( ^ ) : t -> t -> t
+  val slice : ?start:int -> ?stop:int -> t -> t
+  val length : t -> int
+  val get : t -> int -> t
+  val chars : t -> t list
+
+  val draw :
+    io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> t -> point -> unit
+
+  val size : io:io -> ?font:Font.t -> ?size:int -> t -> size
+end
 
 module Window : sig
   val set_size : io:io -> size -> unit

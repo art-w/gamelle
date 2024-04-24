@@ -3,7 +3,7 @@ open Draw_geometry
 
 type key = Events_backend.key
 
-module Chars = Events_backend.Chars
+module Strings = Events_backend.Strings
 
 let mouse_pos ~io =
   Vec.(Events_backend.mouse_pos io.event - io.centering_translation)

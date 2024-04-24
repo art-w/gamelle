@@ -2,24 +2,6 @@ open Gamelle_backend
 open Ui_backend
 open Draw_geometry
 
-type ('state, 'params, 'r) elt =
-  t * string ->
-  ?id:int ->
-  ?size:(ts:(string -> size) -> 'params -> size) ->
-  ?style:Style.t ->
-  ?render:(io:io -> 'params -> 'state -> box -> unit) ->
-  'params ->
-  'r
-
-type 'params inert_elt =
-  t * string ->
-  ?id:int ->
-  ?style:Style.t ->
-  ?size:(ts:(string -> size) -> 'params -> size) ->
-  ?render:(io:io -> 'params -> box -> unit) ->
-  'params ->
-  unit
-
 type ('state, 'params, 'r) node =
   t * string ->
   ?id:int ->
@@ -38,7 +20,15 @@ module type Widget = sig
   val render : io:io -> params -> state -> box -> unit
   val update : io:io -> params -> state -> box -> state
   val result : params -> state -> return
-  val v : (state, params, return) elt
+
+  val v :
+    t * string ->
+    ?id:int ->
+    ?size:(ts:(string -> size) -> params -> size) ->
+    ?style:Style.t ->
+    ?render:(io:io -> params -> state -> box -> unit) ->
+    params ->
+    return
 end
 
 module type Inert_widget = sig
@@ -46,7 +36,15 @@ module type Inert_widget = sig
 
   val size : ts:(string -> size) -> params -> size
   val render : io:io -> params -> box -> unit
-  val v : params inert_elt
+
+  val v :
+    t * string ->
+    ?id:int ->
+    ?style:Style.t ->
+    ?size:(ts:(string -> size) -> 'params -> size) ->
+    ?render:(io:io -> 'params -> box -> unit) ->
+    params ->
+    unit
 end
 
 let render_nothing ~io:_ _ = ()
@@ -90,8 +88,8 @@ let check_id_used_once ~ui id =
 let elt ~(construct_state : 'state -> state) ~destruct_state
     ~(default : 'params -> 'state) ?(style = Style.default)
     ~(size : ts:(string -> size) -> 'params -> size)
-    ~(render : io:io -> 'params -> 'state -> box -> unit) ~update ~result () :
-    ('state, 'params, 'result) elt =
+    ~(render : io:io -> 'params -> 'state -> box -> unit) ~update ~result () : _
+    =
  fun (ui, loc) ?id ?(size = size) ?(style = style) ?(render = render) params ->
   let default = construct_state (default params) in
   let id = { loc_stack = loc :: ui.loc_stack; _hint = id } in

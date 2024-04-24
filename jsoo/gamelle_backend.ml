@@ -2,6 +2,7 @@ open Brr
 open Brr_webaudio
 open Gamelle_common
 open Geometry
+module Text = Text
 module Color = Color
 module Bitmap = Bitmap
 module Font = Font_

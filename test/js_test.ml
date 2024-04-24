@@ -71,9 +71,9 @@ let update ~io { x; y; vx; vy; _ } =
 
   Window.set_size ~io (Size.v 800. 800.);
   Box.fill ~io ~color:black (Window.box ~io);
-  draw_string ~io ~color:Color.white ~size:30 "Hello World!" Vec.zero;
-  draw_string ~io:(View.scaled 2.0 io) ~color:Color.white ~size:30
-    "Hello World!" Vec.zero;
+  Text.draw ~io ~color:Color.white ~size:30 "Hello World!" Vec.zero;
+  Text.draw ~io:(View.scaled 2.0 io) ~color:Color.white ~size:30 "Hello World!"
+    Vec.zero;
   View.(
     translate (Vec.v mx my)
       (Circle.fill ~color:red (Circle.v (Point.v 0.0 0.0) 10.0))

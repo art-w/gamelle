@@ -3,58 +3,61 @@ open Gamelle_common.Events_backend
 
 let key_of_keycode kc =
   match () with
-  | _ when kc = Sdl.K.lalt -> Some `alt
-  | _ when kc = Sdl.K.ralt -> Some `alt_gr
-  | _ when kc = Sdl.K.down -> Some `arrow_down
-  | _ when kc = Sdl.K.left -> Some `arrow_left
-  | _ when kc = Sdl.K.right -> Some `arrow_right
-  | _ when kc = Sdl.K.up -> Some `arrow_up
-  | _ when kc = Sdl.K.backspace -> Some `backspace
-  | _ when kc = Sdl.K.lctrl -> Some `control_left
-  | _ when kc = Sdl.K.rctrl -> Some `control_right
-  | _ when kc = Sdl.K.delete -> Some `delete
-  | _ when kc = Sdl.K.escape -> Some `escape
+  | _ when kc = Sdl.K.lalt -> [ `alt ]
+  | _ when kc = Sdl.K.ralt -> [ `alt_gr ]
+  | _ when kc = Sdl.K.down -> [ `arrow_down ]
+  | _ when kc = Sdl.K.left -> [ `arrow_left ]
+  | _ when kc = Sdl.K.right -> [ `arrow_right ]
+  | _ when kc = Sdl.K.up -> [ `arrow_up ]
+  | _ when kc = Sdl.K.backspace -> [ `backspace ]
+  | _ when kc = Sdl.K.lctrl -> [ `control_left ]
+  | _ when kc = Sdl.K.rctrl -> [ `control_right ]
+  | _ when kc = Sdl.K.delete -> [ `delete ]
+  | _ when kc = Sdl.K.escape -> [ `escape ]
   (* todo : meta key *)
-  | _ when kc = Sdl.K.lshift -> Some `shift
-  | _ when kc = Sdl.K.rshift -> Some `shift
-  | _ when kc = Sdl.K.space -> Some `space
-  | _ when kc = Sdl.K.tab -> Some `tab
-  (* `char _ events are produced by SdlTextInput events not keypresses. This is
-     the only clean way to handle shift key and various layouts *)
-  (*| _ when kc >= 0 && kc <= 127 ->
-      Some (`char (Char.chr ( kc )))*)
-  | _ -> None
+  | _ when kc = Sdl.K.lshift -> [ `shift ]
+  | _ when kc = Sdl.K.rshift -> [ `shift ]
+  | _ when kc = Sdl.K.space -> [ `space ]
+  | _ when kc = Sdl.K.tab -> [ `tab ]
+  | _ -> []
 
-let key_of_event e = key_of_keycode (Sdl.Event.get e Sdl.Event.keyboard_keycode)
+let key_of_scancode sc =
+  let module Sc = Sdl.Scancode in
+  match () with
+  | _ when sc >= Sc.a && sc <= Sc.z ->
+      let char = Char.(chr (code 'a' + sc - Sc.a)) in
+      [ `physical_char char ]
+  | _ -> []
+
+let keys_of_event e =
+  Keys.of_list
+  @@ key_of_scancode Sdl.Event.(get e keyboard_scancode)
+  @ key_of_keycode (Sdl.Event.get e Sdl.Event.keyboard_keycode)
 
 let update t e =
   let typ = Sdl.Event.get e Sdl.Event.typ in
   let t =
     {
       t with
-      pressed_chars = Chars.empty;
+      pressed_chars = Strings.empty;
       keypressed =
-        Keys.filter (function `char _ -> false | _ -> true) t.keypressed;
+        Keys.filter (function `input_char _ -> false | _ -> true) t.keypressed;
     }
   in
   match () with
   | _ when typ = Sdl.Event.quit ->
       { t with keypressed = insert `quit t.keypressed }
   | _ when typ = Sdl.Event.text_input ->
-      let char = Sdl.Event.(get e text_input_text).[0] in
-      let keypressed = Keys.add (`char char) t.keypressed in
-      let pressed_chars = Chars.singleton char in
+      let char = Sdl.Event.(get e text_input_text) in
+      let keypressed = Keys.add (`input_char char) t.keypressed in
+      let pressed_chars = Strings.singleton char in
       { t with pressed_chars; keypressed }
-  | _ when typ = Sdl.Event.key_down -> (
-      let key = key_of_event e in
-      match key with
-      | Some key -> { t with keypressed = insert key t.keypressed }
-      | None -> t)
-  | _ when typ = Sdl.Event.key_up -> (
-      let key = key_of_event e in
-      match key with
-      | Some key -> { t with keypressed = remove key t.keypressed }
-      | None -> t)
+  | _ when typ = Sdl.Event.key_down ->
+      let keys = keys_of_event e in
+      { t with keypressed = Keys.union keys t.keypressed }
+  | _ when typ = Sdl.Event.key_up ->
+      let keys = keys_of_event e in
+      { t with keypressed = Keys.diff t.keypressed keys }
   | _ when typ = Sdl.Event.mouse_wheel -> (
       let wheel_delta = Sdl.Event.(get e mouse_wheel_y) in
       let wheel_delta = t.wheel_delta +. float (wheel_delta * 4) in

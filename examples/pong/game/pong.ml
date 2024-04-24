@@ -135,9 +135,9 @@ let draw_score ~io ~state =
   in
   let score_left = string_of_int score_left in
   let score_right = string_of_int score_right in
-  draw_string ~io ~color ~size:18 score_left
+  Text.draw ~io ~color ~size:18 score_left
     (Vec.v (Box.ox box_game +. 10.) (Box.oy court -. 22.)) ;
-  draw_string ~io ~color ~size:18 score_right
+  Text.draw ~io ~color ~size:18 score_right
     (Vec.v (Box.midx box_game +. 10.) (Box.oy court -. 22.))
 
 let draw_ball ~io {ball_pos; _} = Circle.(fill ~io ~color (v ball_pos 4.))
@@ -153,13 +153,13 @@ let update ~io state =
   let player_speed = player_speed state in
   if Event.is_pressed ~io `escape then raise Exit ;
   let player_left_speed, state =
-    if Event.is_pressed ~io (`char 'w') then
+    if Event.is_pressed ~io (`physical_char 'w') then
       let delta_y = -.player_speed in
       let player_left =
         update_player ~x:player_left_x ~player:state.player_left ~delta_y
       in
       (delta_y, {state with player_left})
-    else if Event.is_pressed ~io (`char 's') then
+    else if Event.is_pressed ~io (`physical_char 's') then
       let delta_y = player_speed in
       let player_left =
         update_player ~x:player_left_x ~player:state.player_left ~delta_y

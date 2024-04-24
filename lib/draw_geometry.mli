@@ -35,9 +35,13 @@ module Box : sig
 end
 
 module Text : sig
-  type t = string
+  include module type of Text
 
-  val draw :
+  val sub : t -> int -> int -> t
+  val split_on_char : char -> t -> t list
+  val concat : t list -> t
+
+  val draw_t :
     io:Gamelle_backend.io ->
     color:color ->
     ?font:Gamelle_backend.Font.t ->
@@ -46,11 +50,27 @@ module Text : sig
     size ->
     unit
 
-  val size :
+  val draw :
+    io:Gamelle_backend.io ->
+    color:color ->
+    ?font:Gamelle_backend.Font.t ->
+    ?size:int ->
+    string ->
+    size ->
+    unit
+
+  val size_t :
     io:Gamelle_backend.io ->
     ?font:Gamelle_backend.Font.t ->
     ?size:int ->
     t ->
+    size
+
+  val size :
+    io:Gamelle_backend.io ->
+    ?font:Gamelle_backend.Font.t ->
+    ?size:int ->
+    string ->
     size
 
   val size_multiline :
@@ -59,8 +79,28 @@ module Text : sig
     ?interline:float ->
     ?font:Gamelle_backend.Font.t ->
     ?size:int ->
+    string ->
+    size
+
+  val size_multiline_t :
+    io:Gamelle_backend.io ->
+    ?width:float ->
+    ?interline:float ->
+    ?font:Gamelle_backend.Font.t ->
+    ?size:int ->
     t ->
     size
+
+  val draw_multiline_t :
+    io:Gamelle_backend.io ->
+    ?width:float ->
+    ?interline:float ->
+    ?font:Gamelle_backend.Font.t ->
+    color:color ->
+    ?size:int ->
+    t ->
+    size ->
+    unit
 
   val draw_multiline :
     io:Gamelle_backend.io ->
@@ -69,7 +109,7 @@ module Text : sig
     ?font:Gamelle_backend.Font.t ->
     color:color ->
     ?size:int ->
-    t ->
+    string ->
     size ->
     unit
 end

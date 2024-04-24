@@ -8,10 +8,12 @@
   events_sdl
   font_
   sdl_buffer
+  text
   sound
   window)
  (libraries
   gamelle_common
+  uuseg
   tsdl
   tsdl-image
   tsdl-mixer

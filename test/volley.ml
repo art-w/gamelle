@@ -101,7 +101,7 @@ let () =
   Window.set_size ~io (Size.v 1010. 1020.);
   Box.fill ~io ~color:Color.black (Window.box ~io);
   if Event.is_pressed ~io `escape then raise Exit
-  else if Event.is_down ~io (`char 'r') then initial_state
+  else if Event.is_down ~io (`input_char "r") then initial_state
   else if Vec.y (Physics.center ball) > 440.0 then
     if Vec.x (Physics.center ball) < 500.0 then
       { state with ball = init_ball (); points2 = state.points2 + 1 }
@@ -116,8 +116,8 @@ let () =
         ~player:player2
     in
     let player1 =
-      update_player ~io ~gravity (`char 'q') (`char 'd') (`char 'z') (`char 's')
-        ~player:player1
+      update_player ~io ~gravity (`physical_char 'a') (`physical_char 'd')
+        (`physical_char 'w') (`physical_char 's') ~player:player1
     in
     let[@warning "-partial-match"] (player1_shape :: player2_shape :: ball :: _)
         =
@@ -135,10 +135,10 @@ let () =
     Physics.draw ~io player1.shape;
     Physics.draw ~io player2.shape;
     Physics.draw ~io ball;
-    draw_string ~io ~size:40 ~color:Color.white
+    Text.draw ~io ~size:40 ~color:Color.white
       (string_of_int state.points1)
       (Point.v 20.0 10.0);
-    draw_string ~io ~size:40 ~color:Color.white
+    Text.draw ~io ~size:40 ~color:Color.white
       (string_of_int state.points2)
       (Point.v 960.0 10.0);
     { state with player1; player2; ball }

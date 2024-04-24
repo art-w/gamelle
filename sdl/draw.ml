@@ -76,16 +76,6 @@ let draw ~io bmp p =
   in
   ()
 
-let draw_string ~io ~color ?(font = Font_.default) ?(size = Font.default_size)
-    text p =
-  if text <> "" then (
-    let bitmap = Font_.draw ~color font size text in
-    draw ~io bitmap p;
-    Bitmap.free ~io bitmap)
-
-let text_size ~io ?(font = Font_.default) ?(size = Font.default_size) text =
-  Delayed.force ~io @@ Font_.text_size font size text
-
 let draw_line ~io ~color segment =
   let p, p' = Segment.to_tuple segment in
   set_color ~io color;

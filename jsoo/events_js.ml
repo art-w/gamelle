@@ -10,36 +10,41 @@ let new_frame () =
 
 let keys_of_string kc =
   match Jstr.to_string kc with
+  | "Alt" -> [ `alt ]
+  | "AltGraph" -> [ `alt_gr ]
   | "ArrowLeft" -> [ `arrow_left ]
   | "ArrowRight" -> [ `arrow_right ]
   | "ArrowUp" -> [ `arrow_up ]
   | "ArrowDown" -> [ `arrow_down ]
+  | "Backspace" -> [ `backspace ]
   | "Escape" -> [ `escape ]
   | "ControlLeft" -> [ `control_left ]
   | "ControlRight" -> [ `control_right ]
+  | "Delete" -> [ `delete ]
   | "Meta" -> [ `meta ]
-  | "Alt" -> [ `alt ]
-  | "AltGraph" -> [ `alt_gr ]
-  | "Backspace" -> [ `backspace ]
   | "Shift" -> [ `shift ]
-  | " " -> [ `space; `char ' ' ]
+  | " " -> [ `space; `input_char " " ]
   | "Tab" -> [ `tab ]
-  | key when String.length key = 1 ->
-      let lt = key.[0] in
-      [ `char (Char.lowercase_ascii lt) ]
+  | key when Jstr.length kc = 1 -> [ `input_char key ]
   | kc ->
       Console.(log [ "TODO key:"; kc ]);
       [ `unknown_key ]
 
-let keys_of_event e = keys_of_string (Ev.Keyboard.key e)
+let keys_of_code kc =
+  let kc = Jstr.to_string kc in
+  if String.length kc = 1 then [ `physical_char (Char.lowercase_ascii kc.[0]) ]
+  else []
+
+let keys_of_event e =
+  keys_of_code (Ev.Keyboard.code e) @ keys_of_string (Ev.Keyboard.key e)
 
 let update ~status t e =
   let keys = keys_of_event e in
   let chars =
     keys
     |> List.filter_map (fun key ->
-           match key with `char c -> Some c | _ -> None)
-    |> Chars.of_list
+           match key with `input_char c -> Some c | _ -> None)
+    |> Strings.of_list
   in
   let keys = Keys.of_list keys in
 
@@ -48,13 +53,13 @@ let update ~status t e =
       {
         t with
         keypressed = Keys.diff t.keypressed keys;
-        pressed_chars = Chars.diff t.pressed_chars chars;
+        pressed_chars = Strings.diff t.pressed_chars chars;
       }
   | `Down ->
       {
         t with
         keypressed = Keys.union keys t.keypressed;
-        pressed_chars = Chars.union t.pressed_chars chars;
+        pressed_chars = Strings.union t.pressed_chars chars;
       }
 
 let do_update ~status e = current := update ~status !current (Ev.as_type e)

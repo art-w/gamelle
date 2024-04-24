@@ -108,16 +108,6 @@ let fill_circle ~io ~color circle =
       C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
       C.fill ctx path)
 
-let draw_string ~io ~color ?(font = Font_.default) ?(size = Font.default_size)
-    txt p =
-  transform ~io;
-  set_color ~io color;
-  let x, y = Vec.to_tuple p in
-  Font_.draw_at ~io font ~size txt (x, y)
-
-let text_size ~io ?(font = Font_.default) ?(size = Font.default_size) txt =
-  Font_.text_size ~io font ~size txt
-
 let show_cursor ~io status =
   let canvas = io.backend.canvas in
   let el = Canvas.to_el canvas in

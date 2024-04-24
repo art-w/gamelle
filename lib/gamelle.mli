@@ -69,35 +69,31 @@ val draw_poly : io:io -> color:Color.t -> point list -> unit
 val fill_poly : io:io -> color:Color.t -> point list -> unit
 val show_cursor : io:io -> bool -> unit
 
-val draw_string :
-  io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> string -> point -> unit
-
-val text_size : io:io -> ?font:Font.t -> ?size:int -> string -> size
-
 module Event : sig
   val mouse_pos : io:io -> point
   val wheel_delta : io:io -> float
 
   type key =
-    [ `quit
-    | `escape
-    | `control_left
-    | `control_right
+    [ `alt
+    | `alt_gr
+    | `arrow_down
     | `arrow_left
     | `arrow_right
     | `arrow_up
-    | `arrow_down
     | `backspace
-    | `shift
-    | `space
-    | `alt
-    | `alt_gr
-    | `tab
-    | `delete
-    | `meta
-    | `char of char
     | `click_left
     | `click_right
+    | `control_left
+    | `control_right
+    | `delete
+    | `escape
+    | `input_char of string
+    | `meta
+    | `physical_char of char
+    | `quit
+    | `shift
+    | `space
+    | `tab
     | `wheel
     | `unknown_key ]
 
