@@ -4,16 +4,44 @@ include Widget_builder
 
 type cap = t * string
 
-let button = Button.v
-let slider = Slider.v
-let checkbox = Checkbox.v
-let label = Label.v
-let text_area = Text_area.v
-let vscroll = Vscroll.v
-let horizontal = Horizontal.v
-let vertical = Vertical.v
-let text_input = Text_input.v
-let radio = Radio.v
+let button cap ?id ?weight ?style text = Button.v cap ?id ?weight ?style text
+
+let slider ?id ?weight ?style ?(width = 50.) cap ~min ~max =
+  let params = { w = width; min; max } in
+  Slider.v cap ?id ?weight ?style params
+
+let checkbox cap ?id ?weight ?style text =
+  Checkbox.v cap ?id ?weight ?style text
+
+let label cap ?weight ?style text = Label.v cap ?weight ?style text
+
+let text_area cap ?weight ?style ?width text =
+  Text_area.v cap ?weight ?width ?style text
+
+let vscroll cap ?weight ?style ~height f =
+  let params = { height; f } in
+  Vscroll.v cap ?weight ?style params
+
+let horizontal cap ?weight ?style f = Horizontal.v cap ?weight ?style f
+let vertical cap ?weight ?style f = Vertical.v cap ?weight ?style f
+
+let text_input cap ?id ?weight ?style float =
+  Text_input.v cap ?id ?weight ?style float
+
+let radio cap ?id ?weight ?style text = Radio.v cap ?id ?weight ?style text
+
+module Customize = struct
+  module Button = Button
+  module Checkbox = Checkbox
+  module Horizontal = Horizontal
+  module Label = Label
+  module Radio = Radio
+  module Slider = Slider
+  module Text_area = Text_area
+  module Text_input = Text_input
+  module Vertical = Vertical
+  module Widget_builder = Widget_builder
+end
 
 let window ?(debug = false) ~io pos f =
   let id = pos in

@@ -20,16 +20,11 @@ let () =
               "aaaa aaaa aaaa aaaa aaaa fffffffffffffffffffffffffffffff aaaa \
                aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb";
             label [%ui] "This is a label ----";
-            vscroll [%ui]
-              {
-                height = 100.;
-                f =
-                  (fun () ->
-                    if button [%ui] "button" then print_endline "button pressed";
-                    if button [%ui] "button" then print_endline "button pressed";
-                    if button [%ui] "button" then print_endline "button pressed";
-                    if button [%ui] "button" then print_endline "button pressed");
-              };
+            vscroll [%ui] ~height:100. (fun () ->
+                if button [%ui] "button" then print_endline "button pressed";
+                if button [%ui] "button" then print_endline "button pressed";
+                if button [%ui] "button" then print_endline "button pressed";
+                if button [%ui] "button" then print_endline "button pressed");
             horizontal [%ui] (fun () ->
                 if button [%ui] "button 1" then print_endline "button 1 pressed";
                 vertical [%ui] (fun () ->
@@ -58,10 +53,10 @@ let () =
               ignore @@ checkbox [%ui] "Checkbox 2 !";
               if button [%ui] "for checkboxers only" then
                 print_endline "YOU ARE A CHECKBOXER");
-            let _number = slider [%ui] { w = 200.; min = 10.; max = 20. } in
+            let _number = slider [%ui] ~min:10. ~max:20. in
             label [%ui]
               (Printf.sprintf "The slider value is %f"
-                 (slider [%ui] { w = 200.; min = 10.; max = 20. }));
+                 (slider [%ui] ~min:10. ~max:20.));
             let v = radio [%ui] [ (`A, "Select A"); (`B, "Select B") ] in
             match v with
             | None -> label [%ui] "Nothing is selected"

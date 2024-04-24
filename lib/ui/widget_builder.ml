@@ -163,8 +163,9 @@ let node ~construct_state ~children_io ?(weight = 1.) ~destruct_state ~dir
     ~size_for_self (render params state);
   result
 
-let inert_node (ui, _loc) ~render ~weight ~size_for_self ~children_offset ~dir f
+let inert_node (ui, _loc) ~render ~weight ~style ~size_for_self ~children_offset ~dir f
     =
+  let _ = style in
   let old_renderers = ui.renderers in
   ui.renderers <- [];
   let result = f () in
