@@ -62,24 +62,24 @@ let path_poly pts =
     (fun pt ->
       let x, y = Vec.to_tuple pt in
       C.Path.line_to path ~x ~y)
-    pts;
+    (Polygon.to_list pts);
   C.Path.close path;
   path
 
-let draw_poly ~io ~color pts =
+let draw_poly ~io ~color poly =
   transform ~io;
   set_color ~io color;
   let ctx = io.backend.ctx in
   Clip.draw_clip ~io ctx (fun () ->
-      let path = path_poly pts in
+      let path = path_poly poly in
       C.stroke ctx path)
 
-let fill_poly ~io ~color pts =
+let fill_poly ~io ~color poly =
   transform ~io;
   set_color ~io color;
   let ctx = io.backend.ctx in
   Clip.draw_clip ~io ctx (fun () ->
-      let path = path_poly pts in
+      let path = path_poly poly in
       C.fill ctx path)
 
 let tau = 8.0 *. atan 1.0

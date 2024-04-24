@@ -6,6 +6,13 @@ module Point : sig
   include module type of Point
 end
 
+module Polygon : sig
+  include module type of Polygon
+
+  val draw : io:io -> color:Color.t -> t -> unit
+  val fill : io:io -> color:Color.t -> t -> unit
+end
+
 module Vec : sig
   include module type of Vec
 end

@@ -65,8 +65,6 @@ end
 val clock : unit -> float
 val dt : unit -> float
 val draw : io:io -> Bitmap.t -> point -> unit
-val draw_poly : io:io -> color:Color.t -> point list -> unit
-val fill_poly : io:io -> color:Color.t -> point list -> unit
 val show_cursor : io:io -> bool -> unit
 
 module Event : sig

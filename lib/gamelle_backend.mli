@@ -40,8 +40,8 @@ val draw : io:io -> Bitmap.t -> point -> unit
 val draw_line : io:io -> color:Color.t -> Segment.t -> unit
 val draw_rect : io:io -> color:Color.t -> box -> unit
 val fill_rect : io:io -> color:Color.t -> box -> unit
-val draw_poly : io:io -> color:Color.t -> point list -> unit
-val fill_poly : io:io -> color:Color.t -> point list -> unit
+val draw_poly : io:io -> color:Color.t -> Polygon.t -> unit
+val fill_poly : io:io -> color:Color.t -> Polygon.t -> unit
 val draw_circle : io:io -> color:Color.t -> Circle.t -> unit
 val fill_circle : io:io -> color:Color.t -> Circle.t -> unit
 val show_cursor : io:io -> bool -> unit

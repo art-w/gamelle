@@ -6,6 +6,7 @@ module Box = Box
 module Color = Color_
 module Size = Size
 module Size1 = Gg.Size1
+module Polygon = Polygon
 
 type color = Color.t
 type point = Point.t

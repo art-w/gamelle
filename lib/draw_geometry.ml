@@ -5,6 +5,13 @@ module Point = struct
   include Geometry.Point
 end
 
+module Polygon = struct
+  include Geometry.Polygon
+
+  let draw = draw_poly
+  let fill = fill_poly
+end
+
 module Vec = struct
   include Geometry.Vec
 end

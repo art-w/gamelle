@@ -89,10 +89,12 @@ let update ~io { x; y; vx; vy; _ } =
                 & Segment.draw ~color:red
                     (Segment.v (Point.v 0. 0.) (Point.v 75. 59.))
                 & translate (Vec.v 5. 5.)
-                    (fill_poly ~color:yellow
+                    (Polygon.fill ~color:yellow
+                       (Polygon.v
+                          [ Point.v 20. 0.; Point.v 30. 30.; Point.v 15. 40. ]))
+                & Polygon.draw ~color:green
+                    (Polygon.v
                        [ Point.v 20. 0.; Point.v 30. 30.; Point.v 15. 40. ])
-                & draw_poly ~color:green
-                    [ Point.v 20. 0.; Point.v 30. 30.; Point.v 15. 40. ]
                 & Circle.draw ~color:green
                     (Circle.v (Point.v (75.0 /. 2.) (59.0 /. 2.)) 10.)))))
     ~io;

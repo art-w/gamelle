@@ -1,14 +1,15 @@
 open Gamelle_backend
 open Draw_geometry
 
-type t = Segment of segment | Circle of circle | Polygon of point list
+type t = Segment of segment | Circle of circle | Polygon of Polygon.t
 
 let segment seg = Segment seg
 let circle c = Circle c
 let polygon pts = Polygon pts
 
 let rect box =
-  polygon [ Box.tl_pt box; Box.tr_pt box; Box.br_pt box; Box.bl_pt box ]
+  polygon
+    (Polygon.v [ Box.tl_pt box; Box.tr_pt box; Box.br_pt box; Box.bl_pt box ])
 
 let draw ~io ~color = function
   | Segment s -> draw_line ~io ~color s
@@ -23,7 +24,7 @@ let fill ~io ~color = function
 let translate dxy = function
   | Segment s -> Segment (Segment.translate s dxy)
   | Circle c -> Circle (Circle.translate c dxy)
-  | Polygon pts -> Polygon (List.map (Vec.( + ) dxy) pts)
+  | Polygon p -> Polygon (Polygon.translate p dxy)
 
 let ( + ) = ( +. )
 let ( - ) = ( -. )
@@ -36,65 +37,23 @@ let rotate_around ~angle ~center shape =
   match shape with
   | Circle c -> Circle (Circle.map_center rot c)
   | Segment s -> Segment (Segment.map_points rot s)
-  | Polygon pts -> Polygon (List.map rot pts)
-
-let polygon_center = function
-  | [] -> assert false
-  | hd :: _ as ps ->
-      let rec go ~area ~cx ~cy = function
-        | [] | [ _ ] ->
-            let area6 = 3.0 * area in
-            Vec.v (cx / area6) (cy / area6)
-        | p0 :: p1 :: ps ->
-            let x0, y0 = Vec.to_tuple p0 in
-            let x1, y1 = Vec.to_tuple p1 in
-            let delta = (x0 * y1) - (x1 * y0) in
-            go ~area:(area + delta)
-              ~cx:(cx + ((x0 + x1) * delta))
-              ~cy:(cy + ((y0 + y1) * delta))
-              (p1 :: ps)
-      in
-      go ~area:0.0 ~cx:0.0 ~cy:0.0 (hd :: List.rev ps)
+  | Polygon pts -> Polygon (Polygon.map_points rot pts)
 
 let center = function
   | Circle c -> Circle.center c
   | Segment s -> Segment.center s
-  | Polygon pts -> polygon_center pts
-
-let polygon_signed_area = function
-  | [] -> 0.0
-  | hd :: _ as ps ->
-      let rec go ~area = function
-        | [] | [ _ ] -> area /. 2.0
-        | p0 :: p1 :: ps ->
-            let x0, y0 = Vec.to_tuple p0 in
-            let x1, y1 = Vec.to_tuple p1 in
-            let delta = (x0 * y1) - (x1 * y0) in
-            go ~area:(area + delta) (p1 :: ps)
-      in
-      go ~area:0.0 (hd :: List.rev ps)
+  | Polygon pts -> Polygon.center pts
 
 let signed_area = function
   | Circle c -> Circle.area c
   | Segment _ -> 1.0
-  | Polygon pts -> polygon_signed_area pts
+  | Polygon pts -> Polygon.signed_area pts
 
 let rotate ?center:opt_center ~angle shape =
   let center =
     match opt_center with Some center -> center | None -> center shape
   in
   rotate_around ~angle:(cos angle, sin angle) ~center shape
-
-let segments_of_polygon pts =
-  match pts with
-  | [] -> []
-  | first :: _ ->
-      let rec go acc = function
-        | [] -> acc
-        | [ last ] -> Segment.v last first :: acc
-        | a :: b :: xs -> go (Segment.v a b :: acc) (b :: xs)
-      in
-      go [] pts
 
 let nearest_point_segment pt s =
   let p0, p1 = Segment.to_tuple s in
@@ -116,7 +75,7 @@ let nearest_points pt = function
       let pt = nearest_point_segment pt s in
       [ (pt, Vec.(unit @@ ortho (p0 - p1))) ]
   | Polygon pts -> (
-      match segments_of_polygon pts with
+      match Polygon.segments pts with
       | [] -> invalid_arg "empty polygon"
       | first :: ss ->
           let compute segment =
@@ -192,7 +151,7 @@ let rec intersections a b =
   | Polygon pts, other | other, Polygon pts ->
       List.concat_map
         (fun s -> intersections (Segment s) other)
-        (segments_of_polygon pts)
+        (Polygon.segments pts)
 
 let intersects a b =
   match (a, b) with
@@ -214,7 +173,7 @@ let mem pt = function
             && x < ((vx0 - vx1) * (y - vy1) / (vy0 - vy1)) + vx1
           then not inside
           else inside)
-        false (segments_of_polygon pts)
+        false (Polygon.segments pts)
 
 let separation_axis_circle c shape =
   let center = Circle.center c and radius = Circle.radius c in
@@ -239,7 +198,8 @@ let project axis = function
           (min v vmin, max v vmax))
         (v, v) pts
 
-let separation_axis_polygon a b =
+let separation_axis_polygon poly_a poly_b =
+  let a = Polygon.to_list poly_a and b = Polygon.to_list poly_b in
   let rec go opt_best = function
     | [] -> opt_best
     | seg :: rest -> (
@@ -259,7 +219,9 @@ let separation_axis_polygon a b =
               go (Some (overlap, axis)) rest
           | _ -> go opt_best rest)
   in
-  let ss = List.rev_append (segments_of_polygon a) (segments_of_polygon b) in
+  let ss =
+    List.rev_append (Polygon.segments poly_a) (Polygon.segments poly_b)
+  in
   match go None ss with None -> None | Some (d, n) -> Some Vec.(d * n)
 
 let separation_axis a b =
@@ -272,14 +234,14 @@ let separation_axis a b =
   | Polygon a, Polygon b -> separation_axis_polygon a b
   | Segment s, Polygon b ->
       let a0, a1 = Segment.to_tuple s in
-      separation_axis_polygon [ a0; a1 ] b
+      separation_axis_polygon (Polygon.v [ a0; a1 ]) b
   | Polygon a, Segment s ->
       let b0, b1 = Segment.to_tuple s in
-      separation_axis_polygon a [ b0; b1 ]
+      separation_axis_polygon a (Polygon.v [ b0; b1 ])
   | Segment s, Segment s' ->
       let a0, a1 = Segment.to_tuple s in
       let b0, b1 = Segment.to_tuple s' in
-      separation_axis_polygon [ a0; a1 ] [ b0; b1 ]
+      separation_axis_polygon (Polygon.v [ a0; a1 ]) (Polygon.v [ b0; b1 ])
 
 let separation_axis a b =
   match separation_axis a b with
@@ -304,6 +266,7 @@ let best_distance (x_dist, xs) (y_dist, ys) =
   else (y_dist, ys)
 
 let contact_points_rectangle pts rect =
+  let pts = Polygon.to_list pts in
   match pts with
   | [] -> invalid_arg "contact_points: empty list"
   | hd :: pts ->
@@ -334,10 +297,10 @@ let rec contact_points a b =
       best_distance fst snd
   | Segment seg, b ->
       let a0, a1 = Segment.to_tuple seg in
-      contact_points (Polygon [ a0; a1 ]) b
+      contact_points (Polygon (Polygon.v [ a0; a1 ])) b
   | a, Segment seg ->
       let b0, b1 = Segment.to_tuple seg in
-      contact_points a (Polygon [ b0; b1 ])
+      contact_points a (Polygon (Polygon.v [ b0; b1 ]))
 
 let contact_points a b =
   let dist, lst = contact_points a b in

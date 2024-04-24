@@ -94,8 +94,9 @@ let draw_rect ~io ~color rect =
   draw_line ~io ~color (Box.left rect);
   draw_line ~io ~color (Box.right rect)
 
-let draw_poly ~io ~color arr =
+let draw_poly ~io ~color poly =
   set_color ~io color;
+  let arr = Polygon.to_list poly in
   let arr = List.map (project ~io) arr in
   let& r, g, b, a = Sdl.get_render_draw_color io.backend.renderer in
   let& () =
@@ -105,8 +106,9 @@ let draw_poly ~io ~color arr =
   in
   ()
 
-let fill_poly ~io ~color arr =
+let fill_poly ~io ~color poly =
   set_color ~io color;
+  let arr = Polygon.to_list poly in
   let arr = List.map (project ~io) arr in
   let& r, g, b, a = Sdl.get_render_draw_color io.backend.renderer in
   let& () =
@@ -122,7 +124,7 @@ let fill_rect ~io ~color rect =
   and p1 = Box.tr_pt rect
   and p2 = Box.br_pt rect
   and p3 = Box.bl_pt rect in
-  let pts = [ p0; p1; p2; p3 ] in
+  let pts = Polygon.v [ p0; p1; p2; p3 ] in
   fill_poly ~io ~color pts
 
 let draw_circle ~io ~color circle =
