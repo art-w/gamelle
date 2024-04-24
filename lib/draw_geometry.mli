@@ -13,6 +13,13 @@ module Polygon : sig
   val fill : io:io -> color:Color.t -> t -> unit
 end
 
+module Shape : sig
+  include module type of Shape
+
+  val draw : io:io -> color:Color.t -> t -> unit
+  val fill : io:io -> color:Color.t -> t -> unit
+end
+
 module Vec : sig
   include module type of Vec
 end

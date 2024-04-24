@@ -1,7 +1,4 @@
-open Gamelle_backend
-open Draw_geometry
-
-type t
+type t = Segment of Segment.t | Circle of Circle.t | Polygon of Polygon.t
 
 val circle : Circle.t -> t
 val segment : Segment.t -> t
@@ -26,7 +23,3 @@ val nearest_points : Point.t -> t -> (Point.t * Vec.t) list
 
 val separation_axis : t -> t -> Vec.t option
 val contact_points : t -> t -> float * Point.t list
-
-(* *)
-val draw : io:io -> color:Color.t -> t -> unit
-val fill : io:io -> color:Color.t -> t -> unit

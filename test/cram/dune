@@ -2,5 +2,4 @@
  (package gamelle)
  (deps
   %{bin:gamelle}
-  (package gamelle)
-  ))
+  (package gamelle)))

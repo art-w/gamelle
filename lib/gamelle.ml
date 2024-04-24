@@ -1,5 +1,4 @@
 module Ui = Ui
-module Shape = Shape
 module Physics = Physics
 module View = View
 module Transform = Gamelle_common.Transform

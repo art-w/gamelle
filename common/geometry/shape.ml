@@ -1,7 +1,4 @@
-open Gamelle_backend
-open Draw_geometry
-
-type t = Segment of segment | Circle of circle | Polygon of Polygon.t
+type t = Segment of Segment.t | Circle of Circle.t | Polygon of Polygon.t
 
 let segment seg = Segment seg
 let circle c = Circle c
@@ -10,16 +7,6 @@ let polygon pts = Polygon pts
 let rect box =
   polygon
     (Polygon.v [ Box.tl_pt box; Box.tr_pt box; Box.br_pt box; Box.bl_pt box ])
-
-let draw ~io ~color = function
-  | Segment s -> draw_line ~io ~color s
-  | Circle c -> draw_circle ~io ~color c
-  | Polygon pts -> draw_poly ~io ~color pts
-
-let fill ~io ~color = function
-  | Segment s -> draw_line ~io ~color s
-  | Circle c -> fill_circle ~io ~color c
-  | Polygon pts -> fill_poly ~io ~color pts
 
 let translate dxy = function
   | Segment s -> Segment (Segment.translate s dxy)

@@ -7,6 +7,7 @@ module Color = Color_
 module Size = Size
 module Size1 = Gg.Size1
 module Polygon = Polygon
+module Shape = Shape
 
 type color = Color.t
 type point = Point.t

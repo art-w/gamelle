@@ -12,6 +12,20 @@ module Polygon = struct
   let fill = fill_poly
 end
 
+module Shape = struct
+  include Geometry.Shape
+
+  let draw ~io ~color = function
+    | Segment s -> draw_line ~io ~color s
+    | Circle c -> draw_circle ~io ~color c
+    | Polygon pts -> draw_poly ~io ~color pts
+
+  let fill ~io ~color = function
+    | Segment s -> draw_line ~io ~color s
+    | Circle c -> fill_circle ~io ~color c
+    | Polygon pts -> fill_poly ~io ~color pts
+end
+
 module Vec = struct
   include Geometry.Vec
 end
