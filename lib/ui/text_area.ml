@@ -10,5 +10,5 @@ let size ~io { text; width } =
 let render ~io { text; width } box =
   Text.draw_multiline ~io ~color:fg ?width ~size:font_size text (Box.o box)
 
-let v (ui, loc) ?(style = default_style) ?(weight = 0.) ?width text =
-  inert_elt (ui, loc) ~style ~size ~weight ~render { text; width }
+let v (ui, loc) ?(style = default_style) ?width text =
+  inert_elt (ui, loc) ~style ~size ~render { text; width }

@@ -41,7 +41,6 @@ let size_radio = size
 let render_radio = render
 
 let v : (_, _, _) elt =
- fun cap ?id ?size ?weight ?style ?render params ->
+ fun cap ?id ?size ?style ?render params ->
   elt ~construct_state ~destruct_state ~default ~size:size_radio
-    ~render:render_radio ~update ~result () cap ?id ?style ?size ?weight ?render
-    params
+    ~render:render_radio ~update ~result () cap ?id ?style ?size ?render params

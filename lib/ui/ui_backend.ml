@@ -4,9 +4,9 @@ open Draw_geometry
 type id = { loc_stack : string list; _hint : int option }
 type dir = V | H
 type alignment = Start | End | Center | Fill
-type style = { vertical : alignment; horizontal : alignment }
+type style = { growth : float; vertical : alignment; horizontal : alignment }
 
-let default_style = { vertical = Center; horizontal = Fill }
+let default_style = { growth = 1.; vertical = Center; horizontal = Fill }
 
 let apply_style style box size =
   let h =
@@ -37,7 +37,6 @@ let flip = function V -> H | H -> V
 
 type renderer = {
   id : id option;
-  weight : float;
   size : size;
   style : style;
   renderer : io:io -> box -> unit;
@@ -107,8 +106,8 @@ let debug_render ~ui f =
 
 let push_renderer ~ui renderer = ui.renderers <- renderer :: ui.renderers
 
-let render_leaf ~ui ?id ~weight ~style ~size renderer =
-  push_renderer ~ui { id; style; size; weight; renderer }
+let render_leaf ~ui ?id ~style ~size renderer =
+  push_renderer ~ui { id; style; size; renderer }
 (*
 let render_node ~ui ?id ~dir ~weight ~children_offset ~children ~children_io
     ~size ~size_for_self renderer =
@@ -142,7 +141,7 @@ let aggregate_sizes ~dir sizes =
 let total_size ~dir renderers =
   aggregate_sizes ~dir (List.map renderer_size renderers)
 
-let renderer_weight = function { weight; _ } -> weight
+let renderer_growth = function { style = { growth; _ }; _ } -> growth
 let size_dir ~dir = match dir with V -> Size.h | H -> Size.w
 let box_size_dir ~dir = match dir with V -> Box.h | H -> Box.w
 let basis_dir ~dir = match dir with V -> Vec.v 0. 1. | H -> Vec.v 1. 0.
@@ -184,13 +183,13 @@ let layout_boxes ~dir box weights sizes =
   boxes
 
 let rec render ~ui box = function
-  | { id; size; style; weight = _; renderer } ->
+  | { id; size; style; renderer } ->
       Option.iter (fun id -> register_layout ~ui ~id box) id;
       debug_box ~ui ~color:Color.red box;
       let box = apply_style style box size in
       renderer ~io:ui.io box
 
-and node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
+and node_renderer ~ui ?id ~size ~style ~dir ~children_offset ~children_io
     ~children ~size_for_self renderer =
   let renderer ~io box =
     debug_box ~ui ~color:Color.green box;
@@ -201,19 +200,19 @@ and node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
     in
     let children = List.rev children in
     let children_sizes = children |> List.map renderer_size in
-    let weights = children |> List.map renderer_weight in
-    let boxes = layout_boxes ~dir children_box weights children_sizes in
+    let growths = children |> List.map renderer_growth in
+    let boxes = layout_boxes ~dir children_box growths children_sizes in
     List.iter2 (fun box child -> render ~ui box child) boxes children;
     ui.io <- old_io;
     Option.iter (fun id -> register_layout ~ui ~id box) id;
     renderer ~io box
   in
-  { id; size; weight; style = default_style; renderer }
+  { id; size; style; renderer }
 
-let render_node ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
+let render_node ~ui ?id ~size ~style ~dir ~children_offset ~children_io
     ~children ~size_for_self renderer =
   push_renderer ~ui
-    (node_renderer ~ui ?id ~size ~weight ~dir ~children_offset ~children_io
+    (node_renderer ~ui ?id ~size ~style ~dir ~children_offset ~children_io
        ~children ~size_for_self renderer)
 
 let io_text_size ~io = Text.size ~io ~size:font_size

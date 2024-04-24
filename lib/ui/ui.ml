@@ -4,31 +4,24 @@ include Widget_builder
 
 type cap = t * string
 
-let button cap ?id ?weight ?style text = Button.v cap ?id ?weight ?style text
+let button cap ?id ?style text = Button.v cap ?id ?style text
 
-let slider ?id ?weight ?style ?(width = 50.) cap ~min ~max =
+let slider ?id ?style ?(width = 50.) cap ~min ~max =
   let params = { w = width; min; max } in
-  Slider.v cap ?id ?weight ?style params
+  Slider.v cap ?id ?style params
 
-let checkbox cap ?id ?weight ?style text =
-  Checkbox.v cap ?id ?weight ?style text
+let checkbox cap ?id ?style text = Checkbox.v cap ?id ?style text
+let label cap ?style text = Label.v cap ?style text
+let text_area cap ?style ?width text = Text_area.v cap ?width ?style text
 
-let label cap ?weight ?style text = Label.v cap ?weight ?style text
-
-let text_area cap ?weight ?style ?width text =
-  Text_area.v cap ?weight ?width ?style text
-
-let vscroll cap ?weight ?style ~height f =
+let vscroll cap ?style ~height f =
   let params = { height; f } in
-  Vscroll.v cap ?weight ?style params
+  Vscroll.v cap ?style params
 
-let horizontal cap ?weight ?style f = Horizontal.v cap ?weight ?style f
-let vertical cap ?weight ?style f = Vertical.v cap ?weight ?style f
-
-let text_input cap ?id ?weight ?style float =
-  Text_input.v cap ?id ?weight ?style float
-
-let radio cap ?id ?weight ?style text = Radio.v cap ?id ?weight ?style text
+let horizontal cap ?style f = Horizontal.v cap ?style f
+let vertical cap ?style f = Vertical.v cap ?style f
+let text_input cap ?id ?style float = Text_input.v cap ?id ?style float
+let radio cap ?id ?style text = Radio.v cap ?id ?style text
 
 module Customize = struct
   module Button = Button
@@ -54,10 +47,14 @@ let window ?(debug = false) ~io pos f =
   let children =
     [
       padding_h_elt;
-      nest ~ui ~children_io:io ~weight:0. ~dir:V
+      nest ~ui ~children_io:io
+        ~style:{ default_style with growth = 0. }
+        ~dir:V
         [
           padding_v_elt;
-          nest ~ui ~children_io:io ~weight:0. ~dir:V
+          nest ~ui ~children_io:io
+            ~style:{ default_style with growth = 0. }
+            ~dir:V
             (insert_padding ~dir ui.renderers);
           padding_v_elt;
         ];
@@ -71,7 +68,8 @@ let window ?(debug = false) ~io pos f =
   Box.fill ~io ~color:bg box;
   Box.draw ~io ~color:fg box;
   render ~ui box
-    (node_renderer ~ui ~dir:H ~weight:1. ~children_offset:Vec.zero ~children
-       ~children_io:io ~size ~size_for_self:Size.zero (fun ~io:_ _ -> ()));
+    (node_renderer ~ui ~dir:H ~style:default_style ~children_offset:Vec.zero
+       ~children ~children_io:io ~size ~size_for_self:Size.zero (fun ~io:_ _ ->
+         ()));
   if debug then ui.debug_render ();
   (r, box)
