@@ -28,9 +28,17 @@ let render ~io options n_checked box =
       render_one ~io label is_checked box)
     (List.combine boxes options)
 
+(* We don't use List.find_index for backwards compatibility *)
+let find_index p =
+  let rec aux i = function
+    | [] -> None
+    | a :: l -> if p a then Some i else aux (i + 1) l
+  in
+  aux 0
+
 let update ~io options previous box =
   let boxes = layout ~io options box in
-  List.find_index (is_clicked ~io) boxes |> function
+  find_index (is_clicked ~io) boxes |> function
   | None -> previous
   | v -> if v = previous then None else v
 
