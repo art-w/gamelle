@@ -1,0 +1,6 @@
+(cram
+ (package gamelle)
+ (deps
+  %{bin:gamelle}
+  (package gamelle)
+  ))
