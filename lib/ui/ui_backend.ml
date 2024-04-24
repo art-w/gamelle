@@ -6,7 +6,6 @@ type dir = V | H
 
 let apply_style style box size =
   let open Style in
-
   let h =
     match style.vertical with
     | Center | Start | End -> Size.h size

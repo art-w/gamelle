@@ -9,7 +9,6 @@ module Style = Style
 type cap = t * string
 
 let nest_loc = nest_loc
-
 let button cap ?id ?style text = Button.v cap ?id ?style text
 
 let slider ?id ?style ?(width = 50.) cap ~min ~max =

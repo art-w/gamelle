@@ -28,7 +28,6 @@ val radio : cap -> ?id:int -> ?style:Style.t -> ('a * string) list -> 'a option
 val text_input : cap -> ?id:int -> ?style:Style.t -> float -> string
 val nest_loc : cap -> (unit -> 'a) -> 'a
 
-
 module Customize : sig
   module Button = Button
   module Checkbox = Checkbox
