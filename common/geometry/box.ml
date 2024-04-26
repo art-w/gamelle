@@ -15,7 +15,6 @@ let random_mem box =
 let translate box vec = v Vec.(o box + vec) (size box)
 
 let centered b1 b2 =
-  let diff = Vec.(mid b2 - mid b1) in
-  v Vec.(o b1 + diff) (size b1)
+  v_mid (mid b2) (size b1)
 
 let v_corners p1 p2 = v p1 Vec.(p2 - p1)
