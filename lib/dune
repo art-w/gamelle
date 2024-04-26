@@ -4,4 +4,4 @@
  (libraries gamelle_common)
  (virtual_modules gamelle_backend))
 
-(include_subdirs unqualified)
+(include_subdirs qualified)

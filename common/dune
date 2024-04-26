@@ -6,4 +6,4 @@
   (pps ppx_blob))
  (preprocessor_deps ../data/FreeMono.ttf))
 
-(include_subdirs unqualified)
+(include_subdirs qualified)
