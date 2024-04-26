@@ -32,8 +32,9 @@ let drawing_box box io =
        user to resize their windows. *)
     previous_size := size;
     Window.set_size ~io (Box.size box));
-  let tr =
-    Vec.(Box.(o (centered box (Window.box ~io))) - io.centering_translation)
-  in
+
+  let window_mid = Box.mid (Window.box ~io) in
+  let box_mid = Box.mid box in
+  let tr = Vec.(window_mid - box_mid) in
   let io = { io with centering_translation = tr } in
   translated tr io
