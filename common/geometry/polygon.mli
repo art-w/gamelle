@@ -7,3 +7,4 @@ val signed_area : t -> float
 val segments : t -> Segment.t list
 val translate : t -> Vec.t -> t
 val map_points : (Point.t -> Point.t) -> t -> t
+val bounding_box : t -> Box.t

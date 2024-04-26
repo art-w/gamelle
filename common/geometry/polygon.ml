@@ -47,3 +47,16 @@ let segments pts =
 
 let translate poly v = List.map (Vec.( + ) v) poly
 let map_points f poly = List.map f poly
+
+let bounding_box poly =
+  let x_min, x_max, y_min, y_max =
+    List.fold_left
+      (fun (x_min, x_max, y_min, y_max) p ->
+        ( Float.min (Point.x p) x_min,
+          Float.max (Point.x p) x_max,
+          Float.min (Point.y p) y_min,
+          Float.max (Point.y p) y_max ))
+      (Float.infinity, Float.neg_infinity, Float.infinity, Float.neg_infinity)
+      poly
+  in
+  Box.v_corners (Point.v x_min y_min) (Point.v x_max y_max)
