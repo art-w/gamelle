@@ -82,6 +82,7 @@ let run () =
             let io = { (make_io backend) with event = !events } in
             fill_rect ~io ~color:Geometry.Color.black (Window.box ~io);
             let state = update ~io state in
+            Window.finalize_set_size ();
             let clean = List.rev_append !(io.clean) clean in
             current_run := Run { state; update; clean });
     Sdl.render_present renderer;

@@ -47,7 +47,7 @@ module View : sig
   type 'a scene = io:io -> 'a
 
   val ( & ) : unit scene -> unit scene -> unit scene
-  val drawing_box : Box.t -> io -> io
+  val drawing_box : ?scale:bool -> ?set_window_size:bool -> box -> io -> io
   val translate : Vec.t -> 'a scene -> 'a scene
   val scale : float -> 'a scene -> 'a scene
   val rotate : float -> 'a scene -> 'a scene

@@ -41,4 +41,3 @@
  (name test_physics)
  (modules test_physics)
  (libraries gamelle.sdl))
-
