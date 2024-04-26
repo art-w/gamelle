@@ -42,7 +42,3 @@
  (modules test_physics)
  (libraries gamelle.sdl))
 
-(executable
- (name volley)
- (modules volley)
- (libraries gamelle.sdl))

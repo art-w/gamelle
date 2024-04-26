@@ -1,0 +1,9 @@
+(lang dune 3.7)
+
+(name volley)
+
+(package
+  (name volley)
+  (synopsis "volley")
+  (depends
+    gamelle))

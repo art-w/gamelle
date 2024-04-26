@@ -1,0 +1,42 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))
+
+(executable
+ (public_name volley)
+ (name volley_bin)
+ (modules volley_bin)
+ (libraries volley gamelle.sdl))
+
+(rule
+ (target volley_bin.ml)
+ (action
+  (with-stdout-to
+   volley_bin.ml
+   (run echo "include Volley"))))
+
+(executable
+ (name volley_js)
+ (modules volley_js)
+ (modes js)
+ (libraries volley gamelle.jsoo))
+
+(rule
+ (target volley_js.ml)
+ (action
+  (with-stdout-to
+   volley_js.ml
+   (run echo "include Volley"))))
+
+(rule
+ (target volley.html)
+ (deps volley.template.html volley_js.bc.js)
+ (action
+  (with-stdout-to
+   volley.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=volley.template.html
+    --script=volley_js.bc.js))))
