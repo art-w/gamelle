@@ -190,6 +190,8 @@ let update ~io _param { text; offset; cursor; focused; pressed_key } box =
   { text; offset; cursor; focused; pressed_key }
 
 let result _ { text; _ } = Text.to_string text
+let destruct_result _ text = { (default ()) with text = Text.of_string text }
 
 let v =
-  elt ~construct_state ~destruct_state ~default ~size ~render ~update ~result ()
+  elt ~construct_state ~destruct_state ~default ~size ~render ~update
+    ~destruct_result ~result ()

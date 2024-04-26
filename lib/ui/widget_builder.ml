@@ -24,6 +24,7 @@ module type Widget = sig
   val v :
     t * string ->
     ?id:int ->
+    ?init:return ->
     ?size:(ts:(string -> size) -> params -> size) ->
     ?style:Style.t ->
     ?render:(io:io -> params -> state -> box -> unit) ->
@@ -88,10 +89,15 @@ let check_id_used_once ~ui id =
 let elt ~(construct_state : 'state -> state) ~destruct_state
     ~(default : 'params -> 'state) ?(style = Style.default)
     ~(size : ts:(string -> size) -> 'params -> size)
-    ~(render : io:io -> 'params -> 'state -> box -> unit) ~update ~result () : _
-    =
- fun (ui, loc) ?id ?(size = size) ?(style = style) ?(render = render) params ->
-  let default = construct_state (default params) in
+    ~(render : io:io -> 'params -> 'state -> box -> unit) ~update
+    ~destruct_result ~result () : _ =
+ fun (ui, loc) ?id ?init ?(size = size) ?(style = style) ?(render = render)
+     params ->
+  let default =
+    match init with
+    | Some v -> construct_state (destruct_result params v)
+    | None -> construct_state (default params)
+  in
   let id = { loc_stack = loc :: ui.loc_stack; _hint = id } in
   let ui_state = ui_state ~ui in
   check_id_used_once ~ui id;

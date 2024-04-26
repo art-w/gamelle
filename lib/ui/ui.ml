@@ -9,13 +9,13 @@ module Style = Style
 type cap = t * string
 
 let nest_loc = nest_loc
-let button cap ?id ?style text = Button.v cap ?id ?style text
+let button cap ?id ?init ?style text = Button.v cap ?id ?init ?style text
 
-let slider ?id ?style ?(width = 50.) cap ~min ~max =
+let slider ?id ?init ?style ?(width = 50.) cap ~min ~max =
   let params = { w = width; min; max } in
-  Slider.v cap ?id ?style params
+  Slider.v cap ?id ?init ?style params
 
-let checkbox cap ?id ?style text = Checkbox.v cap ?id ?style text
+let checkbox cap ?id ?init ?style text = Checkbox.v cap ?id ?init ?style text
 let label cap ?style text = Label.v cap ?style text
 let text_area cap ?style ?width text = Text_area.v cap ?width ?style text
 
@@ -25,8 +25,11 @@ let vscroll cap ?style ~height f =
 
 let horizontal cap ?style f = Horizontal.v cap ?style f
 let vertical cap ?style f = Vertical.v cap ?style f
-let text_input cap ?id ?style float = Text_input.v cap ?id ?style float
-let radio cap ?id ?style text = Radio.v cap ?id ?style text
+
+let text_input cap ?id ?init ?style float =
+  Text_input.v cap ?id ?init ?style float
+
+let radio cap ?id ?init ?style text = Radio.v cap ?id ?init ?style text
 
 module Customize = struct
   module Button = Button

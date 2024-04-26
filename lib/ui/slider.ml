@@ -43,9 +43,10 @@ let update ~io { w = _; min; max } state box =
   in
   { v; grasped }
 
+let destruct_result _ n = { v = n; grasped = false }
 let result _ state = state.v
 
 let v =
   elt ~construct_state ~destruct_state
     ~default:(fun { max; _ } -> { v = max; grasped = false })
-    ~size ~render ~update ~result ()
+    ~size ~render ~update ~destruct_result ~result ()

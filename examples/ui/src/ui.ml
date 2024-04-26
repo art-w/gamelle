@@ -4,6 +4,8 @@ type state = unit
 type k = A | B | C
 type k' = k
 
+let two_checkboxes [%ui] l1 l2 = Ui.(checkbox [%ui] l1, checkbox [%ui] l2)
+
 let () =
   Gamelle.run Box.zero @@ fun ~io box ->
   if Event.is_pressed ~io `escape then raise Exit;
@@ -30,7 +32,6 @@ let () =
                 vertical [%ui] (fun () ->
                     if button [%ui] "button 2" then
                       print_endline "button 2 pressed";
-
                     if button [%ui] "button 3" then
                       print_endline "button 3 pressed";
                     horizontal [%ui] (fun () ->
@@ -53,7 +54,7 @@ let () =
               ignore @@ checkbox [%ui] "Checkbox 2 !";
               if button [%ui] "for checkboxers only" then
                 print_endline "YOU ARE A CHECKBOXER");
-            let _number = slider [%ui] ~min:10. ~max:20. in
+            let _number = slider [%ui] ~init:15. ~min:10. ~max:20. in
             label [%ui]
               (Printf.sprintf "The slider value is %f"
                  (slider [%ui] ~min:10. ~max:20.));

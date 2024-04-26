@@ -23,8 +23,9 @@ let render ~io text _is_clicked box =
 
 let update ~io _text _old_state box = is_clicked ~io box
 let result _ b = b
+let destruct_result _ = Fun.id
 
 let v =
   elt ~construct_state ~destruct_state
     ~default:(fun _ -> false)
-    ~size ~render ~update ~result ()
+    ~size ~render ~update ~destruct_result ~result ()

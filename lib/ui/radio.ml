@@ -48,6 +48,11 @@ let result options n_checked =
 let size_radio = size
 let render_radio = render
 
-let v cap ?id ?size ?style ?render params =
+let destruct_result params result =
+  Option.bind result (fun result ->
+      find_index (fun (id, _label) -> id = result) params)
+
+let v cap ?id ?init ?size ?style ?render params =
   elt ~construct_state ~destruct_state ~default ~size:size_radio
-    ~render:render_radio ~update ~result () cap ?id ?style ?size ?render params
+    ~render:render_radio ~update ~destruct_result ~result () cap ?id ?init
+    ?style ?size ?render params
