@@ -8,6 +8,7 @@ let rotated angle io = { io with view = Transform.rotate angle io.view }
 let clipped clip io = { io with clip = Some clip }
 let unclipped io = { io with clip = None }
 let clipped_events b io = { io with clip_events = b }
+let z_indexed z io = { io with z_index = z }
 
 type 'a scene = io:io -> 'a
 
@@ -22,6 +23,7 @@ let project ~io p = Transform.project io.view p
 let clip clip fn ~io = fn ~io:(clipped clip io)
 let unclip fn ~io = fn ~io:(unclipped io)
 let clip_events b fn ~io = fn ~io:(clipped_events b io)
+let z_index z fn ~io = fn ~io:(z_indexed z io)
 let previous_size = ref Size.zero
 
 let drawing_box ?(scale = false) ?(set_window_size = true) box io =

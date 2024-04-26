@@ -2,6 +2,8 @@ open Gamelle_common
 open Gamelle_common.Geometry
 open Gamelle_backend
 
+val finalize_frame : unit -> unit
+
 module Point : sig
   include module type of Point
 end
@@ -107,10 +109,10 @@ module Text : sig
 
   val draw_multiline_t :
     io:Gamelle_backend.io ->
+    color:color ->
     ?width:float ->
     ?interline:float ->
     ?font:Gamelle_backend.Font.t ->
-    color:color ->
     ?size:int ->
     t ->
     size ->
@@ -118,10 +120,10 @@ module Text : sig
 
   val draw_multiline :
     io:Gamelle_backend.io ->
+    color:color ->
     ?width:float ->
     ?interline:float ->
     ?font:Gamelle_backend.Font.t ->
-    color:color ->
     ?size:int ->
     string ->
     size ->
@@ -138,3 +140,5 @@ type segment = Geometry.segment
 type circle = Geometry.circle
 type box = Geometry.box
 type size = Geometry.size
+
+val draw : io:io -> Bitmap.t -> size -> unit

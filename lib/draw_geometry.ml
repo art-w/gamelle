@@ -1,6 +1,16 @@
 open Gamelle_common
 open Gamelle_backend
 
+let draws : (int * (unit -> unit)) list ref = ref []
+let z ~io f = draws := (io.z_index, fun () -> f ~io) :: !draws
+
+let finalize_frame () =
+  !draws
+  |> List.stable_sort (fun (z, _) (z', _) -> -Int.compare z z')
+  |> List.rev
+  |> List.iter (fun (_z, f) -> f ());
+  draws := []
+
 module Point = struct
   include Geometry.Point
 end
@@ -20,10 +30,14 @@ module Shape = struct
     | Circle c -> draw_circle ~io ~color c
     | Polygon pts -> draw_poly ~io ~color pts
 
+  let draw ~io ~color s = z ~io (draw ~color s)
+
   let fill ~io ~color = function
     | Segment s -> draw_line ~io ~color s
     | Circle c -> fill_circle ~io ~color c
     | Polygon pts -> fill_poly ~io ~color pts
+
+  let fill ~io ~color s = z ~io (fill ~color s)
 end
 
 module Vec = struct
@@ -37,21 +51,21 @@ end
 module Segment = struct
   include Geometry.Segment
 
-  let draw = draw_line
+  let draw ~io ~color s = z ~io (draw_line ~color s)
 end
 
 module Circle = struct
   include Geometry.Circle
 
-  let draw = draw_circle
-  let fill = fill_circle
+  let draw ~io ~color c = z ~io (draw_circle ~color c)
+  let fill ~io ~color c = z ~io (fill_circle ~color c)
 end
 
 module Box = struct
   include Geometry.Box
 
-  let draw = draw_rect
-  let fill = fill_rect
+  let draw ~io ~color r = z ~io (draw_rect ~color r)
+  let fill ~io ~color r = z ~io (fill_rect ~color r)
 end
 
 module Size = Geometry.Size
@@ -79,10 +93,6 @@ module Text = struct
     of_string (Buffer.contents buffer)
 
   let draw_t = draw
-
-  let draw ~io ~color ?font ?size t pos =
-    draw_t ~io ~color ?font ?size (of_string t) pos
-
   let size_t = size
   let size ~io ?font ?size t = size_t ~io ?font ?size (of_string t)
 
@@ -179,7 +189,18 @@ module Text = struct
     ignore (List.fold_left print_line pos lines);
     ()
 
-  let draw_multiline ~io ?width ?interline ?font ~color ?size str pos =
+  let draw_t ~io ~color ?font ?size t pos =
+    z ~io (draw ~color ?font ?size t pos)
+
+  let draw_multiline_t ~io ~color ?width ?interline ?font ?size t pos =
+    z ~io (draw_multiline_t ~color ?width ?interline ?font ?size t pos)
+
+  let draw_multiline ~io ~color ?width ?interline ?font ?size str pos =
     draw_multiline_t ~io ?width ?interline ?font ~color ?size (of_string str)
       pos
+
+  let draw ~io ~color ?font ?size t pos =
+    draw_t ~io ~color ?font ?size (of_string t) pos
 end
+
+let draw ~io bmp pos = z ~io @@ Gamelle_backend.draw bmp pos

@@ -15,6 +15,7 @@ type 'a abstract_io = {
   centering_translation : vec;
   clip : box option;
   clip_events : bool;
+  z_index : int;
   backend : 'a;
 }
 
@@ -26,6 +27,7 @@ let make_io backend =
     centering_translation = Vec.zero;
     clip = None;
     clip_events = false;
+    z_index = 0;
     backend;
   }
 

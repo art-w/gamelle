@@ -60,6 +60,8 @@ module View : sig
   val clipped : box -> io -> io
   val unclipped : io -> io
   val clipped_events : bool -> io -> io
+  val z_indexed : int -> io -> io
+  val z_index : int -> 'a scene -> 'a scene
 end
 
 val clock : unit -> float
