@@ -2,8 +2,8 @@ open Draw_geometry
 open Ui_backend
 open Widget_builder
 
-type params = { w : float; min : float; max : float }
-type state = { v : float; grasped : bool }
+type params = { w : float; min : int; max : int }
+type state = { v : int; grasped : bool }
 type return = float
 type Ui_backend.state += Slider of state
 
@@ -20,6 +20,9 @@ let render ~io { w = _; min; max } state box =
   let sval = state.v in
   let line = Box.v_mid (Box.mid box) (Size.v w 4.) in
   Box.fill ~io ~color:lowlight line;
+  let min = float_of_int min
+  and max = float_of_int max
+  and sval = float_of_int sval in
   let pos =
     radius +. ((sval -. min) *. (w -. (2. *. radius)) /. (max -. min))
   in
@@ -36,9 +39,11 @@ let update ~io { w = _; min; max } state box =
   in
   let v =
     if grasped then
-      Float.max min @@ Float.min max
-      @@ ((Vec.x (Event.mouse_pos ~io) -. Box.minx box) *. (max -. min) /. w)
-         +. min
+      let min = float_of_int min and max = float_of_int max in
+      int_of_float
+        (Float.max min @@ Float.min max
+        @@ ((Vec.x (Event.mouse_pos ~io) -. Box.minx box) *. (max -. min) /. w)
+           +. min)
     else v
   in
   { v; grasped }

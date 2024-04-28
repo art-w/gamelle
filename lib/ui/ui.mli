@@ -22,6 +22,16 @@ val slider :
   max:float ->
   float
 
+val int_slider :
+  ?id:int ->
+  ?init:int ->
+  ?style:Style.t ->
+  ?width:float ->
+  cap ->
+  min:int ->
+  max:int ->
+  int
+
 val vertical : cap -> ?style:Style.t -> (unit -> 'a) -> 'a
 val horizontal : cap -> ?style:Style.t -> (unit -> 'a) -> 'a
 val vscroll : cap -> ?style:Style.t -> height:float -> (unit -> 'a) -> 'a
@@ -46,6 +56,7 @@ module Customize : sig
   module Label = Label
   module Radio = Radio
   module Slider = Slider
+  module Int_slider = Int_slider
   module Text_area = Text_area
   module Text_input = Text_input
   module Vertical = Vertical

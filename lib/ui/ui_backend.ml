@@ -59,8 +59,6 @@ type vscroll_state = {
 }
 (** size is the width or height depending on a vertical on horizontal layout. *)
 
-type slider_state = { v : float; grasped : bool }
-type slider_params = { w : float; min : float; max : float }
 type 'a vscroll_params = { height : float; f : unit -> 'a }
 
 exception IdTypeMismatch
