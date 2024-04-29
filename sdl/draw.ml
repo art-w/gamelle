@@ -5,6 +5,7 @@ module Gfx = Tsdl_gfx.Gfx
 module Delayed = Gamelle_common.Delayed
 
 let set_color ~io c =
+  let c = Gamelle_common.get_color ~io c in
   let r, g, b, a = Color.to_srgbi c in
   let a = int_of_float (a *. 255.) in
   (* Format.printf "%i %i %i %i@." r g b a ; *)
@@ -76,7 +77,7 @@ let draw ~io bmp p =
   in
   ()
 
-let draw_line ~io ~color segment =
+let draw_line ~io ?color segment =
   let p, p' = Segment.to_tuple segment in
   set_color ~io color;
   let x0, y0 = project ~io p in
@@ -88,13 +89,13 @@ let draw_line ~io ~color segment =
   in
   ()
 
-let draw_rect ~io ~color rect =
-  draw_line ~io ~color (Box.top rect);
-  draw_line ~io ~color (Box.bottom rect);
-  draw_line ~io ~color (Box.left rect);
-  draw_line ~io ~color (Box.right rect)
+let draw_rect ~io ?color rect =
+  draw_line ~io ?color (Box.top rect);
+  draw_line ~io ?color (Box.bottom rect);
+  draw_line ~io ?color (Box.left rect);
+  draw_line ~io ?color (Box.right rect)
 
-let draw_poly ~io ~color poly =
+let draw_poly ~io ?color poly =
   set_color ~io color;
   let arr = Polygon.to_list poly in
   let arr = List.map (project ~io) arr in
@@ -106,7 +107,7 @@ let draw_poly ~io ~color poly =
   in
   ()
 
-let fill_poly ~io ~color poly =
+let fill_poly ~io ?color poly =
   set_color ~io color;
   let arr = Polygon.to_list poly in
   let arr = List.map (project ~io) arr in
@@ -118,16 +119,15 @@ let fill_poly ~io ~color poly =
   in
   ()
 
-let fill_rect ~io ~color rect =
-  set_color ~io color;
+let fill_rect ~io ?color rect =
   let p0 = Box.tl_pt rect
   and p1 = Box.tr_pt rect
   and p2 = Box.br_pt rect
   and p3 = Box.bl_pt rect in
   let pts = Polygon.v [ p0; p1; p2; p3 ] in
-  fill_poly ~io ~color pts
+  fill_poly ~io ?color pts
 
-let draw_circle ~io ~color circle =
+let draw_circle ~io ?color circle =
   let center = Circle.center circle in
   let radius = Circle.radius circle in
   set_color ~io color;
@@ -141,7 +141,7 @@ let draw_circle ~io ~color circle =
   in
   ()
 
-let fill_circle ~io ~color circle =
+let fill_circle ~io ?color circle =
   let center = Circle.center circle in
   let radius = Circle.radius circle in
   set_color ~io color;

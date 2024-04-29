@@ -6,6 +6,7 @@ module C = Brr_canvas.C2d
 type io = Jsoo.io
 
 let set_color ~io c =
+  let c = get_color ~io c in
   let r, g, b, a = Color.to_srgbi c in
   let color =
     C.color (Jstr.of_string (Printf.sprintf "rgba(%i,%i,%i,%f)" r g b a))
@@ -27,7 +28,7 @@ let draw ~io bmp p =
   let ctx = io.backend.ctx in
   Clip.draw_clip ~io ctx (fun () -> Bitmap.draw ~io ~ctx bmp ~x ~y)
 
-let fill_rect ~io ~color rect =
+let fill_rect ~io ?color rect =
   transform ~io;
   let x, y = Vec.to_tuple (Box.o rect) in
   let w, h = Vec.to_tuple (Box.size rect) in
@@ -35,7 +36,7 @@ let fill_rect ~io ~color rect =
   let ctx = io.backend.ctx in
   Clip.draw_clip ~io ctx (fun () -> C.fill_rect ctx ~x ~y ~w ~h)
 
-let draw_rect ~io ~color rect =
+let draw_rect ~io ?color rect =
   transform ~io;
   let x, y = Vec.to_tuple (Box.o rect) in
   let w, h = Vec.to_tuple (Box.size rect) in
@@ -43,9 +44,9 @@ let draw_rect ~io ~color rect =
   let ctx = io.backend.ctx in
   Clip.draw_clip ~io ctx (fun () -> C.stroke_rect ctx ~x ~y ~w ~h)
 
-let draw_line ~io ~color segment =
-  let p0, p1 = Segment.to_tuple segment in
+let draw_line ~io ?color segment =
   transform ~io;
+  let p0, p1 = Segment.to_tuple segment in
   let x0, y0 = Vec.to_tuple p0 in
   let x1, y1 = Vec.to_tuple p1 in
   set_color ~io color;
@@ -66,29 +67,29 @@ let path_poly pts =
   C.Path.close path;
   path
 
-let draw_poly ~io ~color poly =
+let draw_poly ~io ?color pts =
   transform ~io;
   set_color ~io color;
   let ctx = io.backend.ctx in
   Clip.draw_clip ~io ctx (fun () ->
-      let path = path_poly poly in
+      let path = path_poly pts in
       C.stroke ctx path)
 
-let fill_poly ~io ~color poly =
+let fill_poly ~io ?color pts =
   transform ~io;
   set_color ~io color;
   let ctx = io.backend.ctx in
   Clip.draw_clip ~io ctx (fun () ->
-      let path = path_poly poly in
+      let path = path_poly pts in
       C.fill ctx path)
 
 let tau = 8.0 *. atan 1.0
 
-let draw_circle ~io ~color circle =
-  let center = Circle.center circle in
-  let radius = Circle.radius circle in
+let draw_circle ~io ?color circle =
   transform ~io;
   set_color ~io color;
+  let center = Circle.center circle in
+  let radius = Circle.radius circle in
   let x, y = Vec.to_tuple center in
   let path = C.Path.create () in
   let ctx = io.backend.ctx in
@@ -96,11 +97,11 @@ let draw_circle ~io ~color circle =
       C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
       C.stroke ctx path)
 
-let fill_circle ~io ~color circle =
-  let center = Circle.center circle in
-  let radius = Circle.radius circle in
+let fill_circle ~io ?color circle =
   transform ~io;
   set_color ~io color;
+  let center = Circle.center circle in
+  let radius = Circle.radius circle in
   let x, y = Vec.to_tuple center in
   let path = C.Path.create () in
   let ctx = io.backend.ctx in

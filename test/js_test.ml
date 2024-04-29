@@ -63,17 +63,18 @@ let update ~io { x; y; vx; vy; _ } =
     else (vx, vy)
   in
 
-  let x = x +. (vx *. dt ()) in
-  let y = y +. (vy *. dt ()) in
+  let dt = dt ~io in
+  let x = x +. (vx *. dt) in
+  let y = y +. (vy *. dt) in
 
   let vx = vx *. 0.9 in
   let vy = vy *. 0.9 in
 
   Window.set_size ~io (Size.v 800. 800.);
   Box.fill ~io ~color:black (Window.box ~io);
-  Text.draw ~io ~color:Color.white ~size:30 "Hello World!" Vec.zero;
+  Text.draw ~io ~color:Color.white ~size:30 "Hello World!" ~at:Vec.zero;
   Text.draw ~io:(View.scaled 2.0 io) ~color:Color.white ~size:30 "Hello World!"
-    Vec.zero;
+    ~at:Vec.zero;
   View.(
     translate (Vec.v mx my)
       (Circle.fill ~color:red (Circle.v (Point.v 0.0 0.0) 10.0))
@@ -81,7 +82,7 @@ let update ~io { x; y; vx; vy; _ } =
         (scale 3.0
            (Box.draw ~color:yellow (Box.v (Point.v 0. 0.) (Size.v 100.0 100.0))
            & translate (Vec.v (75. /. 2.) (59. /. 2.))
-             @@ rotate (1.0 *. clock ())
+             @@ rotate (1.0 *. clock ~io)
              @@ translate (Vec.v (-75. /. 2.) (-59. /. 2.))
              @@ (Box.fill ~color:blue (Box.v (Point.v 0. 0.) (Size.v 75. 59.))
                 & Box.draw ~color:red (Box.v (Point.v 0. 0.) (Size.v 75. 59.))

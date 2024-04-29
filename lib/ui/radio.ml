@@ -16,7 +16,7 @@ let size ~ts options = aggregate_sizes ~dir:V (sizes ~ts options)
 let render_one = Checkbox.render
 
 let layout ~io options box =
-  let sizes = sizes ~ts:(Text.size ~io ~size:font_size) options in
+  let sizes = sizes ~ts:(Text.size ~io) options in
   let weights = List.map (fun _ -> 1.) options in
   layout_boxes ~dir:V box weights sizes
 

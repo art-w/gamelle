@@ -1,3 +1,4 @@
+module Tsdl_image = Tsdl_image.Image
 open Gamelle_common
 open Common
 

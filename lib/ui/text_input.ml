@@ -55,7 +55,7 @@ let size ~ts width =
   let text_size = Size.(v width (h (ts "a"))) in
   Vec.(text_size + (2. * padding_xy))
 
-let text_length ~io text = Size.w (Text.size_t ~io ~size:font_size text)
+let text_length ~io text = Size.w (Text.size_t ~io text)
 let cursor_offset ~io text cursor = text_length ~io (Text.sub text 0 cursor)
 
 let delete_char i text =
@@ -67,7 +67,7 @@ let render ~io _params { text; offset; cursor; focused; pressed_key = _ } box =
   let io = View.clipped box io in
   let nsize = Vec.(Box.size box - (2. * padding_xy)) in
   let box = Box.(v_mid (mid box) nsize) in
-  Text.draw_t ~io ~color:fg ~size:font_size text Vec.(Box.o box + v offset 0.);
+  Text.draw_t ~io ~color:fg ~at:Vec.(Box.o box + v offset 0.) text;
   let cursor_offset = cursor_offset ~io text cursor in
   let cursor_pos = cursor_offset +. offset in
   let cursor_seg =
@@ -75,7 +75,7 @@ let render ~io _params { text; offset; cursor; focused; pressed_key = _ } box =
       (Point.v (Box.minx box +. cursor_pos) (Box.miny box))
       (Point.v
          (Box.minx box +. cursor_pos)
-         (Box.miny box +. Size.h (Text.size ~io ~size:font_size "a")))
+         (Box.miny box +. Size.h (Text.size ~io "a")))
   in
   if focused then Segment.draw ~io ~color:highlight cursor_seg
 

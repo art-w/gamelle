@@ -81,7 +81,6 @@ let find ~default tbl key =
 
 let register_layout ~ui ~id box = Hashtbl.replace (ui_state ~ui).layout id box
 let query_layout ~ui ~id = find ~default:Box.zero (ui_state ~ui).layout id
-let font_size = 20
 let padding = 4.
 let padding_x = Vec.v padding 0.
 let padding_y = Vec.v 0. padding
@@ -210,7 +209,7 @@ let render_node ~ui ?id ~size ~style ~dir ~children_offset ~children_io
     (node_renderer ~ui ?id ~size ~style ~dir ~children_offset ~children_io
        ~children ~size_for_self renderer)
 
-let io_text_size ~io = Text.size ~io ~size:font_size
+let io_text_size ~io str = Text.size ~io str
 let ui_text_size ~ui = io_text_size ~io:ui.io
 
 let clicked_outside ~io box =
@@ -222,7 +221,7 @@ let is_clicked ~io box =
 let centered_text ~io ~color ?font ?size text box =
   let text_size = Text.size ~io ?font ?size text in
   let pos = Box.(o (v_mid (mid box) text_size)) in
-  Text.draw ~io ~color ?font ?size text pos
+  Text.draw ~io ~color ?font ?size ~at:pos text
 
 let nest_loc (ui, loc) f =
   ui.loc_stack <- loc :: ui.loc_stack;

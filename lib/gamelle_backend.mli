@@ -19,7 +19,7 @@ module Font : sig
   val default : t
   val default_size : int
   val load : string -> t
-  val draw : color:Color.t -> t -> int -> string -> Bitmap.t
+  val draw : ?color:Color.t -> t -> int -> string -> Bitmap.t
 end
 
 module Sound : sig
@@ -34,16 +34,16 @@ module Sound : sig
   val play_music : io:io -> music -> unit
 end
 
-val clock : unit -> float
-val dt : unit -> float
+val clock : io:io -> float
+val dt : io:io -> float
 val draw : io:io -> Bitmap.t -> point -> unit
-val draw_line : io:io -> color:Color.t -> Segment.t -> unit
-val draw_rect : io:io -> color:Color.t -> box -> unit
-val fill_rect : io:io -> color:Color.t -> box -> unit
-val draw_poly : io:io -> color:Color.t -> Polygon.t -> unit
-val fill_poly : io:io -> color:Color.t -> Polygon.t -> unit
-val draw_circle : io:io -> color:Color.t -> Circle.t -> unit
-val fill_circle : io:io -> color:Color.t -> Circle.t -> unit
+val draw_line : io:io -> ?color:Color.t -> Segment.t -> unit
+val draw_rect : io:io -> ?color:Color.t -> box -> unit
+val fill_rect : io:io -> ?color:Color.t -> box -> unit
+val draw_poly : io:io -> ?color:Color.t -> Polygon.t -> unit
+val fill_poly : io:io -> ?color:Color.t -> Polygon.t -> unit
+val draw_circle : io:io -> ?color:Color.t -> Circle.t -> unit
+val fill_circle : io:io -> ?color:Color.t -> Circle.t -> unit
 val show_cursor : io:io -> bool -> unit
 
 module Text : sig
@@ -58,7 +58,13 @@ module Text : sig
   val chars : t -> t list
 
   val draw :
-    io:io -> color:Color.t -> ?font:Font.t -> ?size:int -> t -> point -> unit
+    io:io ->
+    ?color:Color.t ->
+    ?font:Font.t ->
+    ?size:int ->
+    at:point ->
+    t ->
+    unit
 
   val size : io:io -> ?font:Font.t -> ?size:int -> t -> size
 end
@@ -68,5 +74,3 @@ module Window : sig
   val size : io:io -> size
   val box : io:io -> box
 end
-
-(* *)

@@ -10,7 +10,8 @@
   sdl_buffer
   text
   sound
-  window)
+  window
+  replay)
  (libraries
   gamelle_common
   uuseg

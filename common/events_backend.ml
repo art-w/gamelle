@@ -42,6 +42,7 @@ type t = {
   pressed_chars : Strings.t;
   down_chars : Strings.t;
   up_chars : Strings.t;
+  clock : int;
 }
 
 let mouse_pos t = Point.v t.mouse_x t.mouse_y
@@ -57,8 +58,13 @@ let default =
     pressed_chars = Strings.empty;
     down_chars = Strings.empty;
     up_chars = Strings.empty;
+    clock = 0;
   }
 
+let desired_fps = 60.0
+let desired_dt = 1. /. desired_fps
+let dt (_ : t) = desired_dt
+let clock t = float t.clock /. desired_fps
 let insert = Keys.add
 let remove = Keys.remove
 let diff = Keys.diff

@@ -1,6 +1,6 @@
 open Common
 open Gamelle_common
-module Ttf = Tsdl_ttf
+module Ttf = Tsdl_ttf.Ttf
 
 type s = { buffer : Sdl_buffer.t; sizes : (int, Ttf.font) Hashtbl.t }
 type t = (io, s) Delayed.t
@@ -23,9 +23,10 @@ let get ~io font size =
       Hashtbl.replace font.sizes size ft;
       ft
 
-let draw ~color font size text =
+let draw ?color font size text =
   Delayed.make @@ fun ~io ->
   let font = get ~io font size in
+  let color = get_color ~io color in
   let r, g, b, a = Geometry.Color.to_srgbi color in
   let a = int_of_float (a *. 255.) in
   let& bmp =
@@ -33,7 +34,7 @@ let draw ~color font size text =
   in
   Bitmap.of_texture ~io bmp
 
-let text_size font size text =
+let text_size (font : t) size text =
   Delayed.make @@ fun ~io ->
   let font = get ~io font size in
   let& w, h = Ttf.size_utf8 font text in

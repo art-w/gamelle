@@ -14,7 +14,7 @@ module Window = Gamelle_backend.Window
 let run init f =
   Gamelle_backend.run init (fun ~io ->
       let r = f ~io in
-      Draw_geometry.finalize_frame ();
+      Gamelle_common.finalize_frame ~io;
       r)
 
 module Font = Gamelle_backend.Font

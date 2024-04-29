@@ -38,10 +38,14 @@ let () =
       obj :: world
     else world
   in
-  let dt = dt () in
+  let dt = dt ~io in
   let gravity = Vec.v 0.0 (1500.0 *. dt) in
   let world = List.map (Physics.add_velocity gravity) world in
   let world = List.map (Physics.update ~dt) world in
   let world = Physics.fix_collisions world in
-  List.iter (Physics.draw ~io) world;
+
+  let color = Color.v 1.0 1.0 0.0 0.2 in
+  List.iter (Physics.fill ~io ~color) world;
+  let color = Color.v 1.0 1.0 0.0 1.0 in
+  List.iter (Physics.draw ~io ~color) world;
   world

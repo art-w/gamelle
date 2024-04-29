@@ -11,12 +11,10 @@ module Transform = Gamelle_common.Transform
 include Draw
 include Jsoo
 
-(* type ctx = C.t *)
-
 let prev_now = ref 0.0
 let now = ref 0.0
-let clock () = !now
-let dt () = !now -. !prev_now
+let clock = Gamelle_common.clock
+let dt = Gamelle_common.dt
 
 module Window = struct
   let size ~io =
@@ -50,6 +48,7 @@ let run state update =
   let audio = Audio.Context.create () in
 
   let backend = { canvas; ctx; audio } in
+  let clock_ref = ref 0 in
 
   let rec animate state =
     let _ = G.request_animation_frame (loop state) in
@@ -59,7 +58,13 @@ let run state update =
     prev_now := !now;
     now := elapsed /. 1000.0;
     Events_js.new_frame ();
-    let io = { (make_io backend) with event = !Events_js.current } in
+    let io =
+      {
+        (make_io backend) with
+        event = { !Events_js.current with clock = !clock_ref };
+      }
+    in
+    incr clock_ref;
     fill_rect ~io ~color:Color.black (Window.box ~io);
     let state = update ~io state in
     Events_js.current := reset_wheel !Events_js.current;

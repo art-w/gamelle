@@ -1,8 +1,16 @@
 open Gamelle_common
 open Gamelle_common.Geometry
 open Gamelle_backend
+module Size : module type of Size
+module Size1 : module type of Size1
 
-val finalize_frame : unit -> unit
+type color = Geometry.color
+type point = Geometry.point
+type vec = Geometry.vec
+type segment = Geometry.segment
+type circle = Geometry.circle
+type box = Geometry.box
+type size = Geometry.size
 
 module Point : sig
   include module type of Point
@@ -11,15 +19,15 @@ end
 module Polygon : sig
   include module type of Polygon
 
-  val draw : io:io -> color:Color.t -> t -> unit
-  val fill : io:io -> color:Color.t -> t -> unit
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
 end
 
 module Shape : sig
   include module type of Shape
 
-  val draw : io:io -> color:Color.t -> t -> unit
-  val fill : io:io -> color:Color.t -> t -> unit
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
 end
 
 module Vec : sig
@@ -33,21 +41,21 @@ end
 module Segment : sig
   include module type of Segment
 
-  val draw : io:io -> color:Color.t -> t -> unit
+  val draw : io:io -> ?color:Color.t -> t -> unit
 end
 
 module Circle : sig
   include module type of Circle
 
-  val draw : io:io -> color:Color.t -> t -> unit
-  val fill : io:io -> color:Color.t -> t -> unit
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
 end
 
 module Box : sig
   include module type of Box
 
-  val draw : io:io -> color:Color.t -> t -> unit
-  val fill : io:io -> color:Color.t -> t -> unit
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
 end
 
 module Text : sig
@@ -59,20 +67,20 @@ module Text : sig
 
   val draw_t :
     io:Gamelle_backend.io ->
-    color:color ->
+    ?color:color ->
     ?font:Gamelle_backend.Font.t ->
     ?size:int ->
+    at:point ->
     t ->
-    size ->
     unit
 
   val draw :
     io:Gamelle_backend.io ->
-    color:color ->
+    ?color:color ->
     ?font:Gamelle_backend.Font.t ->
     ?size:int ->
+    at:point ->
     string ->
-    size ->
     unit
 
   val size_t :
@@ -109,36 +117,25 @@ module Text : sig
 
   val draw_multiline_t :
     io:Gamelle_backend.io ->
-    color:color ->
+    ?color:color ->
     ?width:float ->
     ?interline:float ->
     ?font:Gamelle_backend.Font.t ->
     ?size:int ->
+    at:point ->
     t ->
-    size ->
     unit
 
   val draw_multiline :
     io:Gamelle_backend.io ->
-    color:color ->
+    ?color:color ->
     ?width:float ->
     ?interline:float ->
     ?font:Gamelle_backend.Font.t ->
     ?size:int ->
+    at:point ->
     string ->
-    size ->
     unit
 end
-
-module Size : module type of Size
-module Size1 : module type of Size1
-
-type color = Geometry.color
-type point = Geometry.point
-type vec = Geometry.vec
-type segment = Geometry.segment
-type circle = Geometry.circle
-type box = Geometry.box
-type size = Geometry.size
 
 val draw : io:io -> Bitmap.t -> size -> unit

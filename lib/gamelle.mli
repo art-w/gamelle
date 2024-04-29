@@ -18,7 +18,7 @@ module Font : sig
   val default : t
   val default_size : int
   val load : string -> t
-  val draw : color:Color.t -> t -> int -> string -> Bitmap.t
+  val draw : ?color:Color.t -> t -> int -> string -> Bitmap.t
 end
 
 module Sound : sig
@@ -64,8 +64,8 @@ module View : sig
   val z_index : int -> 'a scene -> 'a scene
 end
 
-val clock : unit -> float
-val dt : unit -> float
+val clock : io:io -> float
+val dt : io:io -> float
 val draw : io:io -> Bitmap.t -> point -> unit
 val show_cursor : io:io -> bool -> unit
 
@@ -111,23 +111,4 @@ end
 (* *)
 
 module Shape : module type of Shape
-
-module Physics : sig
-  type t
-  type kind = Movable | Immovable
-
-  val make :
-    ?mass:float ->
-    ?inertia:float ->
-    ?restitution:float ->
-    ?kind:kind ->
-    Shape.t ->
-    t
-
-  val center : t -> Point.t
-  val add_velocity : Vec.t -> t -> t
-  val add_rot_velocity : float -> t -> t
-  val update : dt:float -> t -> t
-  val fix_collisions : t list -> t list
-  val draw : io:io -> t -> unit
-end
+module Physics : module type of Physics

@@ -72,8 +72,13 @@ let update t e =
 
 let update t e = try update t e with Exit as exn -> raise exn | _ -> t
 
-let reset t =
-  { t with keypressed = remove `wheel t.keypressed; wheel_delta = 0. }
+let reset ~now t =
+  {
+    t with
+    clock = now;
+    keypressed = remove `wheel t.keypressed;
+    wheel_delta = 0.;
+  }
 
 let update_mouse t =
   let state, (x, y) = Sdl.get_mouse_state () in

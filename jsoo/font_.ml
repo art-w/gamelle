@@ -36,7 +36,9 @@ let load binstring =
 let default = load Gamelle_common.Font.default
 let default_size = Gamelle_common.Font.default_size
 
-let draw_at ~io (lazy font_name) ~size text (x, y) =
+let draw_at ~io ?color ~font:(lazy font_name) ~size ~at text =
+  Draw.set_color ~io color;
+  let x, y = Gg.V2.to_tuple at in
   C.set_font io.backend.ctx
     (Jstr.of_string (string_of_int size ^ "px " ^ font_name));
   let text = Jstr.of_string text in
@@ -46,7 +48,7 @@ let draw_at ~io (lazy font_name) ~size text (x, y) =
       C.fill_text ctx text ~x
         ~y:(y +. C.Text_metrics.font_bounding_box_ascent metrics))
 
-let text_size ~io (lazy font_name) ~size text =
+let text_size ~io ~font:(lazy font_name) ~size text =
   C.set_font io.backend.ctx
     (Jstr.of_string (string_of_int size ^ "px " ^ font_name));
   let text = Jstr.of_string text in
@@ -58,4 +60,4 @@ let text_size ~io (lazy font_name) ~size text =
   in
   Size.v w h
 
-let draw ~color:_ _ _ _ = failwith "Font.draw"
+let draw ?color:_ _ _ _ = failwith "Font.draw"

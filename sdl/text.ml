@@ -37,9 +37,10 @@ let slice ?(start = 0) ?stop str =
 let to_string = Fun.id
 let of_string = Fun.id
 
-let draw ~io ~color ?(font = Font_.default) ?(size = Font.default_size) text p =
+let draw ~io ?color ?(font = Font_.default) ?(size = Font.default_size) ~at:p
+    text =
   if text <> "" then (
-    let bitmap = Font_.draw ~color font size text in
+    let bitmap = Font_.draw ?color font size text in
     draw ~io bitmap p;
     Bitmap.free ~io bitmap)
 

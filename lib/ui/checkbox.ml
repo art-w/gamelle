@@ -36,8 +36,8 @@ let render ~io text is_checked box =
            Vec.(Box.size check'box' - (2. * padding_xy)))
      in
      Box.fill ~io ~color:highlight ticked'box');
-  Text.draw ~io ~color:fg ~size:font_size text
-    Vec.(pos + padding_x + v check'box'_size 0. + padding_x)
+  Text.draw ~io ~color:fg text
+    ~at:Vec.(pos + padding_x + v check'box'_size 0. + padding_x)
 
 let update ~io _text previous_is_checked box =
   let is_clicked = is_clicked ~io box in

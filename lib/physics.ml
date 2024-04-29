@@ -30,15 +30,11 @@ let add_rot_velocity dv t =
   | Immovable -> t
   | _ -> { t with rot_speed = t.rot_speed +. dv }
 
-let draw ~io { kind; shape; pos; rot; _ } =
-  let color, colora =
-    match kind with
-    | Immovable -> (Color.v 0.0 1.0 1.0 1.0, Color.v 0.0 1.0 1.0 0.3)
-    | Movable -> (Color.v 1.0 1.0 0.0 1.0, Color.v 1.0 1.0 0.0 0.3)
-  in
-  Shape.draw ~io ~color shape;
-  Shape.fill ~io ~color:colora shape;
-  draw_line ~io ~color:colora (Segment.v pos Vec.(pos + polar 10.0 rot))
+let draw ~io ?color { shape; pos; rot; _ } =
+  Shape.draw ~io ?color shape;
+  draw_line ~io ?color (Segment.v pos Vec.(pos + polar 10.0 rot))
+
+let fill ~io ?color { shape; _ } = Shape.fill ~io ?color shape
 
 let make ?mass ?inertia ?(restitution = 0.2) ?(kind = Movable) shape =
   let pos = Shape.center shape in

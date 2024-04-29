@@ -6,24 +6,13 @@ module Sound = Sound
 module Transform = Gamelle_common.Transform
 module Text = Text
 include Draw
-
-let clock = Common.clock
-let dt = Common.dt
-
-module Ttf = Tsdl_ttf
+module Tsdl_image = Tsdl_image.Image
+module Ttf = Tsdl_ttf.Ttf
 module Window = Window
-
-type run =
-  | No_run : run
-  | Run : {
-      state : 'a;
-      update : io:io -> 'a -> 'a;
-      clean : (unit -> unit) list;
-    }
-      -> run
 
 let lock = Mutex.create ()
 let current_run = ref No_run
+let desired_time = 1.0 /. 60.0
 
 let run () =
   let& () = Sdl.init Sdl.Init.(video + audio) in
@@ -55,47 +44,72 @@ let run () =
   let& _ = Sdl.show_cursor false in
 
   let t0 = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
-  Common.start_time := t0;
-  Common.now := t0;
+  let start_time = t0 in
+  let now_prev = ref t0 in
+  let now = ref t0 in
 
   let open Gamelle_common in
   let events = ref Events_backend.default in
 
+  let latest_io = ref (make_io backend) in
+
   let rec loop () : unit =
     let t0 = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
-    Common.now_prev := !Common.now;
-    Common.now := t0;
+    let t0 = t0 -. start_time in
+    now_prev := !now;
+    now := t0;
+
+    let was_replayed =
+      mutex_protect lock @@ fun () ->
+      Replay.replay ~backend ~events ~latest_io current_run
+    in
+
     let e = Sdl.Event.create () in
     let previous = !events in
-    events := Events_sdl.reset !events;
-    while Sdl.poll_event (Some e) do
-      events := Events_sdl.update !events e;
-      events := Events_sdl.update_mouse !events
-    done;
-    events := Events_backend.update_updown previous !events;
+    events := Events_sdl.reset ~now:!Replay.clock !events;
+    Sdl.pump_events ();
+    let has_focus =
+      (not was_replayed)
+      &&
+      let flags = Sdl.get_window_flags window in
+      Sdl.Window.(test input_focus) flags
+    in
+    if has_focus then (
+      while Sdl.poll_event (Some e) do
+        events := Events_sdl.update !events e;
+        events := Events_sdl.update_mouse !events
+      done;
+      events := Events_backend.update_updown previous !events);
 
     mutex_protect lock (fun () ->
         match !current_run with
         | No_run -> invalid_arg "No game currently running"
-        | Run { state; update; clean } ->
-            let& () = Sdl.render_clear renderer in
+        | Run { state; update; clean } when has_focus ->
+            Replay.add !events;
             let io = { (make_io backend) with event = !events } in
+            latest_io := io;
             fill_rect ~io ~color:Geometry.Color.black (Window.box ~io);
             let state = update ~io state in
             Window.finalize_set_size ();
             let clean = List.rev_append !(io.clean) clean in
-            current_run := Run { state; update; clean });
-    Sdl.render_present renderer;
+            current_run := Run { state; update; clean }
+        | Run _ -> ());
+
+    (let io = !latest_io in
+     let draw_calls = !(io.draws) in
+     Gamelle_common.finalize_frame ~io;
+     io.draws := draw_calls;
+     Sdl.render_present renderer);
 
     if Events_backend.is_pressed !events `quit then raise Exit;
 
     let now = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
     let frame_elapsed = now -. t0 in
-    let desired_time = 1.0 /. 60.0 in
     let wait_time =
-      Int32.of_float (max 0.0 (1000.0 *. (desired_time -. frame_elapsed)))
+      Int32.of_float (max 0.001 (1000.0 *. (desired_time -. frame_elapsed)))
     in
 
+    (* Format.printf "delay %.2f <= %.2f %.2f@." (Int32.to_float wait_time) (1000.0 *. frame_elapsed) (1000.0 *. desired_time) ; *)
     Sdl.delay wait_time;
     loop ()
   in
@@ -121,4 +135,5 @@ let run state update =
       run ()
   | Run { clean; _ } ->
       List.iter (fun fn -> fn ()) clean;
+      Replay.reload ();
       Mutex.unlock lock

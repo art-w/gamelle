@@ -136,9 +136,9 @@ let draw_score ~io ~state =
   let score_left = string_of_int score_left in
   let score_right = string_of_int score_right in
   Text.draw ~io ~color ~size:18 score_left
-    (Vec.v (Box.ox box_game +. 10.) (Box.oy court -. 22.)) ;
+    ~at:(Vec.v (Box.ox box_game +. 10.) (Box.oy court -. 22.)) ;
   Text.draw ~io ~color ~size:18 score_right
-    (Vec.v (Box.midx box_game +. 10.) (Box.oy court -. 22.))
+    ~at:(Vec.v (Box.midx box_game +. 10.) (Box.oy court -. 22.))
 
 let draw_ball ~io {ball_pos; _} = Circle.(fill ~io ~color (v ball_pos 4.))
 

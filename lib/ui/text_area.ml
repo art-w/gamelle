@@ -4,11 +4,10 @@ open Widget_builder
 
 type params = { text : string; width : float option }
 
-let size ~io { text; width } =
-  Text.size_multiline ~io ?width ~size:font_size text
+let size ~io { text; width } = Text.size_multiline ~io ?width text
 
 let render ~io { text; width } box =
-  Text.draw_multiline ~io ~color:fg ?width ~size:font_size text (Box.o box)
+  Text.draw_multiline ~io ~color:fg ?width ~at:(Box.o box) text
 
 let v (ui, loc) ?(style = Style.default) ?width text =
   inert_elt (ui, loc) ~style ~size ~render { text; width }
