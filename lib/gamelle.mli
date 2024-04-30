@@ -48,16 +48,7 @@ module Transform : sig
 end
 
 module View : sig
-  type 'a scene = io:io -> 'a
-
-  val ( & ) : unit scene -> unit scene -> unit scene
   val drawing_box : ?scale:bool -> ?set_window_size:bool -> box -> io -> io
-  val translate : Vec.t -> 'a scene -> 'a scene
-  val scale : float -> 'a scene -> 'a scene
-  val rotate : float -> 'a scene -> 'a scene
-  val clip : box -> 'a scene -> 'a scene
-  val unclip : 'a scene -> 'a scene
-  val clip_events : bool -> 'a scene -> 'a scene
   val translated : Vec.t -> io -> io
   val scaled : float -> io -> io
   val rotated : float -> io -> io
@@ -65,13 +56,9 @@ module View : sig
   val unclipped : io -> io
   val clipped_events : bool -> io -> io
   val z_indexed : int -> io -> io
-  val z_index : int -> 'a scene -> 'a scene
-  val color : Color.t -> 'a scene -> 'a scene
   val colored : Color.t -> io -> io
   val fonted : Font.t -> io -> io
-  val font : Font.t -> 'a scene -> 'a scene
   val font_sized : int -> io -> io
-  val font_size : int -> 'a scene -> 'a scene
 end
 
 val clock : io:io -> float

@@ -51,7 +51,9 @@ let update ~io ~children_size box state { height = _; f = _ } =
   let max_offset = real_height -. height in
   let mouse_pos = Event.mouse_pos ~io in
   let grasped =
-    if grasped then not (View.clip_events false ~io @@ Event.is_up `click_left)
+    if grasped then
+      let io = View.clipped_events false io in
+      not (Event.is_up ~io `click_left)
     else Event.is_down ~io `click_left && Box.mem mouse_pos scroll_rail_box
   in
   let offset =

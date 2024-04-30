@@ -34,7 +34,9 @@ let update ~io { w = _; min; max } state box =
   let w = Box.w box -. (2. *. padding) in
   let { v; grasped } = state in
   let grasped =
-    if grasped then not (View.clip_events false ~io @@ Event.is_up `click_left)
+    if grasped then
+      let io = View.clipped_events false io in
+      not (Event.is_up ~io `click_left)
     else Event.is_down ~io `click_left && Box.mem (Event.mouse_pos ~io) box
   in
   let v =

@@ -17,23 +17,7 @@ let fonted ft io =
 let font_sized s io =
   { io with backend = Gamelle_backend.Font.set_font_size s io.backend }
 
-type 'a scene = io:io -> 'a
-
-let ( & ) f g ~io =
-  f ~io;
-  g ~io
-
-let translate dxy fn ~io = fn ~io:(translated dxy io)
-let scale factor fn ~io = fn ~io:(scaled factor io)
-let rotate angle fn ~io = fn ~io:(rotated angle io)
 let project ~io p = Transform.project io.view p
-let clip clip fn ~io = fn ~io:(clipped clip io)
-let unclip fn ~io = fn ~io:(unclipped io)
-let clip_events b fn ~io = fn ~io:(clipped_events b io)
-let z_index z fn ~io = fn ~io:(z_indexed z io)
-let color c fn ~io = fn ~io:(colored c io)
-let font ft fn ~io = fn ~io:(fonted ft io)
-let font_size s fn ~io = fn ~io:(font_sized s io)
 let previous_size = ref Size.zero
 
 let drawing_box ?(scale = false) ?(set_window_size = true) box io =

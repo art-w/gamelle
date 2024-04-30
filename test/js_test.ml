@@ -75,6 +75,7 @@ let update ~io { x; y; vx; vy; _ } =
   Text.draw ~io ~color:Color.white ~size:30 "Hello World!" ~at:Vec.zero;
   Text.draw ~io:(View.scaled 2.0 io) ~color:Color.white ~size:30 "Hello World!"
     ~at:Vec.zero;
+  (*
   View.(
     translate (Vec.v mx my)
       (Circle.fill ~color:red (Circle.v (Point.v 0.0 0.0) 10.0))
@@ -99,6 +100,7 @@ let update ~io { x; y; vx; vy; _ } =
                 & Circle.draw ~color:green
                     (Circle.v (Point.v (75.0 /. 2.) (59.0 /. 2.)) 10.)))))
     ~io;
+  *)
   { x; y; vx; vy; mx; my }
 
 let () = run { mx = 0.0; my = 0.0; x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 } update
