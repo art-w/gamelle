@@ -1,10 +1,10 @@
 .PHONY: run html
 
 run:
-	dune build
+	dune build --root=.
 	gamelle hotreload _build/default/game/pong.cmxs &
-	dune build --watch
+	dune build --root=. --watch
 
 html:
-	dune build
+	dune build --root=.
 	xdg-open _build/default/bin/index.html

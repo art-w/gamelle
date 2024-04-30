@@ -1,6 +1,6 @@
 run:
-	dune exec morpion
+	dune exec --root=. morpion
 
 html:
-	dune build
+	dune build --root=.
 	firefox _build/default/bin/index.html

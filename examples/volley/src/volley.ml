@@ -131,6 +131,10 @@ let () =
     in
     let player1 = { player1 with shape = player1_shape } in
     let player2 = { player2 with shape = player2_shape } in
+    List.iter (Physics.fill ~io ~color:Color.white) world;
+    Physics.fill ~io ~color:Color.blue player1.shape;
+    Physics.fill ~io ~color:Color.blue player2.shape;
+    Physics.fill ~io ~color:Color.red ball;
     List.iter (Physics.draw ~io) world;
     Physics.draw ~io player1.shape;
     Physics.draw ~io player2.shape;
