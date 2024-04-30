@@ -1,4 +1,3 @@
-open Gamelle_common
 open Draw
 module Gfx = Tsdl_gfx.Gfx
 module Delayed = Gamelle_common.Delayed
@@ -37,12 +36,11 @@ let slice ?(start = 0) ?stop str =
 let to_string = Fun.id
 let of_string = Fun.id
 
-let draw ~io ?color ?(font = Font_.default) ?(size = Font.default_size) ~at:p
-    text =
+let draw ~io ?color ?font ?size ~at:p text =
   if text <> "" then (
-    let bitmap = Font_.draw ?color font size text in
+    let bitmap = Font_.draw ?color ?font ?size text in
     draw ~io bitmap p;
     Bitmap.free ~io bitmap)
 
-let size ~io ?(font = Font_.default) ?(size = Font.default_size) text =
-  Delayed.force ~io @@ Font_.text_size font size text
+let size ~io ?font ?size text =
+  Delayed.force ~io @@ Font_.text_size ?font ?size text

@@ -7,6 +7,7 @@
   draw
   events_sdl
   font_
+  sdl_base
   sdl_buffer
   text
   sound

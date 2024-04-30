@@ -3,7 +3,20 @@ open Jsoo
 open Gamelle_common
 open Geometry
 
-type t = string Lazy.t
+type t = font
+
+let set_font font io = { io with font }
+let set_font_size font_size io = { io with font_size }
+
+let get_font ~io = function
+  | Some (lazy font) -> font
+  | None -> Lazy.force io.font
+
+let get_font_size ~io = function Some size -> size | None -> io.font_size
+
+let get_font ~io font size =
+  let io = io.backend in
+  (get_font ~io font, get_font_size ~io size)
 
 let uid = ref 0
 
@@ -36,7 +49,8 @@ let load binstring =
 let default = load Gamelle_common.Font.default
 let default_size = Gamelle_common.Font.default_size
 
-let draw_at ~io ?color ~font:(lazy font_name) ~size ~at text =
+let draw_at ~io ?color ?font ?size ~at text =
+  let font_name, size = get_font ~io font size in
   Draw.set_color ~io color;
   let x, y = Gg.V2.to_tuple at in
   C.set_font io.backend.ctx
@@ -48,7 +62,8 @@ let draw_at ~io ?color ~font:(lazy font_name) ~size ~at text =
       C.fill_text ctx text ~x
         ~y:(y +. C.Text_metrics.font_bounding_box_ascent metrics))
 
-let text_size ~io ~font:(lazy font_name) ~size text =
+let text_size ~io ?font ?size text =
+  let font_name, size = get_font ~io font size in
   C.set_font io.backend.ctx
     (Jstr.of_string (string_of_int size ^ "px " ^ font_name));
   let text = Jstr.of_string text in
@@ -60,4 +75,4 @@ let text_size ~io ~font:(lazy font_name) ~size text =
   in
   Size.v w h
 
-let draw ?color:_ _ _ _ = failwith "Font.draw"
+let draw ?color:_ ?font:_ ?size:_ _ = failwith "Font.draw"

@@ -47,7 +47,9 @@ let run state update =
   let ctx = C.get_context canvas in
   let audio = Audio.Context.create () in
 
-  let backend = { canvas; ctx; audio } in
+  let backend =
+    { canvas; ctx; audio; font = Font.default; font_size = Font.default_size }
+  in
   let clock_ref = ref 0 in
 
   let rec animate state =

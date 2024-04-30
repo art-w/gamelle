@@ -18,7 +18,7 @@ module Font : sig
   val default : t
   val default_size : int
   val load : string -> t
-  val draw : ?color:Color.t -> t -> int -> string -> Bitmap.t
+  val draw : ?color:Color.t -> ?font:t -> ?size:int -> string -> Bitmap.t
 end
 
 module Sound : sig
@@ -62,6 +62,12 @@ module View : sig
   val clipped_events : bool -> io -> io
   val z_indexed : int -> io -> io
   val z_index : int -> 'a scene -> 'a scene
+  val color : Color.t -> 'a scene -> 'a scene
+  val colored : Color.t -> io -> io
+  val fonted : Font.t -> io -> io
+  val font : Font.t -> 'a scene -> 'a scene
+  val font_sized : int -> io -> io
+  val font_size : int -> 'a scene -> 'a scene
 end
 
 val clock : io:io -> float

@@ -1,15 +1,26 @@
-module Sdl = Tsdl.Sdl
+include Sdl_base
 module Delayed = Gamelle_common.Delayed
 
-type io_backend = { window : Sdl.window; renderer : Sdl.renderer }
-type io = io_backend Gamelle_common.abstract_io
+type font_s = { buffer : Sdl_buffer.t; sizes : (int, Ttf.font) Hashtbl.t }
+
+type io_backend = {
+  window : Sdl.window;
+  renderer : Sdl.renderer;
+  font : font;
+  font_size : int;
+}
+
+and io = io_backend Gamelle_common.abstract_io
+and font = (io, font_s) Delayed.t
 
 let clock = Gamelle_common.clock
 let dt = Gamelle_common.dt
-let force = function Error (`Msg m) -> failwith m | Ok x -> x
-let ( let& ) x f = f (force x)
-let ( let* ) = Result.bind
-let int = int_of_float
+let get_font ~io = function Some font -> font | None -> io.font
+let get_font_size ~io = function Some size -> size | None -> io.font_size
+
+let get_font ~io font_opt font_size =
+  let io = io.Gamelle_common.backend in
+  (get_font ~io font_opt, get_font_size ~io font_size)
 
 let[@inline never] mutex_protect m f =
   let open Mutex in

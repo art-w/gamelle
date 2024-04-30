@@ -2,8 +2,10 @@ open Common
 open Gamelle_common
 module Ttf = Tsdl_ttf.Ttf
 
-type s = { buffer : Sdl_buffer.t; sizes : (int, Ttf.font) Hashtbl.t }
-type t = (io, s) Delayed.t
+type t = font
+
+let set_font font io = { io with font }
+let set_font_size font_size io = { io with font_size }
 
 let load binstring =
   Delayed.make @@ fun ~io ->
@@ -23,7 +25,11 @@ let get ~io font size =
       Hashtbl.replace font.sizes size ft;
       ft
 
-let draw ?color font size text =
+let get ~io font size =
+  let font, size = Common.get_font ~io font size in
+  get ~io font size
+
+let draw ?color ?font ?size text =
   Delayed.make @@ fun ~io ->
   let font = get ~io font size in
   let color = get_color ~io color in
@@ -34,10 +40,11 @@ let draw ?color font size text =
   in
   Bitmap.of_texture ~io bmp
 
-let text_size (font : t) size text =
+let text_size ?font ?size text =
   Delayed.make @@ fun ~io ->
   let font = get ~io font size in
   let& w, h = Ttf.size_utf8 font text in
+  (* TODO: transform according to io.transform? *)
   Geometry.(Size.v (float w) (float h))
 
 let default_size = Gamelle_common.Font.default_size

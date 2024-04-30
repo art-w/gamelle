@@ -9,6 +9,13 @@ let clipped clip io = { io with clip = Some clip }
 let unclipped io = { io with clip = None }
 let clipped_events b io = { io with clip_events = b }
 let z_indexed z io = { io with z_index = z }
+let colored c io = { io with color = c }
+
+let fonted ft io =
+  { io with backend = Gamelle_backend.Font.set_font ft io.backend }
+
+let font_sized s io =
+  { io with backend = Gamelle_backend.Font.set_font_size s io.backend }
 
 type 'a scene = io:io -> 'a
 
@@ -24,6 +31,9 @@ let clip clip fn ~io = fn ~io:(clipped clip io)
 let unclip fn ~io = fn ~io:(unclipped io)
 let clip_events b fn ~io = fn ~io:(clipped_events b io)
 let z_index z fn ~io = fn ~io:(z_indexed z io)
+let color c fn ~io = fn ~io:(colored c io)
+let font ft fn ~io = fn ~io:(fonted ft io)
+let font_size s fn ~io = fn ~io:(font_sized s io)
 let previous_size = ref Size.zero
 
 let drawing_box ?(scale = false) ?(set_window_size = true) box io =

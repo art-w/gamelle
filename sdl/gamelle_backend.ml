@@ -39,7 +39,9 @@ let run () =
     Sdl.create_renderer ~flags:Sdl.Renderer.(accelerated + presentvsync) window
   in
 
-  let backend = { window; renderer } in
+  let backend =
+    { window; renderer; font = Font.default; font_size = Font.default_size }
+  in
 
   let& _ = Sdl.show_cursor false in
 
