@@ -1,9 +1,8 @@
-type io = Gamelle_backend.io
+type io
 
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
 
-include module type of Draw_geometry
-module Ui : module type of Ui
+module Ui : Ui.S with type io := io
 
 module Bitmap : sig
   type t
@@ -19,6 +18,12 @@ module Font : sig
   val default_size : int
   val load : string -> t
 end
+
+include
+  Draw_geometry_intf.S
+    with type io := io
+     and type bitmap := Bitmap.t
+     and type font := Font.t
 
 module Sound : sig
   type sound
@@ -116,4 +121,24 @@ end
 (* *)
 
 module Shape : module type of Shape
-module Physics : module type of Physics
+
+module Physics : sig
+  type t
+  type kind = Movable | Immovable
+
+  val make :
+    ?mass:float ->
+    ?inertia:float ->
+    ?restitution:float ->
+    ?kind:kind ->
+    Shape.t ->
+    t
+
+  val center : t -> Point.t
+  val add_velocity : Vec.t -> t -> t
+  val add_rot_velocity : float -> t -> t
+  val update : dt:float -> t -> t
+  val fix_collisions : t list -> t list
+  val draw : io:io -> ?color:color -> t -> unit
+  val fill : io:io -> ?color:color -> t -> unit
+end

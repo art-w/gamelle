@@ -2,6 +2,8 @@ open Draw_geometry
 open Ui_backend
 open Widget_builder
 
+module type S = Ui_intf.S
+
 type t = Ui_backend.t
 
 module Style = Style
