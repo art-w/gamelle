@@ -64,7 +64,7 @@ let delete_char i text =
 let render ~io _params { text; offset; cursor; focused; pressed_key = _ } box =
   Box.fill ~io ~color:bg' box;
   Box.draw ~io ~color:(if focused then highlight else fg) box;
-  let io = View.clipped box io in
+  let io = View.clip box io in
   let nsize = Vec.(Box.size box - (2. * padding_xy)) in
   let box = Box.(v_mid (mid box) nsize) in
   Text.draw_t ~io ~color:fg ~at:Vec.(Box.o box + v offset 0.) text;

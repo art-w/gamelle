@@ -52,7 +52,7 @@ let update ~io ~children_size box state { height = _; f = _ } =
   let mouse_pos = Event.mouse_pos ~io in
   let grasped =
     if grasped then
-      let io = View.clipped_events false io in
+      let io = View.clip_events false io in
       not (Event.is_up ~io `click_left)
     else Event.is_down ~io `click_left && Box.mem mouse_pos scroll_rail_box
   in
@@ -79,7 +79,7 @@ let default _ =
 
 let size_for_self = Size.(v scroll_bar_width 0.)
 let children_offset state = Vec.(zero - v 0. state.offset)
-let children_io ~io box = View.clipped_events true @@ View.clipped box io
+let children_io ~io box = View.clip_events true @@ View.clip box io
 
 let v : type a. (_, a params, a) node =
  fun (ui, loc) ?id ?(style = Style.default) ?(size = size) ?(render = render)

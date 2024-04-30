@@ -73,7 +73,7 @@ let update ~io { x; y; vx; vy; _ } =
   Window.set_size ~io (Size.v 800. 800.);
   Box.fill ~io ~color:black (Window.box ~io);
   Text.draw ~io ~color:Color.white ~size:30 "Hello World!" ~at:Vec.zero;
-  Text.draw ~io:(View.scaled 2.0 io) ~color:Color.white ~size:30 "Hello World!"
+  Text.draw ~io:(View.scale 2.0 io) ~color:Color.white ~size:30 "Hello World!"
     ~at:Vec.zero;
   (*
   View.(

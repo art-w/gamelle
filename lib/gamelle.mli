@@ -49,16 +49,16 @@ end
 
 module View : sig
   val drawing_box : ?scale:bool -> ?set_window_size:bool -> box -> io -> io
-  val translated : Vec.t -> io -> io
-  val scaled : float -> io -> io
-  val rotated : float -> io -> io
-  val clipped : box -> io -> io
-  val unclipped : io -> io
-  val clipped_events : bool -> io -> io
-  val z_indexed : int -> io -> io
-  val colored : Color.t -> io -> io
-  val fonted : Font.t -> io -> io
-  val font_sized : int -> io -> io
+  val translate : Vec.t -> io -> io
+  val scale : float -> io -> io
+  val rotate : float -> io -> io
+  val clip : box -> io -> io
+  val unclip : io -> io
+  val clip_events : bool -> io -> io
+  val z_index : int -> io -> io
+  val color : Color.t -> io -> io
+  val font : Font.t -> io -> io
+  val font_size : int -> io -> io
 end
 
 val clock : io:io -> float

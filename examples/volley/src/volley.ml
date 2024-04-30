@@ -97,7 +97,7 @@ let update_player ~io ~player:{ shape = player; jumps } ~gravity left right up
 let () =
   Gamelle.run initial_state
   @@ fun ~io ({ player1; player2; ball; _ } as state) ->
-  let io = View.translated (Vec.v 0.0 500.0) io in
+  let io = View.translate (Vec.v 0.0 500.0) io in
   Window.set_size ~io (Size.v 1010. 1020.);
   Box.fill ~io ~color:Color.black (Window.box ~io);
   if Event.is_pressed ~io `escape then raise Exit
