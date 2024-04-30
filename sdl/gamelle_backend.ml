@@ -66,7 +66,6 @@ let run () =
       Replay.replay ~backend ~events ~latest_io current_run
     in
 
-    let e = Sdl.Event.create () in
     let previous = !events in
     events := Events_sdl.reset ~now:!Replay.clock !events;
     Sdl.pump_events ();
@@ -77,11 +76,16 @@ let run () =
       Sdl.Window.(test input_focus) flags
     in
     if has_focus then (
+      let e = Sdl.Event.create () in
       while Sdl.poll_event (Some e) do
         events := Events_sdl.update !events e;
         events := Events_sdl.update_mouse !events
       done;
-      events := Events_backend.update_updown previous !events);
+      events := Events_backend.update_updown previous !events)
+    else if not was_replayed then (
+      Sdl.flush_events min_int max_int;
+      let& () = Sdl.wait_event None in
+      ());
 
     mutex_protect lock (fun () ->
         match !current_run with
