@@ -32,9 +32,7 @@ let run () =
 
   ignore @@ Tsdl_mixer.Mixer.allocate_channels Gamelle_common.max_sounds;
 
-  let& window =
-    Sdl.create_window "Test" ~w:640 ~h:480 Sdl.Window.(windowed + resizable)
-  in
+  let& window = Sdl.create_window "Test" ~w:640 ~h:640 Sdl.Window.(windowed) in
   let& renderer =
     Sdl.create_renderer ~flags:Sdl.Renderer.(accelerated + presentvsync) window
   in
