@@ -39,6 +39,7 @@ let clean_io ~io fn = io.clean := fn :: !(io.clean)
 let get_color ~io = function None -> io.color | Some c -> c
 let clock ~io = Events_backend.clock io.event
 let dt ~io = Events_backend.dt io.event
+let z ~io f = io.draws := (io.z_index, fun () -> f ~io) :: !(io.draws)
 
 let finalize_frame ~io =
   !(io.draws)

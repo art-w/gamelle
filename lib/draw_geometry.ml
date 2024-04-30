@@ -1,8 +1,6 @@
 open Gamelle_common
 open Gamelle_backend
 
-let z ~io f = io.draws := (io.z_index, fun () -> f ~io) :: !(io.draws)
-
 module Point = struct
   include Geometry.Point
 end

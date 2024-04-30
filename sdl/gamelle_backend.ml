@@ -90,7 +90,6 @@ let run () =
             Replay.add !events;
             let io = { (make_io backend) with event = !events } in
             latest_io := io;
-            fill_rect ~io ~color:Geometry.Color.black (Window.box ~io);
             let state = update ~io state in
             Window.finalize_set_size ();
             let clean = List.rev_append !(io.clean) clean in
@@ -99,6 +98,7 @@ let run () =
 
     (let io = !latest_io in
      let draw_calls = !(io.draws) in
+     fill_rect ~io ~color:Geometry.Color.black (Window.box ~io);
      Gamelle_common.finalize_frame ~io;
      io.draws := draw_calls;
      Sdl.render_present renderer);
@@ -110,9 +110,8 @@ let run () =
     let wait_time =
       Int32.of_float (max 0.001 (1000.0 *. (desired_time -. frame_elapsed)))
     in
-
-    (* Format.printf "delay %.2f <= %.2f %.2f@." (Int32.to_float wait_time) (1000.0 *. frame_elapsed) (1000.0 *. desired_time) ; *)
     Sdl.delay wait_time;
+
     loop ()
   in
   (try loop () with Exit -> ());

@@ -1,3 +1,5 @@
+let () = Random.init 0
+
 module Ui = Ui
 module Physics = Physics
 module View = View
