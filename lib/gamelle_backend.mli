@@ -19,7 +19,6 @@ module Font : sig
   val default : t
   val default_size : int
   val load : string -> t
-  val draw : ?color:Color.t -> ?font:t -> ?size:int -> string -> Bitmap.t
   val set_font : t -> io_backend -> io_backend
   val set_font_size : int -> io_backend -> io_backend
 end

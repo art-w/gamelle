@@ -18,7 +18,6 @@ module Font : sig
   val default : t
   val default_size : int
   val load : string -> t
-  val draw : ?color:Color.t -> ?font:t -> ?size:int -> string -> Bitmap.t
 end
 
 module Sound : sig

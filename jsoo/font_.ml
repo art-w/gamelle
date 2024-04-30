@@ -74,5 +74,3 @@ let text_size ~io ?font ?size text =
     +. C.Text_metrics.font_bounding_box_descent metrics
   in
   Size.v w h
-
-let draw ?color:_ ?font:_ ?size:_ _ = failwith "Font.draw"
