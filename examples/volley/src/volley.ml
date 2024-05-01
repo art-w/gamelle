@@ -67,17 +67,17 @@ let update_player ~io ~player:{ shape = player; jumps } ~gravity left right up
     down =
   let dt = dt ~io in
   let player =
-    if Event.is_pressed ~io left then
+    if Input.is_pressed ~io left then
       Physics.add_velocity (Vec.v (-.horz_speed *. dt) 0.0) player
     else player
   in
   let player =
-    if Event.is_pressed ~io right then
+    if Input.is_pressed ~io right then
       Physics.add_velocity (Vec.v (horz_speed *. dt) 0.0) player
     else player
   in
   let player =
-    if Event.is_pressed ~io down then
+    if Input.is_pressed ~io down then
       Physics.add_velocity (Vec.v 0.0 (10_000.0 *. dt)) player
     else player
   in
@@ -86,7 +86,7 @@ let update_player ~io ~player:{ shape = player; jumps } ~gravity left right up
     else jumps
   in
   let player, jumps =
-    if Event.is_down ~io up && jumps < 2 then
+    if Input.is_down ~io up && jumps < 2 then
       (Physics.add_velocity (Vec.v 0.0 (-60000.0 *. dt)) player, jumps + 1)
     else (player, jumps)
   in
@@ -100,8 +100,8 @@ let () =
   let io = View.translate (Vec.v 0.0 500.0) io in
   Window.set_size ~io (Size.v 1010. 1020.);
   Box.fill ~io ~color:Color.black (Window.box ~io);
-  if Event.is_pressed ~io `escape then raise Exit
-  else if Event.is_down ~io (`input_char "r") then initial_state
+  if Input.is_pressed ~io `escape then raise Exit
+  else if Input.is_down ~io (`input_char "r") then initial_state
   else if Vec.y (Physics.center ball) > 440.0 then
     if Vec.x (Physics.center ball) < 500.0 then
       { state with ball = init_ball (); points2 = state.points2 + 1 }

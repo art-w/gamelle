@@ -1,5 +1,3 @@
-(data_only_dirs template)
-
 (library
  (name gamelle_template))
 

@@ -133,9 +133,9 @@ let draw_grid ~io () =
 let draw_cell ~io cell p =
   match cell with
   | Some Circle ->
-      draw ~io Assets.circle p
+      draw ~io Assets.circle ~at:p
   | Some Cross ->
-      draw ~io Assets.cross p
+      draw ~io Assets.cross ~at:p
   | None ->
       ()
 
@@ -173,8 +173,8 @@ let () =
     | Some Cross ->
         print_endline "Cross won" ; exit 0
     | None ->
-        if Event.is_pressed ~io `click_left then
-          let x, y = Vec.to_tuple @@ Event.mouse_pos ~io in
+        if Input.is_pressed ~io `click_left then
+          let x, y = Vec.to_tuple @@ Input.mouse_pos ~io in
           (* first column *)
           let cell_x = Int.of_float (floor x /. 64.)
           and cell_y = Int.of_float (floor (y /. 64.)) in
@@ -189,7 +189,7 @@ let () =
             {player; board}
         else state
   in
-  show_cursor ~io true ;
+  Window.show_cursor ~io true ;
   draw_background ~io () ;
   draw_board ~io state.board ;
   draw_grid ~io () ;

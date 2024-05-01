@@ -108,9 +108,3 @@ let fill_circle ~io ?color circle =
   Clip.draw_clip ~io ctx (fun () ->
       C.Path.arc path ~cx:x ~cy:y ~r:radius ~start:0.0 ~stop:tau;
       C.fill ctx path)
-
-let show_cursor ~io status =
-  let canvas = io.backend.canvas in
-  let el = Canvas.to_el canvas in
-  if status then Brr.El.remove_inline_style Brr.El.Style.cursor el
-  else Brr.El.set_inline_style Brr.El.Style.cursor (Jstr.of_string "none") el

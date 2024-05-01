@@ -21,19 +21,19 @@ let random_size2 () = Size.v (2.0 *. random_size1 ()) (2.0 *. random_size1 ())
 
 let () =
   run world @@ fun ~io world ->
-  show_cursor ~io true;
-  if Event.is_up ~io `escape then raise Exit;
+  Window.show_cursor ~io true;
+  if Input.is_up ~io `escape then raise Exit;
   let world =
-    if Event.is_down ~io `click_left then
+    if Input.is_down ~io `click_left then
       let obj =
         Physics.make
-        @@ Shape.circle (Circle.v (Event.mouse_pos ~io) (random_size1 ()))
+        @@ Shape.circle (Circle.v (Input.mouse_pos ~io) (random_size1 ()))
       in
       obj :: world
-    else if Event.is_down ~io `click_right then
+    else if Input.is_down ~io `click_right then
       let obj =
         Physics.make @@ Shape.rect
-        @@ Box.v (Event.mouse_pos ~io) (random_size2 ())
+        @@ Box.v (Input.mouse_pos ~io) (random_size2 ())
       in
       obj :: world
     else world

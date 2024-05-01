@@ -26,14 +26,14 @@ let compute_rect ((x1, y1), (x2, y2)) =
   Box.v (Point.v x1 y1) (Size.v w h)
 
 let main ~io st =
-  let x, y = Vec.to_tuple @@ Event.mouse_pos ~io in
+  let x, y = Vec.to_tuple @@ Input.mouse_pos ~io in
   let mouse = (x /. st.scale, y /. st.scale) in
   let st = { st with mouse } in
   let st =
-    match (st.click, Event.is_pressed ~io `click_left) with
+    match (st.click, Input.is_pressed ~io `click_left) with
     | None, false ->
-        if Event.is_pressed ~io `wheel then
-          let amount = Event.wheel_delta ~io in
+        if Input.is_pressed ~io `wheel then
+          let amount = Input.wheel_delta ~io in
           { st with scale = st.scale +. amount }
         else st
     | Some _, true -> st (* just keep dragging *)
@@ -42,9 +42,9 @@ let main ~io st =
         { st with click = None; rects = (fst_pos, st.mouse) :: st.rects }
   in
   Box.fill ~io ~color:Color.black (Box.v (Point.v 0. 0.) (Point.v 500. 500.));
-  show_cursor ~io true;
+  Window.show_cursor ~io true;
   let io = View.scale st.scale io in
-  draw ~io st.bmp (Point.v 0. 0.);
+  draw ~io st.bmp ~at:Point.o;
   Option.iter
     (fun pos ->
       let rect = compute_rect (pos, st.mouse) in
@@ -72,5 +72,5 @@ let print_rects ~file { rects; _ } =
 let do_the_thing out file =
   let st = fresh_state file in
   run st @@ fun ~io st ->
-  if Event.is_pressed ~io `quit then print_rects ~file:out st;
+  if Input.is_pressed ~io `quit then print_rects ~file:out st;
   main ~io st

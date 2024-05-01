@@ -3,7 +3,10 @@ open Gamelle
 type player = {pos: float; score: int}
 
 type state =
-  {player_left: player; player_right: player; ball_speed: vec; ball_pos: point}
+  { player_left: player
+  ; player_right: player
+  ; ball_speed: Vec.t
+  ; ball_pos: Point.t }
 
 type side = Left | Right
 
@@ -151,15 +154,15 @@ let draw_players ~io state =
 let update ~io state =
   let io = View.drawing_box box_game io in
   let player_speed = player_speed state in
-  if Event.is_pressed ~io `escape then raise Exit ;
+  if Input.is_pressed ~io `escape then raise Exit ;
   let player_left_speed, state =
-    if Event.is_pressed ~io (`physical_char 'w') then
+    if Input.is_pressed ~io (`physical_char 'w') then
       let delta_y = -.player_speed in
       let player_left =
         update_player ~x:player_left_x ~player:state.player_left ~delta_y
       in
       (delta_y, {state with player_left})
-    else if Event.is_pressed ~io (`physical_char 's') then
+    else if Input.is_pressed ~io (`physical_char 's') then
       let delta_y = player_speed in
       let player_left =
         update_player ~x:player_left_x ~player:state.player_left ~delta_y
@@ -168,13 +171,13 @@ let update ~io state =
     else (0., state)
   in
   let player_right_speed, state =
-    if Event.is_pressed ~io `arrow_up then
+    if Input.is_pressed ~io `arrow_up then
       let delta_y = -.player_speed in
       let player_right =
         update_player ~x:player_right_x ~player:state.player_right ~delta_y
       in
       (delta_y, {state with player_right})
-    else if Event.is_pressed ~io `arrow_down then
+    else if Input.is_pressed ~io `arrow_down then
       let delta_y = player_speed in
       let player_right =
         update_player ~x:player_right_x ~player:state.player_right ~delta_y

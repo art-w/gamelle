@@ -1,73 +1,352 @@
+(** Gamelle is a tiny 2D game engine. It provides:
+
+- Hot code reload on every file change for a quick feedback loop
+- Export to a single HTML file to share your game online
+- Automatic assets loading for images, sounds and fonts: see {!section:Assets}
+- Immediate mode GUI to quickly put together menus and widgets: see {!Ui}
+- Collisions detection and rigid physics: see {!Physics}
+
+{1 Getting started}
+
+You can create a new game project with:
+
+{@shell[
+$ gamelle init mygame
+$ cd mygame
+$ make
+]}
+
+The [make] command starts the game in development mode: Editing [src/mygame.ml] will automatically reload your game on every change. Game assets added to the folder [assets/] are automatically available through the dynamic [Assets] module.
+
+To export your game as a single HTML file, compiled with [js_of_ocaml] and including all game assets:
+
+{@shell[
+$ make html
+]}
+
+*)
+
+(** {1 Main loop} *)
+
 type io
+(** The type allowing input/output operations. Every side-effecting function requires a named argument [~io] of this type. *)
 
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
+(** [run initial_state fn] is the game main loop. The function [fn] will
+    be called at every frame to react to player inputs and draw the game state on the screen.
 
-module Ui : Ui.S with type io := io
+    {[
+open Gamelle
 
-module Bitmap : sig
-  type t
+type state = ...
 
-  val load : string -> t
-  val sub : t -> int -> int -> int -> int -> t
+let initial_state = ...
+
+let () =
+  Gamelle.run initial_state @@ fun ~io current_state ->
+    let new_state = (* TODO: react to player inputs and update the current state *) in
+    (* TODO: draw the new game state *)
+    new_state
+]}
+
+*)
+
+(** {1 Maths} *)
+
+(** {2 Linear Algebra} *)
+
+(** Gamelle extends the {!Gg} maths library. *)
+
+module Color : sig
+  (** Colors. *)
+
+  type t = Gg.color
+  (** The type of colors. *)
+
+  val rgb : ?alpha:float -> int -> int -> int -> t
+  val v : float -> float -> float -> float -> t
+
+  (** {1 Transformations} *)
+
+  val with_a : t -> float -> t
+
+  (** {1 Basic colors} *)
+
+  val red : t
+  val green : t
+  val blue : t
+  val white : t
+  val black : t
 end
 
-module Font : sig
+module Transform : sig
+  (** Rotations, scaling, translations. *)
+
   type t
 
   val default : t
-  val default_size : int
+  val translate : Gg.v2 -> t -> t
+  val scale : float -> t -> t
+  val rotate : float -> t -> t
+  val project : t -> Gg.p2 -> Gg.p2
+end
+
+module Point : sig
+  (** Points: [x] and [y] positions in 2D. *)
+
+  type t = Gg.p2
+  (** The type of positions. *)
+
+  include module type of Gg.P2 with type t := t
+
+  (*
+  val v : float -> float -> t
+  val zero : t
+  *)
+end
+
+module Vec : sig
+  (** Vectors: directions in 2D. *)
+
+  type t = Gg.v2
+  (** The type of directional vectors. *)
+
+  val zero : t
+  val v : float -> float -> t
+  val x : t -> float
+  val y : t -> float
+  val to_tuple : t -> float * float
+  val norm : t -> float
+  val unit : t -> t
+  val dot : t -> t -> float
+  val ( * ) : float -> t -> t
+  val ( + ) : t -> t -> t
+  val ( - ) : t -> t -> t
+end
+
+(** {2 Geometry} *)
+
+module Size : module type of Draw_geometry.Size
+(** Sizes: [width] and [height] dimensions. *)
+
+module Segment : sig
+  (** Segments connecting two {!Point}s. *)
+
+  type t
+
+  val v : Point.t -> Point.t -> t
+  val to_tuple : t -> Point.t * Point.t
+  val vector : t -> Vec.t
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val intersect : t -> t -> bool
+end
+
+module Box : sig
+  (** Axis-aligned bounding boxes. *)
+
+  type t = Gg.box2
+  (** The type of axis-aligned bounding boxes (rectangles without a rotation). *)
+
+  val zero : t
+  val v : Point.t -> Size.t -> t
+  val o : t -> Point.t
+  val ox : t -> float
+  val oy : t -> float
+  val size : t -> Size.t
+  val w : t -> float
+  val h : t -> float
+  val sides : t -> Segment.t * Segment.t * Segment.t * Segment.t
+  val mem : Point.t -> t -> bool
+  val random_mem : t -> Point.t
+  val midx : t -> float
+  val midy : t -> float
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
+end
+
+module Circle : sig
+  (** Circles. *)
+
+  include module type of Draw_geometry.Circle
+
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
+end
+
+module Polygon : sig
+  (** Polygons. *)
+
+  include module type of Draw_geometry.Polygon
+
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
+end
+
+module Shape : sig
+  (** Arbitrary shapes: circles and polygons. *)
+
+  include module type of Draw_geometry.Shape
+
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
+end
+
+(** {1:Assets Assets} *)
+
+(** Game assets like images, fonts and sounds which are added to the [assets/] folder are automatically loaded and available through the dynamic [Assets] module. For example, a bitmap file [assets/foo.png] is accessible as [Assets.foo : Bitmap.t]. *)
+
+(** {3 Images} *)
+
+module Bitmap : sig
+  (** Bitmap images: PNG, JPEG. *)
+
+  type t
+  (** The type of bitmap images (png, jpeg). *)
+
+  val sub : t -> int -> int -> int -> int -> t
+  (** [sub img x y w h] returns the sub-image at position [x,y] and size [w,h]. *)
+
+  (**/**)
+
   val load : string -> t
 end
 
-include
-  Draw_geometry_intf.S
-    with type io := io
-     and type bitmap := Bitmap.t
-     and type font := Font.t
+val draw : io:io -> at:Point.t -> Bitmap.t -> unit
+(** [draw ~io ~at bitmap] draws the image [bitmap] at position [at] on the screen. *)
+
+(** {3 Text} *)
+
+module Font : sig
+  (** Typefaces used to render text on screen. *)
+
+  type t
+  (** The type of fonts (ttf). *)
+
+  val default : t
+  (** The default font. *)
+
+  val default_size : int
+  (** The default font size. *)
+
+  (**/**)
+
+  val load : string -> t
+end
+
+module Text : sig
+  type t
+
+  val to_string : t -> string
+  val of_string : string -> t
+  val ( ^ ) : t -> t -> t
+  val length : t -> int
+  val sub : t -> int -> int -> t
+  val split_on_char : char -> t -> t list
+  val concat : t list -> t
+
+  val draw_t :
+    io:io ->
+    ?color:Color.t ->
+    ?font:Font.t ->
+    ?size:int ->
+    at:Point.t ->
+    t ->
+    unit
+
+  val draw :
+    io:io ->
+    ?color:Color.t ->
+    ?font:Font.t ->
+    ?size:int ->
+    at:Point.t ->
+    string ->
+    unit
+
+  val size_t : io:io -> ?font:Font.t -> ?size:int -> t -> Size.t
+  val size : io:io -> ?font:Font.t -> ?size:int -> string -> Size.t
+
+  val size_multiline :
+    io:io ->
+    ?width:float ->
+    ?interline:float ->
+    ?font:Font.t ->
+    ?size:int ->
+    string ->
+    Size.t
+
+  val size_multiline_t :
+    io:io ->
+    ?width:float ->
+    ?interline:float ->
+    ?font:Font.t ->
+    ?size:int ->
+    t ->
+    Size.t
+
+  val draw_multiline_t :
+    io:io ->
+    ?color:Color.t ->
+    ?width:float ->
+    ?interline:float ->
+    ?font:Font.t ->
+    ?size:int ->
+    at:Point.t ->
+    t ->
+    unit
+
+  val draw_multiline :
+    io:io ->
+    ?color:Color.t ->
+    ?width:float ->
+    ?interline:float ->
+    ?font:Font.t ->
+    ?size:int ->
+    at:Point.t ->
+    string ->
+    unit
+end
+
+val draw_string :
+  io:io ->
+  ?color:Color.t ->
+  ?font:Font.t ->
+  ?size:int ->
+  at:Point.t ->
+  string ->
+  unit
+(** [draw_string ~io ~at txt] prints the string [txt] at position [at] on the screen.
+
+- [?color] is the text color, see {!View.color}
+- [?font] is the typeface used to render the text, see {!View.font}
+- [?size] is the font size, see {!View.font_size}
+
+ *)
+
+(** {3 Audio} *)
 
 module Sound : sig
+  (** Audio sounds and musics: MP3, OGG. *)
+
   type sound
 
-  val load : string -> sound
   val play : io:io -> sound -> unit
 
   type music
 
-  val load_music : string -> music
   val play_music : io:io -> music -> unit
+
+  (**/**)
+
+  val load : string -> sound
+  val load_music : string -> music
 end
 
-module Transform : sig
-  type t
+(** {1 Player inputs} *)
 
-  val default : t
-  val translate : Vec.t -> t -> t
-  val scale : float -> t -> t
-  val rotate : float -> t -> t
-  val project : t -> Point.t -> Point.t
-end
+module Input : sig
+  (** Player inputs: mouse and keyboard events. *)
 
-module View : sig
-  val drawing_box : ?scale:bool -> ?set_window_size:bool -> box -> io -> io
-  val translate : Vec.t -> io -> io
-  val scale : float -> io -> io
-  val rotate : float -> io -> io
-  val clip : box -> io -> io
-  val unclip : io -> io
-  val clip_events : bool -> io -> io
-  val z_index : int -> io -> io
-  val color : Color.t -> io -> io
-  val font : Font.t -> io -> io
-  val font_size : int -> io -> io
-end
-
-val clock : io:io -> float
-val dt : io:io -> float
-val draw : io:io -> Bitmap.t -> point -> unit
-val show_cursor : io:io -> bool -> unit
-
-module Event : sig
-  val mouse_pos : io:io -> point
+  val mouse_pos : io:io -> Point.t
   val wheel_delta : io:io -> float
 
   type key =
@@ -99,17 +378,47 @@ module Event : sig
   val is_down : io:io -> key -> bool
 end
 
-module Window : sig
-  val set_size : io:io -> size -> unit
-  val size : io:io -> size
-  val box : io:io -> box
+module Ui : Ui.S with type io := io
+(** Graphical user interface: buttons, checkboxes, text inputs. *)
+
+(** {1 Camera} *)
+
+module View : sig
+  (** Customize the {!io} camera, default color and font used. *)
+
+  val drawing_box : ?scale:bool -> ?set_window_size:bool -> Box.t -> io -> io
+  val translate : Vec.t -> io -> io
+  val scale : float -> io -> io
+  val rotate : float -> io -> io
+  val clip : Box.t -> io -> io
+  val unclip : io -> io
+  val clip_events : bool -> io -> io
+  val z_index : int -> io -> io
+  val color : Color.t -> io -> io
+  val font : Font.t -> io -> io
+  val font_size : int -> io -> io
 end
 
-(* *)
+module Window : sig
+  (** Configure the game window. *)
 
-module Shape : module type of Shape
+  val show_cursor : io:io -> bool -> unit
+  val set_size : io:io -> Size.t -> unit
+  val size : io:io -> Size.t
+  val box : io:io -> Box.t
+end
+
+(** {1 Animations} *)
+
+val clock : io:io -> float
+(** [clock ~io] returns the number of elapsed seconds since the game started until the current frame. The clock is defined at the beginning of a frame, calling [clock] multiple times will always produce the same result. *)
+
+val dt : io:io -> float
+(** [dt ~io] is the duration of a frame, which is fixed to a 60fps framerate. *)
 
 module Physics : sig
+  (** Rigid physics for {!Shape} objects. *)
+
   type t
   type kind = Movable | Immovable
 
@@ -126,6 +435,6 @@ module Physics : sig
   val add_rot_velocity : float -> t -> t
   val update : dt:float -> t -> t
   val fix_collisions : t list -> t list
-  val draw : io:io -> ?color:color -> t -> unit
-  val fill : io:io -> ?color:color -> t -> unit
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> t -> unit
 end

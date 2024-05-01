@@ -59,7 +59,6 @@ module Box = struct
 end
 
 module Size = Geometry.Size
-module Size1 = Geometry.Size1
 
 type color = Geometry.color
 type point = Geometry.point
@@ -68,6 +67,8 @@ type segment = Geometry.segment
 type circle = Geometry.circle
 type box = Geometry.box
 type size = Geometry.size
+type polygon = Polygon.t
+type shape = Shape.t
 
 module Text = struct
   include Gamelle_backend.Text
@@ -193,4 +194,4 @@ module Text = struct
     draw_t ~io ?color ?font ?size ~at (of_string t)
 end
 
-let draw ~io bmp pos = z ~io @@ Gamelle_backend.draw bmp pos
+let draw ~io ~at:pos bmp = z ~io @@ Gamelle_backend.draw bmp pos

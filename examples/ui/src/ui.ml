@@ -8,8 +8,8 @@ let two_checkboxes [%ui] l1 l2 = Ui.(checkbox [%ui] l1, checkbox [%ui] l2)
 
 let () =
   Gamelle.run Box.zero @@ fun ~io box ->
-  if Event.is_pressed ~io `escape then raise Exit;
-  show_cursor ~io true;
+  if Input.is_pressed ~io `escape then raise Exit;
+  Window.show_cursor ~io true;
   let io = View.drawing_box box io in
   let box =
     snd

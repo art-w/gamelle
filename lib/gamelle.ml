@@ -4,7 +4,7 @@ module Ui = Ui
 module Physics = Physics
 module View = View
 module Transform = Gamelle_common.Transform
-module Event = Event
+module Input = Event
 include Draw_geometry
 
 let dt = Gamelle_backend.dt
@@ -25,4 +25,5 @@ type io = Gamelle_backend.io
 
 module Bitmap = Gamelle_backend.Bitmap
 
-let show_cursor = Gamelle_backend.show_cursor
+let draw_string ~io ?color ?font ?size ~at txt =
+  Text.draw ~io ?color ?font ?size ~at txt

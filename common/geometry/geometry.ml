@@ -5,7 +5,6 @@ module Circle = Circle
 module Box = Box
 module Color = Color_
 module Size = Size
-module Size1 = Gg.Size1
 module Polygon = Polygon
 module Shape = Shape
 

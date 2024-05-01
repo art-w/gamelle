@@ -157,7 +157,3 @@ let fill_circle ~io ?color circle =
         Gfx.aacircle_rgba renderer ~x ~y ~rad:radius ~r ~g ~b ~a)
   in
   ()
-
-let show_cursor ~io:_ b =
-  let& _ = Sdl.show_cursor b in
-  ()

@@ -22,3 +22,7 @@ let size ~io =
   Size.v (float x) (float y)
 
 let box ~io = Box.v Vec.zero (size ~io)
+
+let show_cursor ~io:_ b =
+  let& _ = Sdl.show_cursor b in
+  ()

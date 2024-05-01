@@ -45,7 +45,6 @@ val draw_poly : io:io -> ?color:Color.t -> Polygon.t -> unit
 val fill_poly : io:io -> ?color:Color.t -> Polygon.t -> unit
 val draw_circle : io:io -> ?color:Color.t -> Circle.t -> unit
 val fill_circle : io:io -> ?color:Color.t -> Circle.t -> unit
-val show_cursor : io:io -> bool -> unit
 
 module Text : sig
   type t
@@ -71,6 +70,7 @@ module Text : sig
 end
 
 module Window : sig
+  val show_cursor : io:io -> bool -> unit
   val set_size : io:io -> size -> unit
   val size : io:io -> size
   val box : io:io -> box
