@@ -416,6 +416,58 @@ val clock : io:io -> float
 val dt : io:io -> float
 (** [dt ~io] is the duration of a frame, which is fixed to a 60fps framerate. *)
 
+module Ease : sig
+  (** Easing functions, to smooth changes over time.
+
+   - [in_] functions are smooth near zero.
+   - [out_] functions are smooth near one.
+   - [in_out_] functions are smooth on both ends.
+
+  *)
+
+  type t = float -> float
+  (** The type of easing functions, with input and output varying from [0.0] to [1.0]. *)
+
+  val linear : t
+  (** The [linear] identity, providing no easing at all. *)
+
+  (** {1 Quadratic} *)
+
+  val in_quad : t
+  val out_quad : t
+  val in_out_quad : t
+
+  (** {1 Cubic} *)
+
+  val in_cubic : t
+  val out_cubic : t
+  val in_out_cubic : t
+
+  (** {1 Quartic} *)
+
+  val in_quart : t
+  val out_quart : t
+  val in_out_quart : t
+
+  (** {1 Backward overshoot} *)
+
+  val in_back : t
+  val out_back : t
+  val in_out_back : t
+
+  (** {1 Bounce} *)
+
+  val in_bounce : t
+  val out_bounce : t
+  val in_out_bounce : t
+
+  (** {1 Elastic overshoot} *)
+
+  val in_elastic : t
+  val out_elastic : t
+  val in_out_elastic : t
+end
+
 module Physics : sig
   (** Rigid physics for {!Shape} objects. *)
 
