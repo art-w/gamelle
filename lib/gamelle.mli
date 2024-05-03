@@ -99,10 +99,8 @@ module Point : sig
 
   include module type of Gg.P2 with type t := t
 
-  (*
-  val v : float -> float -> t
-  val zero : t
-  *)
+  val lerp : float -> t -> t -> t
+  (** [lerp t a b] is the linear interpolation between the two points [a] and [b] controlled by the time parameter [t]. *)
 end
 
 module Vec : sig
@@ -466,6 +464,64 @@ module Ease : sig
   val in_elastic : t
   val out_elastic : t
   val in_out_elastic : t
+end
+
+module Anim : sig
+  (** Animations. *)
+
+  type 'a t
+  (** The type of animations describing an ['a] value varying over time. *)
+
+  val v : float -> (float -> 'a) -> 'a t
+  (** [v duration fn] is an animation, lasting [duration] in seconds. The function [fn] will be called on demand to compute the current ['a] value. *)
+
+  val const : float -> 'a -> 'a t
+  (** [const duration x] is a constant animation always producing [x], lasting [duration] seconds. *)
+
+  val get : 'a t -> 'a
+  (** [get t] returns the current ['a] value. *)
+
+  val last : 'a t -> 'a
+  (** [last t] returns the last ['a] value, at the end of the animation. *)
+
+  val duration : 'a t -> float
+  (** [duration t] is the length of the animation [t]. Returns [0.0] if the animation has completed. *)
+
+  val update : dt:float -> 'a t -> 'a t
+  (** [update ~dt t] moves the animation [t] forward in time by [dt] seconds. See {!dt}. *)
+
+  val seq : 'a t -> 'a t -> 'a t
+  (** [seq a b] is the animation [a] followed by the animation [b]. *)
+
+  val ( >> ) : 'a t -> 'a t -> 'a t
+  (** [a >> b] is the same as [seq a b]. *)
+
+  val continue : 'a t -> ('a -> 'a t) -> 'a t
+  (** [continue t fn] is the same as [seq a (fn (last t))]. It continues the animation [t] with a follow-up animation depending on the last value of [t]. *)
+
+  val ( >>- ) : 'a t -> ('a -> 'a t) -> 'a t
+  (** [t >>- fn] is the same as [continue t fn]. *)
+
+  val ( let> ) : 'a t -> ('a -> 'a t) -> 'a t
+  (** [let> v = t in ...] is the same as [continue t (fun v -> ...)]. *)
+
+  val rev : 'a t -> 'a t
+  (** [rev t] returns the animation [t] playing backward. *)
+
+  val scale : float -> 'a t -> 'a t
+  (** [scale f t] stretches the animation [t] duration by a factor [f]. *)
+
+  val cut : float -> 'a t -> 'a t * 'a t
+  (** [cut duration t] returns the animation [t] truncated to [duration], and the rest. *)
+
+  val frames : float -> 'a array -> 'a t
+  (** [frames duration arr] is an animation, lasting [duration] seconds, which steps over the values of the array [arr]. *)
+
+  val map : ('a -> 'b) -> 'a t -> 'b t
+  (** [map fn t] applies [fn] to each output value of the animation [t]. *)
+
+  val map2 : ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
+  (** [map2 fn ta tb] applies [fn] to each animation [ta] and [tb] values. *)
 end
 
 module Physics : sig

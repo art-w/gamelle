@@ -2,6 +2,7 @@ let () = Random.init 0
 
 module Ui = Ui
 module Ease = Ease
+module Anim = Anim
 module Physics = Physics
 module View = View
 module Transform = Gamelle_common.Transform
