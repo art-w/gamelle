@@ -38,15 +38,10 @@ module Window = struct
     else Brr.El.set_inline_style Brr.El.Style.cursor (Jstr.of_string "none") el
 end
 
-let run state update =
-  let canvas =
-    match Document.find_el_by_id G.document (Jstr.of_string "target") with
-    | None -> failwith "missing 'target' canvas"
-    | Some elt ->
-        Events_js.attach ~target:(El.as_target elt);
-        Canvas.of_el elt
-  in
+let run ~canvas state update =
   let open Jsoo in
+  Events_js.attach ~target:(El.as_target canvas);
+  let canvas = Canvas.of_el canvas in
   Canvas.set_w canvas (640 * 2);
   Canvas.set_h canvas (480 * 2);
 
@@ -75,7 +70,27 @@ let run state update =
     incr clock_ref;
     fill_rect ~io ~color:Color.black (Window.box ~io);
     let state = update ~io state in
+    Gamelle_common.finalize_frame ~io;
     Events_js.current := reset_wheel !Events_js.current;
     animate state
   in
   animate state
+
+let run state update =
+  let canvas =
+    match Document.find_el_by_id G.document (Jstr.of_string "target") with
+    | None -> failwith "missing 'target' canvas"
+    | Some elt -> elt
+  in
+  let started = ref false in
+  let _ =
+    Ev.listen
+      (Ev.Type.create (Jstr.of_string "focus"))
+      (fun _ ->
+        if !started then ()
+        else (
+          started := true;
+          run ~canvas state update))
+      (El.as_target canvas)
+  in
+  ()

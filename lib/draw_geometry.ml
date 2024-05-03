@@ -8,8 +8,8 @@ end
 module Polygon = struct
   include Geometry.Polygon
 
-  let draw = draw_poly
-  let fill = fill_poly
+  let draw ~io ?color s = z ~io (draw_poly ?color s)
+  let fill ~io ?color s = z ~io (fill_poly ?color s)
 end
 
 module Shape = struct
