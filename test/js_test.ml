@@ -76,6 +76,9 @@ let update ~io { x; y; vx; vy; _ } =
   Text.draw ~io:(View.scale 2.0 io) ~color:Color.white ~size:30 "Hello World!"
     ~at:Vec.zero;
 
+  Segment.draw ~io ~color:(Color.v 1.0 1.0 1.0 0.2)
+    (Segment.v Point.o (Window.size ~io));
+
   Circle.fill
     ~io:(View.translate (Vec.v mx my) io)
     ~color:red

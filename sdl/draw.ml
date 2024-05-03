@@ -4,13 +4,11 @@ open Geometry
 module Gfx = Tsdl_gfx.Gfx
 module Delayed = Gamelle_common.Delayed
 
-let set_color ~io c =
+let get_color ~io c =
   let c = Gamelle_common.get_color ~io c in
   let r, g, b, a = Color.to_srgbi c in
   let a = int_of_float (a *. 255.) in
-  (* Format.printf "%i %i %i %i@." r g b a ; *)
-  let& () = Sdl.set_render_draw_color io.backend.renderer r g b a in
-  ()
+  (r, g, b, a)
 
 let tau = 8.0 *. atan 1.0
 let point_zero = Sdl.Point.create ~x:0 ~y:0
@@ -79,13 +77,13 @@ let draw ~io bmp p =
 
 let draw_line ~io ?color segment =
   let p, p' = Segment.to_tuple segment in
-  set_color ~io color;
-  let x0, y0 = project ~io p in
-  let x1, y1 = project ~io p' in
-
+  let x1, y1 = project ~io p in
+  let x2, y2 = project ~io p' in
+  let r, g, b, a = get_color ~io color in
   let& () =
     let renderer = io.backend.renderer in
-    draw_clip ~io renderer (fun () -> Sdl.render_draw_line renderer x0 y0 x1 y1)
+    draw_clip ~io renderer (fun () ->
+        Gfx.aaline_rgba renderer ~x1 ~y1 ~x2 ~y2 ~r ~g ~b ~a)
   in
   ()
 
@@ -96,22 +94,20 @@ let draw_rect ~io ?color rect =
   draw_line ~io ?color (Box.right rect)
 
 let draw_poly ~io ?color poly =
-  set_color ~io color;
   let arr = Polygon.to_list poly in
   let arr = List.map (project ~io) arr in
-  let& r, g, b, a = Sdl.get_render_draw_color io.backend.renderer in
+  let r, g, b, a = get_color ~io color in
   let& () =
     let renderer = io.backend.renderer in
     draw_clip ~io renderer (fun () ->
-        Gfx.polygon_rgba renderer ~ps:arr ~r ~g ~b ~a)
+        Gfx.aapolygon_rgba renderer ~ps:arr ~r ~g ~b ~a)
   in
   ()
 
 let fill_poly ~io ?color poly =
-  set_color ~io color;
   let arr = Polygon.to_list poly in
   let arr = List.map (project ~io) arr in
-  let& r, g, b, a = Sdl.get_render_draw_color io.backend.renderer in
+  let r, g, b, a = get_color ~io color in
   let& () =
     let renderer = io.backend.renderer in
     draw_clip ~io renderer (fun () ->
@@ -130,10 +126,9 @@ let fill_rect ~io ?color rect =
 let draw_circle ~io ?color circle =
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  set_color ~io color;
   let x, y = project ~io center in
   let radius = int (io.view.scale *. radius) in
-  let& r, g, b, a = Sdl.get_render_draw_color io.backend.renderer in
+  let r, g, b, a = get_color ~io color in
   let& () =
     let renderer = io.backend.renderer in
     draw_clip ~io renderer (fun () ->
@@ -144,10 +139,9 @@ let draw_circle ~io ?color circle =
 let fill_circle ~io ?color circle =
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  set_color ~io color;
   let x, y = project ~io center in
   let radius = int (io.view.scale *. radius) in
-  let& r, g, b, a = Sdl.get_render_draw_color io.backend.renderer in
+  let r, g, b, a = get_color ~io color in
   let& () =
     let renderer = io.backend.renderer in
     draw_clip ~io renderer (fun () ->
