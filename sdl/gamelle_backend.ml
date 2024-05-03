@@ -82,7 +82,14 @@ let run () =
       events := Events_backend.update_updown previous !events)
     else if not was_replayed then (
       Sdl.flush_events min_int max_int;
-      let& () = Sdl.wait_event None in
+      let run = !current_run in
+      while
+        (not (Sdl.wait_event_timeout None 20))
+        && mutex_protect lock (fun () -> run == !current_run)
+      do
+        ()
+      done;
+      (* let& () = Sdl.wait_event None in *)
       ());
 
     mutex_protect lock (fun () ->
