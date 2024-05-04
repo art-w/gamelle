@@ -33,6 +33,13 @@ let[@inline never] mutex_protect m f =
 let watch ~lock cmxs_file =
   let th =
     Thread.create @@ fun () ->
+    let previous_files = ref [] in
+    let to_clean file = previous_files := file :: !previous_files in
+    let cleanup () =
+      let lst = !previous_files in
+      previous_files := [];
+      List.iter (fun file -> try Sys.remove file with _ -> to_clean file) lst
+    in
     let target_file = Filename.concat (Sys.getcwd ()) cmxs_file in
     let count = ref 0 in
     while true do
@@ -53,6 +60,8 @@ let watch ~lock cmxs_file =
                 Sys.command (Printf.sprintf "cp %S %S" target_file new_file)
               in
               if copy_ok = 0 then (
+                cleanup ();
+                to_clean new_file;
                 try Dynlink.loadfile_private new_file
                 with _err ->
                   (* Format.printf "dynlink failed: %s@." (Printexc.to_string _err); *)
