@@ -201,12 +201,27 @@ module Bitmap : sig
   type t
   (** The type of bitmap images (png, jpeg). *)
 
-  val sub : t -> int -> int -> int -> int -> t
-  (** [sub img x y w h] returns the sub-image at position [x,y] and size [w,h]. *)
+  val draw : io:io -> at:Point.t -> t -> unit
+  (** [draw ~io ~at img] draws the image [img] at position [at] on the screen. *)
+
+  val width : t -> int
+  (** [width img] is the width in pixels of the image [img]. *)
+
+  val height : t -> int
+  (** [height img] is the height in pixels of the image [img]. *)
+
+  val dimensions : t -> int * int
+  (** [dimensions img] is the width and height dimensions of the image [img]. *)
+
+  val size : t -> Size.t
+  (** [size img] is the width and height size of the image [img]. Same as {!dimensions}. *)
+
+  val sub : x:int -> y:int -> w:int -> h:int -> t -> t
+  (** [sub ~x ~y ~w ~h img] returns the sub-image at position [x,y] and size [w,h]. *)
 
   (**/**)
 
-  val load : string -> t
+  val load : w:int -> h:int -> string -> t
 end
 
 val draw : io:io -> at:Point.t -> Bitmap.t -> unit

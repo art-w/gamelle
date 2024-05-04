@@ -2,4 +2,12 @@
  (public_name gamelle)
  (name gamelle_bin)
  (package gamelle)
- (libraries gamelle.sdl gamelle_template unix str cmdliner dynlink inotify))
+ (libraries
+  gamelle.sdl
+  gamelle_template
+  unix
+  str
+  cmdliner
+  dynlink
+  inotify
+  tsdl-image))

@@ -1,7 +1,7 @@
 open Gamelle_common.Geometry
 open Gamelle_backend
 
-type bitmap := Gamelle_backend.Bitmap.t
+type bitmap := Bitmap_.t
 type font := Gamelle_backend.Font.t
 
 module Color : sig

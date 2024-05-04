@@ -194,4 +194,4 @@ module Text = struct
     draw_t ~io ?color ?font ?size ~at (of_string t)
 end
 
-let draw ~io ~at:pos bmp = z ~io @@ Gamelle_backend.draw bmp pos
+let draw = Bitmap_.draw

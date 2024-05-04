@@ -12,7 +12,7 @@ type state = {
 
 let fresh_state file =
   {
-    bmp = Bitmap.load file;
+    bmp = Bitmap.load ~w:0 ~h:0 file;
     scale = 1.;
     mouse = (0., 0.);
     click = None;
