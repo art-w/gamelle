@@ -6,7 +6,7 @@ open Brr_io
 open Audio
 open Fut.Syntax
 
-type sound = (io, Audio.Buffer.t Fut.t) Delayed.t
+type t = (io, Audio.Buffer.t Fut.t) Delayed.t
 
 let dont_wait f = Fut.await f Fun.id
 
@@ -49,20 +49,42 @@ let load binstring =
       |> Context.Base.decode_audio_data node_ctx
       |> Fut.map get_ok)
 
-let play ~io s =
-  dont_wait
-  @@
+let play_source ~io ~loop s =
   let audio_ctx = io.backend.audio in
   let node_ctx = Context.as_base audio_ctx in
-  let* buffer = Delayed.force ~io s in
   let src = Node.Buffer_source.create node_ctx in
-  Node.Buffer_source.set_buffer src (Some buffer);
-  let node = Node.Buffer_source.as_node src in
-  let dst = node_ctx |> Context.Base.destination |> Node.Destination.as_node in
-  Node.connect_node node ~dst;
-  Fut.return @@ Node.Buffer_source.start src
+  Node.Buffer_source.set_loop src loop;
+  let () =
+    dont_wait
+    @@
+    let* buffer = Delayed.force ~io s in
+    Node.Buffer_source.set_buffer src (Some buffer);
+    let node = Node.Buffer_source.as_node src in
+    let dst =
+      node_ctx |> Context.Base.destination |> Node.Destination.as_node
+    in
+    Node.connect_node node ~dst;
+    Fut.return @@ Node.Buffer_source.start src
+  in
+  src
 
-type music = unit
+let play ~io s = ignore (play_source ~io ~loop:false s)
+let current_music = ref None
 
-let load_music _ = ()
-let play_music ~io:_ _ = ()
+let play_music ~io s =
+  let src = play_source ~io ~loop:true s in
+  current_music := Some (s, src)
+
+let stop_music ~io:_ =
+  match !current_music with
+  | Some (_, src) ->
+      current_music := None;
+      Node.Buffer_source.stop src
+  | None -> ()
+
+let play_music ~io s =
+  match !current_music with
+  | Some (music, _) when s == music -> ()
+  | _ ->
+      stop_music ~io;
+      play_music ~io s

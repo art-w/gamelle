@@ -340,18 +340,21 @@ val draw_string :
 module Sound : sig
   (** Audio sounds and musics: MP3, OGG. *)
 
-  type sound
+  type t
+  (** The type of sounds and musics (mp3, ogg). *)
 
-  val play : io:io -> sound -> unit
+  val play : io:io -> t -> unit
+  (** [play ~io t] plays the sound [t] once. *)
 
-  type music
+  val play_music : io:io -> t -> unit
+  (** [play_music ~io t] plays the music [t] on a loop. If the music [t] was already playing, this function does nothing. Otherwise there can only be one music playing at a time, so the previous one is stopped. *)
 
-  val play_music : io:io -> music -> unit
+  val stop_music : io:io -> unit
+  (** [stop_music ~io] stops the currently playing music. *)
 
   (**/**)
 
-  val load : string -> sound
-  val load_music : string -> music
+  val load : string -> t
 end
 
 (** {1 Player inputs} *)

@@ -24,15 +24,12 @@ module Font : sig
 end
 
 module Sound : sig
-  type sound
+  type t
 
-  val load : string -> sound
-  val play : io:io -> sound -> unit
-
-  type music
-
-  val load_music : string -> music
-  val play_music : io:io -> music -> unit
+  val load : string -> t
+  val play : io:io -> t -> unit
+  val play_music : io:io -> t -> unit
+  val stop_music : io:io -> unit
 end
 
 val clock : io:io -> float
