@@ -4,7 +4,7 @@ open Draw_geometry
 type t
 type kind = Movable | Immovable
 
-val make :
+val v :
   ?mass:float ->
   ?inertia:float ->
   ?restitution:float ->

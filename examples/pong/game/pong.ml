@@ -32,9 +32,9 @@ let box_game = Box.v (Point.v 0. 0.) (Vec.v 400. 220.)
 
 let court = Box.v (Point.v 0. 20.) (Vec.v 400. 200.)
 
-let player_left_x = Box.ox court +. 20.
+let player_left_x = Box.x_left court +. 20.
 
-let player_right_x = Box.w court -. 20.
+let player_right_x = Box.x_right court -. 20.
 
 let player_height = 50.
 
@@ -103,11 +103,13 @@ let wall_collision state wall =
   in
   {state with ball_speed}
 
+let box_sides box = Box.(top box, right box, bottom box, left box)
+
 let tick state ~player_left_speed ~player_right_speed =
   let {ball_pos; ball_speed; _} = state in
   let new_ball_pos = Vec.(ball_pos + ball_speed) in
   let ball_pos = state.ball_pos in
-  let top, right, bottom, left = Box.sides court in
+  let top, right, bottom, left = box_sides court in
   let ball_segment = Segment.v ball_pos new_ball_pos in
   if Segment.intersect ball_segment right then goal ~side:Left state
   else if Segment.intersect ball_segment left then goal ~side:Right state
@@ -139,9 +141,9 @@ let draw_score ~io ~state =
   let score_left = string_of_int score_left in
   let score_right = string_of_int score_right in
   Text.draw ~io ~color ~size:18 score_left
-    ~at:(Vec.v (Box.ox box_game +. 10.) (Box.oy court -. 22.)) ;
+    ~at:(Vec.v (Box.x_left box_game +. 10.) (Box.y_top court -. 22.)) ;
   Text.draw ~io ~color ~size:18 score_right
-    ~at:(Vec.v (Box.midx box_game +. 10.) (Box.oy court -. 22.))
+    ~at:(Vec.v (Box.x_middle box_game +. 10.) (Box.y_top court -. 22.))
 
 let draw_ball ~io {ball_pos; _} = Circle.(fill ~io ~color (v ball_pos 4.))
 

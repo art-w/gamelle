@@ -97,10 +97,27 @@ module Point : sig
   type t = Gg.p2
   (** The type of positions. *)
 
-  include module type of Gg.P2 with type t := t
+  val v : float -> float -> t
+  (** [v x y] returns a point at coordinates [x] and [y]. *)
+
+  val o : t
+  (** [o] is the point at the zero origin [v 0.0 0.0] *)
+
+  (** {2 Accessors} *)
+
+  val x : t -> float
+  (** [x pt] returns the [x] coordinate of the point [pt]. *)
+
+  val y : t -> float
+  (** [y pt] returns the [y] coordinate of the point [pt]. *)
 
   val lerp : float -> t -> t -> t
-  (** [lerp t a b] is the linear interpolation between the two points [a] and [b] controlled by the time parameter [t]. *)
+  (** [lerp t a b] is the linear interpolation between the two points [a] and [b] controlled by the time parameter [t].
+
+      - [lerp 0.0 a b = a]
+      - [lerp 1.0 a b = b]
+      - [lerp 0.5 a b =] mid point of [a] and [b]
+  *)
 end
 
 module Vec : sig
@@ -109,34 +126,90 @@ module Vec : sig
   type t = Gg.v2
   (** The type of directional vectors. *)
 
-  val zero : t
   val v : float -> float -> t
+  (** [v x y] is a vector with direction [x], [y]. *)
+
+  val zero : t
+  (** [zero] is the zero vector [v 0.0 0.0]. *)
+
+  (** {2 Accessors} *)
+
   val x : t -> float
+  (** [x v] is the [x] component of the vector [v]. *)
+
   val y : t -> float
+  (** [y v] is the [y] component of the vector [v]. *)
+
   val to_tuple : t -> float * float
+  (** [to_tuple v] is [x v, y v]. *)
+
+  (** {2 Linear algebra} *)
+
   val norm : t -> float
+  (** [norm v] is the length of the vector [v]. *)
+
   val unit : t -> t
+  (** [unit v] is the vector [v] normalized to have a unit length. *)
+
   val dot : t -> t -> float
+  (** [dot a b] is the dot product of the vectors [a], [b]. *)
+
+  (** {2 Operators} *)
+
   val ( * ) : float -> t -> t
+  (** [f * v] is the vector [v] scaled by a factor [f]. *)
+
   val ( + ) : t -> t -> t
+  (** [a + b] is the sum of the two vectors [a], [b]. *)
+
   val ( - ) : t -> t -> t
+  (** [a - b] is the substraction of vector [a] by [b]. *)
 end
 
 (** {2 Geometry} *)
 
-module Size : module type of Draw_geometry.Size
-(** Sizes: [width] and [height] dimensions. *)
+module Size : sig
+  (** Sizes: [width] and [height] dimensions. *)
+
+  type t = Gg.size2
+  (** The type of sizes in 2D. *)
+
+  val v : float -> float -> t
+  (** [v w h] is a size with width [w] and height [h]. *)
+
+  (** {2 Accessors} *)
+
+  val w : t -> float
+  (** [w s] is the width of [s]. *)
+
+  val h : t -> float
+  (** [h s] is the height of [s]. *)
+end
 
 module Segment : sig
   (** Segments connecting two {!Point}s. *)
 
   type t
+  (** The type of segments. *)
 
   val v : Point.t -> Point.t -> t
-  val to_tuple : t -> Point.t * Point.t
-  val vector : t -> Vec.t
+  (** [v start stop] is a segment connecting point [start] to point [stop]. *)
+
+  (** {2 Draw} *)
+
   val draw : io:io -> ?color:Color.t -> t -> unit
+  (** [draw ~io s] draws the segment on the screen. *)
+
+  (** {2 Accessors} *)
+
+  val to_tuple : t -> Point.t * Point.t
+  (** [to_tuple s] returns the two end-points of the segment [s]. *)
+
+  val vector : t -> Vec.t
+  (** [vector s] is the direction vector of the segment [s]. *)
+
   val intersect : t -> t -> bool
+  (** [intersect a b] returns [true] if segment [a] intersects segment [b], [false] otherwise. *)
 end
 
 module Box : sig
@@ -145,48 +218,197 @@ module Box : sig
   type t = Gg.box2
   (** The type of axis-aligned bounding boxes (rectangles without a rotation). *)
 
-  val zero : t
   val v : Point.t -> Size.t -> t
-  val o : t -> Point.t
-  val ox : t -> float
-  val oy : t -> float
-  val size : t -> Size.t
-  val w : t -> float
-  val h : t -> float
-  val sides : t -> Segment.t * Segment.t * Segment.t * Segment.t
-  val mem : Point.t -> t -> bool
-  val random_mem : t -> Point.t
-  val midx : t -> float
-  val midy : t -> float
+  (** [v topleft size] is a box with origin point [topleft] and dimension [size]. *)
+
+  val zero : t
+  (** [zero] is the empty box located at the origin. *)
+
+  (** {2 Draw} *)
+
   val draw : io:io -> ?color:Color.t -> t -> unit
+  (** [draw ~io b] draws the outline border of the box [b]. *)
+
   val fill : io:io -> ?color:Color.t -> t -> unit
+  (** [fill ~io b] fills the inside of the box [b]. *)
+
+  (** {2 Accessors} *)
+
+  val o : t -> Point.t
+  (** [o b] returns the top-left point of the box [b]. *)
+
+  val size : t -> Size.t
+  (** [size b] returns the dimension of the box [b]. *)
+
+  val x_left : t -> float
+  (** [x_left b] is the left-most [x] coordinate of the box [b]. *)
+
+  val x_middle : t -> float
+  (** [x_middle b] is the center [x] coordinate of the box [b]. *)
+
+  val x_right : t -> float
+  (** [x_right b] is the right-most [x] coordinate of the box [b]. *)
+
+  val y_top : t -> float
+  (** [y_top b] is the upper [y] coordinate of the box [b]. *)
+
+  val y_middle : t -> float
+  (** [y_middle b] is the center [y] coordinate of the box [b]. *)
+
+  val y_bottom : t -> float
+  (** [y_bottom b] is the lower [y] coordinate of the box [b]. *)
+
+  val left : t -> Segment.t
+  (** [left b] returns the left segment of the box [b]. *)
+
+  val right : t -> Segment.t
+  (** [right b] returns the right segment of the box [b]. *)
+
+  val top : t -> Segment.t
+  (** [top b] returns the top segment of the box [b]. *)
+
+  val bottom : t -> Segment.t
+  (** [bottom b] returns the bottom segment of the box [b]. *)
+
+  val mem : Point.t -> t -> bool
+  (** [mem pt b] returns [true] if the point [pt] lies inside the box [b], [false] otherwise. *)
+
+  val random_mem : t -> Point.t
+  (** [random_mem b] returns a random point inside the box [b]. *)
 end
 
 module Circle : sig
   (** Circles. *)
 
-  include module type of Draw_geometry.Circle
+  type t
+  (** The type of circles. *)
+
+  val v : Point.t -> float -> t
+  (** [v pt r] is a circle with center point [pt] and radius [r]. *)
+
+  (** {2 Draw} *)
 
   val draw : io:io -> ?color:Color.t -> t -> unit
+  (** [draw ~io c] draws the outline border of the circle [c]. *)
+
   val fill : io:io -> ?color:Color.t -> t -> unit
+  (** [fill ~io c] fills the inside of the circle [c]. *)
+
+  (** {2 Accessors} *)
+
+  val center : t -> Point.t
+  (** [center c] is the center point of the circle [c]. *)
+
+  val radius : t -> float
+  (** [radius c] is the radius of the circle [c]. *)
+
+  (** {2 Transforms} *)
+
+  val translate : Vec.t -> t -> t
+  (** [translate v c] translates the circle [c] by vector [v]. *)
+
+  (* val scale : float -> t -> t *)
+  (** [scale f c] scales the circle [c] by factor [f]. *)
+
+  (** {2 Collisions} *)
+
+  val mem : Point.t -> t -> bool
+  (** [mem pt c] returns [true] if point [pt] lies inside the circle [c], [false] otherwise. *)
+
+  val intersect : t -> t -> bool
+  (** [intersect a b] returns [true] if circle [a] intersects circle [b], [false] otherwise. *)
+
+  val intersections : t -> t -> Point.t list
+  (** [intersections a b] returns the list of intersections points between the circles [a] and [b]. *)
 end
 
 module Polygon : sig
   (** Polygons. *)
 
-  include module type of Draw_geometry.Polygon
+  type t
+  (** The type of polygons. *)
+
+  val v : Point.t list -> t
+  (** [v pts] is a polygon with vertices [pts]. *)
 
   val draw : io:io -> ?color:Color.t -> t -> unit
+  (** [draw ~io p] draws the outline border of the polygon [p]. *)
+
   val fill : io:io -> ?color:Color.t -> t -> unit
+  (** [fill ~io p] fills the inside of the polygon [p]. *)
+
+  (** {2 Accessors} *)
+
+  val center : t -> Point.t
+  (** [center p] returns the center of mass of the polygon [p]. *)
+
+  val points : t -> Point.t list
+  (** [segments p] returns the list of vertices of the polygon [p]. *)
+
+  val segments : t -> Segment.t list
+  (** [segments p] returns the list of segments of the polygon [p]. *)
+
+  val bounding_box : t -> Box.t
+  (** [bounding_box p] returns the bounding box of the polygon [p]. *)
+
+  (** {2 Transforms} *)
+
+  val translate : Vec.t -> t -> t
+  (** [translate v p] translates the polygon [p] by vector [v]. *)
 end
 
 module Shape : sig
-  (** Arbitrary shapes: circles and polygons. *)
+  (** Arbitrary shapes: segments, circles and polygons. *)
 
-  include module type of Draw_geometry.Shape
+  type t
+  (** The type of shapes: segments, circles, polygons. *)
+
+  val segment : Segment.t -> t
+  (** [segment s] is the shape representing the segment [s]. *)
+
+  val circle : Circle.t -> t
+  (** [circle c] is the shape representing the circle [c]. *)
+
+  val rect : Box.t -> t
+  (** [rect b] is the shape representing the rectangle [b]. *)
+
+  val polygon : Polygon.t -> t
+  (** [polygon p] is the shape representing the polygon [p]. *)
+
+  (** {2 Draw} *)
 
   val draw : io:io -> ?color:Color.t -> t -> unit
+  (** [draw ~io s] draws the outline border of the shape [s]. *)
+
   val fill : io:io -> ?color:Color.t -> t -> unit
+  (** [fill ~io p] fills the inside of the shape [s]. *)
+
+  (** {2 Accessors} *)
+
+  val center : t -> Point.t
+  (** [center s] returns the center of mass of the shape [s]. *)
+
+  val signed_area : t -> float
+  (** [signed_area s] returns the signed area of the shape [s]. *)
+
+  (** {2 Transform} *)
+
+  val rotate : ?center:Point.t -> float -> t -> t
+  (** [rotate a s] rotates the shape [s] by angle [a] (in radians). *)
+
+  (** {2 Collisions} *)
+
+  val mem : Point.t -> t -> bool
+  (** [mem pt s] returns [true] if point [pt] lies inside the shape [s], [false] otherwise. *)
+
+  val distance2 : Point.t -> t -> float
+  (** [distance2 pt s] returns the squared distance of the point [pt] with the shape [s]. *)
+
+  val intersect : t -> t -> bool
+  (** [intersect a b] returns [true] if the shape [a] intersects the shape [b], [false] otherwise. *)
+
+  val intersections : t -> t -> Point.t list
+  (** [intersections a b] returns the list of intersections points between the shapes [a] and [b]. *)
 end
 
 (** {1:Assets Assets} *)
@@ -204,6 +426,8 @@ module Bitmap : sig
   val draw : io:io -> at:Point.t -> t -> unit
   (** [draw ~io ~at img] draws the image [img] at position [at] on the screen. *)
 
+  (** {2 Accessors} *)
+
   val width : t -> int
   (** [width img] is the width in pixels of the image [img]. *)
 
@@ -216,6 +440,8 @@ module Bitmap : sig
   val size : t -> Size.t
   (** [size img] is the width and height size of the image [img]. Same as {!dimensions}. *)
 
+  (** {2 Transforms} *)
+
   val sub : x:int -> y:int -> w:int -> h:int -> t -> t
   (** [sub ~x ~y ~w ~h img] returns the sub-image at position [x,y] and size [w,h]. *)
 
@@ -225,7 +451,16 @@ module Bitmap : sig
 end
 
 val draw : io:io -> at:Point.t -> Bitmap.t -> unit
-(** [draw ~io ~at bitmap] draws the image [bitmap] at position [at] on the screen. *)
+(** [draw ~io ~at bitmap] draws the image [bitmap] at position [at] on the screen. Same as {!Bitmap.draw}.
+
+Example:
+
+{[
+(* draw the assets/player.png bitmap at position x=100, y=200 *)
+draw ~io Assets.player ~at:(Point.v 100. 200.) ;
+]}
+
+*)
 
 (** {3 Text} *)
 
@@ -247,24 +482,7 @@ module Font : sig
 end
 
 module Text : sig
-  type t
-
-  val to_string : t -> string
-  val of_string : string -> t
-  val ( ^ ) : t -> t -> t
-  val length : t -> int
-  val sub : t -> int -> int -> t
-  val split_on_char : char -> t -> t list
-  val concat : t list -> t
-
-  val draw_t :
-    io:io ->
-    ?color:Color.t ->
-    ?font:Font.t ->
-    ?size:int ->
-    at:Point.t ->
-    t ->
-    unit
+  (** Text rendering. *)
 
   val draw :
     io:io ->
@@ -274,38 +492,7 @@ module Text : sig
     at:Point.t ->
     string ->
     unit
-
-  val size_t : io:io -> ?font:Font.t -> ?size:int -> t -> Size.t
-  val size : io:io -> ?font:Font.t -> ?size:int -> string -> Size.t
-
-  val size_multiline :
-    io:io ->
-    ?width:float ->
-    ?interline:float ->
-    ?font:Font.t ->
-    ?size:int ->
-    string ->
-    Size.t
-
-  val size_multiline_t :
-    io:io ->
-    ?width:float ->
-    ?interline:float ->
-    ?font:Font.t ->
-    ?size:int ->
-    t ->
-    Size.t
-
-  val draw_multiline_t :
-    io:io ->
-    ?color:Color.t ->
-    ?width:float ->
-    ?interline:float ->
-    ?font:Font.t ->
-    ?size:int ->
-    at:Point.t ->
-    t ->
-    unit
+  (** [draw ~io ~at txt] prints the string [txt] at position [at] on the screen. *)
 
   val draw_multiline :
     io:io ->
@@ -317,6 +504,22 @@ module Text : sig
     at:Point.t ->
     string ->
     unit
+  (** [draw_multiline ~io ~at txt] prints the string [txt] at position [at] on the screen, possibly wrapping it on multiple lines if the text overflows [?width]. *)
+
+  (** {2 Measure} *)
+
+  val size : io:io -> ?font:Font.t -> ?size:int -> string -> Size.t
+  (** [size ~io str] returns the size that would be used by {!draw} to render the text [str]. *)
+
+  val size_multiline :
+    io:io ->
+    ?width:float ->
+    ?interline:float ->
+    ?font:Font.t ->
+    ?size:int ->
+    string ->
+    Size.t
+  (** [size_multiline ~io str] returns the size that would be used by {!draw_multiline} to render the text [str] on multiple lines. *)
 end
 
 val draw_string :
@@ -327,11 +530,19 @@ val draw_string :
   at:Point.t ->
   string ->
   unit
-(** [draw_string ~io ~at txt] prints the string [txt] at position [at] on the screen.
+(** [draw_string ~io ~at txt] prints the string [txt] at position [at] on the screen. Same as {!Text.draw}.
 
 - [?color] is the text color, see {!View.color}
 - [?font] is the typeface used to render the text, see {!View.font}
 - [?size] is the font size, see {!View.font_size}
+
+Examples:
+
+{[
+draw_string ~io "Hello World" ~at:(Input.mouse_pos ~io) ;
+draw_string ~io ~color:Color.red ~at:(Point.v 200. 100.) "Bloody!" ;
+draw_string ~io ~at:Point.o "Why so serious?" ~font:Assets.comic_sans ~size:50 ;
+]}
 
  *)
 
@@ -362,9 +573,6 @@ end
 module Input : sig
   (** Player inputs: mouse and keyboard events. *)
 
-  val mouse_pos : io:io -> Point.t
-  val wheel_delta : io:io -> float
-
   type key =
     [ `alt
     | `alt_gr
@@ -388,49 +596,143 @@ module Input : sig
     | `tab
     | `wheel
     | `unknown_key ]
+  (** The type of player inputs. *)
 
   val is_pressed : io:io -> key -> bool
-  val is_up : io:io -> key -> bool
+  (** [is_pressed ~io key] returns [true] if the player is currently holding [key]. *)
+
   val is_down : io:io -> key -> bool
+  (** [is_down ~io key] returns [true] if the player just started pressing the [key]. *)
+
+  val is_up : io:io -> key -> bool
+  (** [is_up ~io key] returns [true] if the player was holding [key] and just released it. *)
+
+  (** {2 Mouse} *)
+
+  val mouse_pos : io:io -> Point.t
+  (** [mouse_pos ~io] returns the coordinates of the player mouse. *)
+
+  val wheel_delta : io:io -> float
+  (** [wheel_delta ~io] returns the amount of change of the mouse wheel. *)
 end
 
-module Ui : Ui.S with type io := io
-(** Graphical user interface: buttons, checkboxes, text inputs. *)
+module Ui : sig
+  (** Graphical user interface: buttons, checkboxes, text inputs. *)
+
+  include Ui.S with type io := io
+  (** @inline *)
+end
 
 (** {1 Camera} *)
 
 module View : sig
   (** Customize the {!io} camera, default color and font used. *)
 
-  val drawing_box : ?scale:bool -> ?set_window_size:bool -> Box.t -> io -> io
+  (** {2 Viewport} *)
+
   val translate : Vec.t -> io -> io
+  (** [translate v io] translates everything by vector [v]. *)
+
   val scale : float -> io -> io
+  (** [scale f io] scales everything by a factor [f]. *)
+
   val rotate : float -> io -> io
+  (** [rotate a io] rotates everything by angle [a]. *)
+
+  val drawing_box : ?scale:bool -> ?set_window_size:bool -> Box.t -> io -> io
+  (** [drawing_box b io] ensures the box [b] matches the dimensions of the window. See {!Window.size}. *)
+
   val clip : Box.t -> io -> io
-  val unclip : io -> io
-  val clip_events : bool -> io -> io
+  (** [clip b io] ensures no drawing can happen outside of the box [b]. *)
+
   val z_index : int -> io -> io
+  (** [z_index z io] controls the depth [z] of the following draws. *)
+
   val color : Color.t -> io -> io
+  (** [color c io] specifies the default color [c]. *)
+
+  (** {2 Font} *)
+
   val font : Font.t -> io -> io
+  (** [font f io] specifies the default font [f]. *)
+
   val font_size : int -> io -> io
+  (** [font_size s io] specifies the default font size [s]. *)
 end
 
 module Window : sig
   (** Configure the game window. *)
 
   val show_cursor : io:io -> bool -> unit
+  (** [show_cursor ~io visible] toggles the visibility of the operating system mouse cursor. *)
+
   val set_size : io:io -> Size.t -> unit
+  (** [set_size ~io wh] resizes the operating system window.
+
+      Example:
+
+      {[
+      Window.set_size (Size.v 800. 800.) ;
+      ]}
+
+  *)
+
   val size : io:io -> Size.t
+  (** [size ~io] returns the current size of the game window. *)
+
   val box : io:io -> Box.t
+  (** [box ~io] returns a box matching the game window contents.
+
+      Example:
+
+      {[
+      (* clear the screen *)
+      Box.fill ~io ~color:Color.white (Window.box ~io) ;
+      ]}
+  *)
 end
 
 (** {1 Animations} *)
 
 val clock : io:io -> float
-(** [clock ~io] returns the number of elapsed seconds since the game started until the current frame. The clock is defined at the beginning of a frame, calling [clock] multiple times will always produce the same result. *)
+(** [clock ~io] returns the number of elapsed seconds since the game started until the current frame. The clock is defined at the beginning of a frame, calling [clock] multiple times will always produce the same result.
+
+Examples:
+
+{[
+(* circle moving around a circle *)
+let center = Vec.(100.0 * v (1. +. cos (clock ~io)) (1. +. sin (clock ~io))) in
+Circle.fill ~io (Circle.v center 10.0);
+]}
+
+{[
+(* show elapsed time since the last click *)
+Gamelle.run 0. @@ fun ~io last_click ->
+let now = clock ~io in
+let last_click = if Input.is_up ~io `click_left then now else last_click in
+let elapsed = now -. last_click in
+draw_string ~io ~at:Point.o (Printf.sprintf "Time since clicked: %fs" elapsed);
+last_click
+]}
+
+*)
 
 val dt : io:io -> float
-(** [dt ~io] is the duration of a frame, which is fixed to a 60fps framerate. *)
+(** [dt ~io] is the duration of a frame, which is fixed to a 60fps framerate.
+
+Example:
+
+{[
+Gamelle.run (Point.v 200. 200., Vec.zero) @@ fun ~io (position, velocity) ->
+let acceleration = Vec.v 0. 9.81 in
+(* gravity *)
+let velocity = Vec.(velocity + (dt ~io * acceleration)) in
+let position = Vec.(position + (dt ~io * velocity)) in
+Circle.draw ~io (Circle.v position 20.0);
+(position, velocity)
+]}
+
+*)
 
 module Ease : sig
   (** Easing functions, to smooth changes over time.
@@ -496,6 +798,14 @@ module Anim : sig
   val const : float -> 'a -> 'a t
   (** [const duration x] is a constant animation always producing [x], lasting [duration] seconds. *)
 
+  val frames : float -> 'a array -> 'a t
+  (** [frames duration arr] is an animation, lasting [duration] seconds, which steps over the values of the array [arr]. *)
+
+  val update : dt:float -> 'a t -> 'a t
+  (** [update ~dt t] moves the animation [t] forward in time by [dt] seconds. See {!dt}. *)
+
+  (** {2 Accessors} *)
+
   val get : 'a t -> 'a
   (** [get t] returns the current ['a] value. *)
 
@@ -505,8 +815,7 @@ module Anim : sig
   val duration : 'a t -> float
   (** [duration t] is the length of the animation [t]. Returns [0.0] if the animation has completed. *)
 
-  val update : dt:float -> 'a t -> 'a t
-  (** [update ~dt t] moves the animation [t] forward in time by [dt] seconds. See {!dt}. *)
+  (** {2 Composition} *)
 
   val seq : 'a t -> 'a t -> 'a t
   (** [seq a b] is the animation [a] followed by the animation [b]. *)
@@ -523,6 +832,8 @@ module Anim : sig
   val ( let> ) : 'a t -> ('a -> 'a t) -> 'a t
   (** [let> v = t in ...] is the same as [continue t (fun v -> ...)]. *)
 
+  (** {2 Transforms} *)
+
   val rev : 'a t -> 'a t
   (** [rev t] returns the animation [t] playing backward. *)
 
@@ -531,9 +842,6 @@ module Anim : sig
 
   val cut : float -> 'a t -> 'a t * 'a t
   (** [cut duration t] returns the animation [t] truncated to [duration], and the rest. *)
-
-  val frames : float -> 'a array -> 'a t
-  (** [frames duration arr] is an animation, lasting [duration] seconds, which steps over the values of the array [arr]. *)
 
   val map : ('a -> 'b) -> 'a t -> 'b t
   (** [map fn t] applies [fn] to each output value of the animation [t]. *)
@@ -546,21 +854,49 @@ module Physics : sig
   (** Rigid physics for {!Shape} objects. *)
 
   type t
+  (** The type of rigid bodies. *)
+
   type kind = Movable | Immovable
 
-  val make :
+  val v :
     ?mass:float ->
     ?inertia:float ->
     ?restitution:float ->
     ?kind:kind ->
     Shape.t ->
     t
+  (** [v s] returns a new rigid body with shape [s].
+
+    - [?mass] is the weight of the rigid body.
+    - [?inertia] controls the reactivity of the rigid body.
+    - [?restitution] defines the bouncyness of the rigid body.
+    - [?kind] controls if the rigid body can move.
+
+  *)
+
+  (** {2 Accessors} *)
 
   val center : t -> Point.t
+
+  (** {2 Simulation} *)
+
   val add_velocity : Vec.t -> t -> t
+  (** [add_velocity v t] adds [v] to the rigid body [t] current velocity. *)
+
   val add_rot_velocity : float -> t -> t
+  (** [add_rot_velocity r t] adds [r] to the rigid body [t] current rotational velocity. *)
+
   val update : dt:float -> t -> t
+  (** [update ~dt t] updates the rigid body [t] position and rotation according to its current velocities and delta time [dt]. *)
+
   val fix_collisions : t list -> t list
+  (** [fix_collisions lst] detects and repairs any collisions between the rigid bodies in the list [lst]. *)
+
+  (** {2 Draw} *)
+
   val draw : io:io -> ?color:Color.t -> t -> unit
+  (** [draw ~io t] draws the outline border of the rigid body [t]. *)
+
   val fill : io:io -> ?color:Color.t -> t -> unit
+  (** [fill ~io t] fills the inside of the rigid body [t]. *)
 end

@@ -7,14 +7,14 @@ let v center radius =
 let center { center; _ } = center
 let radius { radius; _ } = radius
 
-let translate { center; radius } vec =
+let translate vec { center; radius } =
   { center = Point.translate center vec; radius }
 
 let map_center f { center; radius } = { center = f center; radius }
 let area { radius; _ } = Float.pi *. radius *. radius
 let square f = f *. f
 
-let intersection { center = c0; radius = r0 } { center = c1; radius = r1 } =
+let intersections { center = c0; radius = r0 } { center = c1; radius = r1 } =
   let dist2 = Vec.(norm2 (c1 - c0)) in
   if dist2 >= square (r0 +. r1) || dist2 <= square (r0 -. r1) then []
   else
@@ -36,11 +36,11 @@ let intersection { center = c0; radius = r0 } { center = c1; radius = r1 } =
         Point.v (base_x -. px) (base_y +. py);
       ]
 
-let intersects { center = c0; radius = r0 } { center = c1; radius = r1 } =
+let intersect { center = c0; radius = r0 } { center = c1; radius = r1 } =
   let dist2 = Vec.(norm2 (c1 - c0)) in
   let r2 = square (r0 +. r1) in
   dist2 < r2
 
-let mem { center; radius } pt =
+let mem pt { center; radius } =
   let dist2 = Vec.(norm2 (center - pt)) in
   dist2 <= radius *. radius

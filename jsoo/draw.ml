@@ -63,7 +63,7 @@ let path_poly pts =
     (fun pt ->
       let x, y = Vec.to_tuple pt in
       C.Path.line_to path ~x ~y)
-    (Polygon.to_list pts);
+    (Polygon.points pts);
   C.Path.close path;
   path
 

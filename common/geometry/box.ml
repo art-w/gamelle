@@ -5,7 +5,6 @@ let top box = Segment.v (tl_pt box) (tr_pt box)
 let left box = Segment.v (tl_pt box) (bl_pt box)
 let right box = Segment.v (tr_pt box) (br_pt box)
 let bottom box = Segment.v (bl_pt box) (br_pt box)
-let sides box = (top box, right box, bottom box, left box)
 
 let random_mem box =
   let x = Random.float (Box2.w box) +. Box2.ox box
@@ -15,3 +14,9 @@ let random_mem box =
 let translate box vec = v Vec.(o box + vec) (size box)
 let centered b1 b2 = v_mid (mid b2) (size b1)
 let v_corners p1 p2 = v p1 Vec.(p2 - p1)
+let x_left = ox
+let x_right b = ox b +. w b
+let x_middle b = ox b +. (w b /. 2.0)
+let y_top = oy
+let y_bottom b = oy b +. h b
+let y_middle b = oy b +. (h b /. 2.0)

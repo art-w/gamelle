@@ -1,7 +1,7 @@
 type t = Point.t list
 
 let v li = li
-let to_list p = p
+let points p = p
 
 let center = function
   | [] -> assert false
@@ -45,7 +45,7 @@ let segments pts =
       in
       go [] pts
 
-let translate poly v = List.map (Vec.( + ) v) poly
+let translate v poly = List.map (Vec.( + ) v) poly
 let map_points f poly = List.map f poly
 
 let bounding_box poly =

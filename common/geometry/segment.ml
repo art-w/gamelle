@@ -32,7 +32,7 @@ let intersection { start = p1; end_ = p2 } { start = q1; end_ = q2 } =
 let intersect s s' = Option.is_some (intersection s s')
 let equal s s' = Vec.equal s.start s.end_ && Vec.equal s'.start s'.end_
 
-let translate { start; end_ } vec =
+let translate vec { start; end_ } =
   { start = Point.translate start vec; end_ = Point.translate end_ vec }
 
 let map_points f { start; end_ } = { start = f start; end_ = f end_ }

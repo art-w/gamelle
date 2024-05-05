@@ -94,7 +94,7 @@ let draw_rect ~io ?color rect =
   draw_line ~io ?color (Box.right rect)
 
 let draw_poly ~io ?color poly =
-  let arr = Polygon.to_list poly in
+  let arr = Polygon.points poly in
   let arr = List.map (project ~io) arr in
   let r, g, b, a = get_color ~io color in
   let& () =
@@ -105,7 +105,7 @@ let draw_poly ~io ?color poly =
   ()
 
 let fill_poly ~io ?color poly =
-  let arr = Polygon.to_list poly in
+  let arr = Polygon.points poly in
   let arr = List.map (project ~io) arr in
   let r, g, b, a = get_color ~io color in
   let& () =

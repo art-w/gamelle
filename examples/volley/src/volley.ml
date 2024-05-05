@@ -17,13 +17,13 @@ let horz_speed = 2000.0
 
 let init_ball () =
   Physics.add_velocity (Vec.v (Random.float 30.0 -. 15.0) (-1_000.0))
-  @@ Physics.make ~mass:1.0 ~restitution:1.0 ~kind:Movable
+  @@ Physics.v ~mass:1.0 ~restitution:1.0 ~kind:Movable
        (Shape.circle (Circle.v (Point.v 500.0 0.0) 50.0))
 
 let init_player pos =
   {
     shape =
-      Physics.make ~restitution:0.8 ~kind:Movable ~mass:1000.0
+      Physics.v ~restitution:0.8 ~kind:Movable ~mass:1000.0
         (Shape.circle (Circle.v pos player_radius));
     jumps = 0;
   }
@@ -39,27 +39,27 @@ let initial_state =
 
 let world =
   [
-    Physics.make ~restitution ~kind:Immovable
+    Physics.v ~restitution ~kind:Immovable
       (Shape.circle (Circle.v (Point.v 500.0 200.0) 10.0));
-    Physics.make ~restitution:0.5 ~kind:Immovable
+    Physics.v ~restitution:0.5 ~kind:Immovable
       (Shape.rect @@ Box.v (Point.v 0.0 (-1500.0)) (Vec.v 1000.0 1010.0));
-    Physics.make ~restitution:0.5 ~kind:Immovable
+    Physics.v ~restitution:0.5 ~kind:Immovable
       (Shape.rect @@ Box.v (Point.v 490.0 200.0) (Vec.v 20.0 1000.0));
-    Physics.make ~restitution:0.5 ~kind:Immovable
+    Physics.v ~restitution:0.5 ~kind:Immovable
       (Shape.rect @@ Box.v (Point.v (-1000.0) (-1000.0)) (Vec.v 1010.0 1500.0));
-    Physics.make ~restitution:0.5 ~kind:Immovable
+    Physics.v ~restitution:0.5 ~kind:Immovable
       (Shape.rect @@ Box.v (Point.v 1000.0 (-1000.0)) (Vec.v 1010.0 1500.0));
-    Physics.make ~restitution:0.0 ~kind:Immovable
+    Physics.v ~restitution:0.0 ~kind:Immovable
       (Shape.rect @@ Box.v (Point.v (-1000.0) bottom) (Vec.v 3500.0 1000.0));
   ]
 
 let block_player1 =
-  Physics.make ~restitution ~kind:Immovable
+  Physics.v ~restitution ~kind:Immovable
   @@ Shape.rect
   @@ Box.v (Point.v 500.0 (-1000.0)) (Vec.v 1000.0 2000.0)
 
 let block_player2 =
-  Physics.make ~restitution ~kind:Immovable
+  Physics.v ~restitution ~kind:Immovable
   @@ Shape.rect
   @@ Box.v (Point.v (-500.0) (-1000.0)) (Vec.v 1000.0 2000.0)
 

@@ -9,9 +9,9 @@ let rect box =
     (Polygon.v [ Box.tl_pt box; Box.tr_pt box; Box.br_pt box; Box.bl_pt box ])
 
 let translate dxy = function
-  | Segment s -> Segment (Segment.translate s dxy)
-  | Circle c -> Circle (Circle.translate c dxy)
-  | Polygon p -> Polygon (Polygon.translate p dxy)
+  | Segment s -> Segment (Segment.translate dxy s)
+  | Circle c -> Circle (Circle.translate dxy c)
+  | Polygon p -> Polygon (Polygon.translate dxy p)
 
 let ( + ) = ( +. )
 let ( - ) = ( -. )
@@ -36,7 +36,7 @@ let signed_area = function
   | Segment _ -> 1.0
   | Polygon pts -> Polygon.signed_area pts
 
-let rotate ?center:opt_center ~angle shape =
+let rotate ?center:opt_center angle shape =
   let center =
     match opt_center with Some center -> center | None -> center shape
   in
@@ -134,19 +134,19 @@ let rec intersections a b =
   | Segment s, Circle c | Circle c, Segment s -> intersection_segment_circle s c
   | Segment p, Segment q -> (
       match segment_intersection p q with None -> [] | Some pt -> [ pt ])
-  | Circle c, Circle c' -> Circle.intersection c c'
+  | Circle c, Circle c' -> Circle.intersections c c'
   | Polygon pts, other | other, Polygon pts ->
       List.concat_map
         (fun s -> intersections (Segment s) other)
         (Polygon.segments pts)
 
-let intersects a b =
+let intersect a b =
   match (a, b) with
-  | Circle c, Circle c' -> Circle.intersects c c'
+  | Circle c, Circle c' -> Circle.intersect c c'
   | _ -> intersections a b <> []
 
 let mem pt = function
-  | Circle c -> Circle.mem c pt
+  | Circle c -> Circle.mem pt c
   | Segment _ -> false
   | Polygon pts ->
       let x, y = Vec.to_tuple pt in
@@ -186,7 +186,7 @@ let project axis = function
         (v, v) pts
 
 let separation_axis_polygon poly_a poly_b =
-  let a = Polygon.to_list poly_a and b = Polygon.to_list poly_b in
+  let a = Polygon.points poly_a and b = Polygon.points poly_b in
   let rec go opt_best = function
     | [] -> opt_best
     | seg :: rest -> (
@@ -253,7 +253,7 @@ let best_distance (x_dist, xs) (y_dist, ys) =
   else (y_dist, ys)
 
 let contact_points_rectangle pts rect =
-  let pts = Polygon.to_list pts in
+  let pts = Polygon.points pts in
   match pts with
   | [] -> invalid_arg "contact_points: empty list"
   | hd :: pts ->

@@ -36,7 +36,7 @@ let draw ~io ?color { shape; pos; rot; _ } =
 
 let fill ~io ?color { shape; _ } = Shape.fill ~io ?color shape
 
-let make ?mass ?inertia ?(restitution = 0.2) ?(kind = Movable) shape =
+let v ?mass ?inertia ?(restitution = 0.2) ?(kind = Movable) shape =
   let pos = Shape.center shape in
   let mass =
     match mass with
@@ -74,7 +74,7 @@ let update ~dt p =
         speed = Vec.(0.99 * p.speed);
         rot_speed = 0.99 *. p.rot_speed;
         shape =
-          Shape.rotate ~angle:dt_rot_speed ~center:pos
+          Shape.rotate dt_rot_speed ~center:pos
           @@ Shape.translate dt_speed p.shape;
       }
 
