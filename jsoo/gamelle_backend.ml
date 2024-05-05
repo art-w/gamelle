@@ -17,19 +17,16 @@ let clock = Gamelle_common.clock
 let dt = Gamelle_common.dt
 
 module Window = struct
-  let size ~io =
-    let canvas = io.backend.canvas in
-    let w = Canvas.w canvas in
-    let h = Canvas.h canvas in
-    Size.v (float w) (float h)
+  let current_size = ref (0, 0)
 
-  let set_size ~io s =
-    let w = s |> Size.w |> int_of_float and h = s |> Size.h |> int_of_float in
-    let canvas = io.backend.canvas in
-    Canvas.set_w canvas w;
-    Canvas.set_h canvas h
-
-  let box ~io = Box.v Vec.zero (size ~io)
+  let set_size ~io =
+    let s = !(io.window_size) in
+    if s <> !current_size then (
+      let w, h = s in
+      let canvas = io.backend.canvas in
+      Canvas.set_w canvas w;
+      Canvas.set_h canvas h;
+      current_size := s)
 
   let show_cursor ~io status =
     let canvas = io.backend.canvas in
@@ -37,6 +34,15 @@ module Window = struct
     if status then Brr.El.remove_inline_style Brr.El.Style.cursor el
     else Brr.El.set_inline_style Brr.El.Style.cursor (Jstr.of_string "none") el
 end
+
+let finalize_frame ~io =
+  Window.set_size ~io;
+  let ctx = io.backend.ctx in
+  let w, h = !Window.current_size in
+  C.reset_transform ctx;
+  C.set_fill_style ctx (C.color (Jstr.of_string "black"));
+  C.fill_rect ctx ~x:0.0 ~y:0.0 ~w:(float w) ~h:(float h);
+  Gamelle_common.finalize_frame ~io
 
 let run ~canvas state update =
   let open Jsoo in
@@ -68,9 +74,8 @@ let run ~canvas state update =
       }
     in
     incr clock_ref;
-    fill_rect ~io ~color:Color.black (Window.box ~io);
     let state = update ~io state in
-    Gamelle_common.finalize_frame ~io;
+    finalize_frame ~io;
     Events_js.current := reset_wheel !Events_js.current;
     animate state
   in

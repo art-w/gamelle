@@ -14,7 +14,7 @@ let dt = Gamelle_backend.dt
 let clock = Gamelle_backend.clock
 
 module Sound = Gamelle_backend.Sound
-module Window = Gamelle_backend.Window
+module Window = Window_
 
 let run init f =
   Gamelle_backend.run init (fun ~io ->

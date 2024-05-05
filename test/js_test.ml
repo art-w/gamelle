@@ -70,7 +70,6 @@ let update ~io { x; y; vx; vy; _ } =
   let vx = vx *. 0.9 in
   let vy = vy *. 0.9 in
 
-  Window.set_size ~io (Size.v 800. 800.);
   Box.fill ~io ~color:black (Window.box ~io);
   Text.draw ~io ~color:Color.white ~size:30 "Hello World!" ~at:Vec.zero;
   Text.draw ~io:(View.scale 2.0 io) ~color:Color.white ~size:30 "Hello World!"
@@ -103,6 +102,7 @@ let update ~io { x; y; vx; vy; _ } =
     (Polygon.v [ Point.v 20. 0.; Point.v 30. 30.; Point.v 15. 40. ]);
   Circle.draw ~io ~color:green
     (Circle.v (Point.v (75.0 /. 2.) (59.0 /. 2.)) 10.);
+  Window.set_size ~io (Size.v 800. 800.);
   { x; y; vx; vy; mx; my }
 
 let () = run { mx = 0.0; my = 0.0; x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 } update

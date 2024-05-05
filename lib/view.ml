@@ -1,5 +1,4 @@
 open Gamelle_common
-open Gamelle_backend
 open Draw_geometry
 
 let translate dxy io = { io with view = Transform.translate dxy io.view }
@@ -18,11 +17,10 @@ let font_size s io =
   { io with backend = Gamelle_backend.Font.set_font_size s io.backend }
 
 let project ~io p = Transform.project io.view p
-let previous_size = ref Size.zero
 
 let drawing_box ?scale:must_scale ?(set_window_size = true) box io =
   let must_scale = Option.value must_scale ~default:false in
-  let window_size = Window.size ~io in
+  let window_size = Window_.size ~io in
   let ratio_w =
     let w_win = Size.w window_size in
     let w_box = Box.w box in
@@ -37,14 +35,8 @@ let drawing_box ?scale:must_scale ?(set_window_size = true) box io =
   let io = if must_scale then scale ratio io else io in
   let io_scale = io.view.scale in
   let size = Box.size box in
-  if set_window_size && (not must_scale) && !previous_size <> size then (
-    (* If you repeatdly set the size of a maximised window, it could lead to
-       very big performance issue. This also has the benefit how allowing the
-       user to resize their windows. *)
-    previous_size := size;
-    Window.set_size ~io size);
-
-  let window_mid = Box.mid (Window.box ~io) in
+  if set_window_size && not must_scale then Window_.set_size ~io size;
+  let window_mid = Box.mid (Window_.box ~io) in
   let box_mid = Box.mid box in
   let inv_scale = 1. /. io_scale in
   let tr = Vec.((inv_scale * window_mid) - box_mid) in

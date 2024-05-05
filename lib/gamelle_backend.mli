@@ -71,7 +71,4 @@ end
 
 module Window : sig
   val show_cursor : io:io -> bool -> unit
-  val set_size : io:io -> size -> unit
-  val size : io:io -> size
-  val box : io:io -> box
 end

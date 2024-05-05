@@ -16,6 +16,7 @@ type 'a abstract_io = {
   clip_events : bool;
   z_index : int;
   color : Color.t;
+  window_size : (int * int) ref;
   clean : (unit -> unit) list ref;
   draws : (int * (unit -> unit)) list ref;
   backend : 'a;
@@ -30,6 +31,7 @@ let make_io backend =
     clip_events = false;
     z_index = 0;
     color = Color.white;
+    window_size = ref (0, 0);
     clean = ref [];
     draws = ref [];
     backend;

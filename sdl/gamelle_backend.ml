@@ -100,15 +100,13 @@ let run () =
             let io = { (make_io backend) with event = !events } in
             latest_io := io;
             let state = update ~io state in
-            Window.finalize_set_size ();
             let clean = List.rev_append !(io.clean) clean in
             current_run := Run { state; update; clean }
         | Run _ -> ());
 
     (let io = !latest_io in
      let draw_calls = !(io.draws) in
-     fill_rect ~io ~color:Geometry.Color.black (Window.box ~io);
-     Gamelle_common.finalize_frame ~io;
+     Window.finalize_frame ~io;
      io.draws := draw_calls;
      Sdl.render_present renderer);
 

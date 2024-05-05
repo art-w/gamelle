@@ -1,28 +1,26 @@
 open Gamelle_common
-open Common
 open Geometry
+open Common
 
-let previous_window_size = ref (Size.v (-1.) (-1.))
-let size_to_be_set = ref None
-let set_size ~io s = size_to_be_set := Some (io, s)
+let current_size = ref (0, 0)
 
-let finalize_set_size () =
-  Option.iter
-    (fun (io, s) ->
-      let w = s |> Size.w |> int_of_float and h = s |> Size.h |> int_of_float in
-      let previous = !previous_window_size in
-      if previous <> s then (
-        Sdl.set_window_size io.backend.window ~w ~h;
-        previous_window_size := s))
-    !size_to_be_set;
-  size_to_be_set := None
+let set_size ~io =
+  let s = !(io.window_size) in
+  if s <> !current_size then (
+    let w, h = s in
+    Sdl.set_window_size io.backend.window ~w ~h;
+    current_size := s)
 
-let size ~io =
-  let x, y = Sdl.get_window_size io.backend.window in
-  Size.v (float x) (float y)
-
-let box ~io = Box.v Vec.zero (size ~io)
+let box ~io =
+  let w, h = !(io.window_size) in
+  Box.v Vec.zero (Size.v (float w) (float h))
 
 let show_cursor ~io:_ b =
   let& _ = Sdl.show_cursor b in
   ()
+
+let finalize_frame ~io =
+  set_size ~io;
+  let& () = Sdl.set_render_draw_color io.backend.renderer 0 0 0 255 in
+  let& () = Sdl.render_clear io.backend.renderer in
+  Gamelle_common.finalize_frame ~io
