@@ -21,7 +21,7 @@
     (tsdl-image (>= 0.6))
     (tsdl-mixer (>= 0.6))
     (tsdl-ttf (>= 0.6))
-    conf-sdl-gfx
+    conf-sdl2-gfx
     (ctypes (>= 0.21.1))
     (result (>= 1.5))
     (crunch (>= 3.3.1))
@@ -29,4 +29,4 @@
     (inotify (>= 2.1))
     (uuseg (>= 15.1.0))))
 
-(package (name conf-sdl-gfx) (allow_empty))
+(package (name conf-sdl2-gfx) (allow_empty))
