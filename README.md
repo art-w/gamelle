@@ -1,4 +1,4 @@
-Gamelle is a tiny 2D game library/engine, perfect for gamejams or as an excuse to learn OCaml!
+Gamelle is a tiny 2D game library/engine, perfect for gamejams or as a playground to learn OCaml!
 
 - **Automatic assets loading** for images, sounds and fonts.
 - **Hot code reload** on every file change for a quick feedback loop.
@@ -6,7 +6,7 @@ Gamelle is a tiny 2D game library/engine, perfect for gamejams or as an excuse t
 - **Immediate mode GUI** to quickly put together menus and widgets.
 - **Rigid physics**, collisions detection, animations, ...
 
-We hope the library will be easy to learn and fun to use, as there should be few requirements to be productive: [**Online Documentation**]()
+We hope the library will be easy to learn and fun to use, as there should be few requirements to be productive: [**Online Documentation**](https://art-w.github.io/gamelle/gamelle/Gamelle)
 
 ```ocaml
 open Gamelle
@@ -26,15 +26,15 @@ let () =
 Installation:
 
 ```bash
-$ opam install https://github.com/art-w/gamelle
+$ opam pin https://github.com/art-w/gamelle.git
 ```
 
-Installing the library will also install a `gamelle` executable, which can be used to create a fresh new game project:
+Installing the library will also install the `gamelle` executable, which can be used to create a fresh new game project:
 
 ```bash
 $ gamelle init my-super-game
 $ cd my-super-game
-my-super-game/ $ make   # launch the game!
+$ make   # launch the game!
 ```
 
 While you can use the `gamelle` library by setting up the dune files yourself, the starter project enables all of the feature out of the box:

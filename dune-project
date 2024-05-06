@@ -5,7 +5,7 @@
 (name gamelle)
 (version 0.1)
 (source (github art-w/gamelle))
-(authors "Arthur Wendling")
+(authors "Arthur Wendling" "Emile Trotignon")
 (maintainers "art.wendling@gmail.com")
 (license MIT)
 

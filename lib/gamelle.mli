@@ -533,7 +533,7 @@ val draw_string :
 (** [draw_string ~io ~at txt] prints the string [txt] at position [at] on the screen. Same as {!Text.draw}.
 
 - [?color] is the text color, see {!View.color}
-- [?font] is the typeface used to render the text, see {!View.font}
+- [?font] is the typeface used to render the text, see {!val:View.font}
 - [?size] is the font size, see {!View.font_size}
 
 Examples:
