@@ -85,11 +85,11 @@ let padding = 4.
 let padding_x = Vec.v padding 0.
 let padding_y = Vec.v 0. padding
 let padding_xy = Vec.(padding_x + padding_y)
-let fg = Color.Gruvbox.Light.fg
-let bg = Color.Gruvbox.Light.bg
-let bg' = Color.Gruvbox.Light.bg1
-let highlight = Color.Gruvbox.Light.blue
-let lowlight = Color.Gruvbox.Light.gray
+let fg = Gruvbox.Light.fg
+let bg = Gruvbox.Light.bg
+let bg' = Gruvbox.Light.bg1
+let highlight = Gruvbox.Light.blue
+let lowlight = Gruvbox.Light.gray
 
 let debug_render ~ui f =
   let prev_f = ui.debug_render in

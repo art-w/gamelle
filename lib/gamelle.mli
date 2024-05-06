@@ -63,12 +63,19 @@ module Color : sig
   type t = Gg.color
   (** The type of colors. *)
 
-  val rgb : ?alpha:float -> int -> int -> int -> t
   val v : float -> float -> float -> float -> t
+  (** [v r g b a] is the color with alpha transparency [a] and RGB components between [0.0] and [1.0] *)
+
+  val rgb : ?alpha:float -> int -> int -> int -> t
+  (** [rgb r g b] is the RGB color with components red [r], green [g] and blue [b] between [0] and [255]. *)
+
+  val hsl : ?alpha:float -> float -> float -> float -> t
+  (** [hsl h s l] returns a color from the hue [h] (between [0.0] and [360.0]), the saturation [s] and lightness [l] (between [0.0] and [1.0]). *)
 
   (** {1 Transformations} *)
 
-  val with_a : t -> float -> t
+  val with_alpha : float -> t -> t
+  (** [with_alpha a c] returns the color [c] with its alpha transparency set to [a]. *)
 
   (** {1 Basic colors} *)
 

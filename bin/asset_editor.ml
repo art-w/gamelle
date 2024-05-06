@@ -50,7 +50,7 @@ let main ~io st =
       let rect = compute_rect (pos, st.mouse) in
       Box.draw ~io ~color:Color.green rect)
     st.click;
-  let pale_green = Color.(with_a green 0.2) in
+  let pale_green = Color.(with_alpha 0.2 green) in
   List.iter
     (fun poss ->
       let rect = compute_rect poss in
