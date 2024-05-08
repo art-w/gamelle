@@ -10,7 +10,6 @@ open Geometry
 type 'a abstract_io = {
   view : Transform.t;
   event : Events_backend.t;
-  centering_translation : vec;
   clip : box option;
   clip_events : bool;
   z_index : int;

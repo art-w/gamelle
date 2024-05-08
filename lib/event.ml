@@ -6,7 +6,7 @@ type key = Events_backend.key
 module Strings = Events_backend.Strings
 
 let mouse_pos ~io =
-  Vec.(Events_backend.mouse_pos io.event - io.centering_translation)
+  Transform.inv_project io.view (Events_backend.mouse_pos io.event)
 
 let handle_clip_events ~io b =
   if io.clip_events then

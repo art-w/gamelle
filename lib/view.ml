@@ -40,6 +40,5 @@ let drawing_box ?scale:must_scale ?(set_window_size = true) box io =
   let box_mid = Box.center box in
   let inv_scale = 1. /. io_scale in
   let tr = Vec.((inv_scale * window_mid) - box_mid) in
-  let io = { io with centering_translation = tr } in
   let io = translate tr io in
   io

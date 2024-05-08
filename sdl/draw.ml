@@ -22,7 +22,7 @@ let draw_clip ~io renderer f =
   let* () =
     Option.map
       (fun clip ->
-        let clip = Box.translate io.centering_translation clip in
+        let clip = Transform.project_box io.view clip in
         let clip_rect =
           Sdl.Rect.create
             ~x:((int @@ Box.x_left clip) + 1)

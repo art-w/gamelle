@@ -20,3 +20,16 @@ let project { scale; translate = tr; rotate } p =
   let c, s = (scale *. cos rotate, scale *. sin rotate) in
   let p = Point.v ((c *. x) -. (s *. y)) ((s *. x) +. (c *. y)) in
   Point.(p + tr)
+
+let inv_project { scale; translate = tr; rotate } p =
+  let rotate = -.rotate in
+  let scale = 1.0 /. scale in
+  let p = Point.(p - tr) in
+  let x, y = (p.x, p.y) in
+  let c, s = (scale *. cos rotate, scale *. sin rotate) in
+  Point.v ((c *. x) -. (s *. y)) ((s *. x) +. (c *. y))
+
+let project_box t box =
+  let top_left = project t (Box.top_left box) in
+  let size = Size.(t.scale * Box.size box) in
+  Box.v top_left size

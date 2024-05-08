@@ -11,7 +11,6 @@ open Geometry
 type 'a abstract_io = {
   view : Transform.t;
   event : Events_backend.t;
-  centering_translation : vec;
   clip : box option;
   clip_events : bool;
   z_index : int;
@@ -26,7 +25,6 @@ let make_io backend =
   {
     view = Transform.default;
     event = Events_backend.default;
-    centering_translation = Vec.zero;
     clip = None;
     clip_events = false;
     z_index = 0;
