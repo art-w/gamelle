@@ -93,3 +93,16 @@ let update_mouse t =
     else { t with keypressed = remove `click_right t.keypressed }
   in
   { t with mouse_x = float x; mouse_y = float y }
+
+let update ~clock previous =
+  let t = reset ~now:clock previous in
+  let e = Sdl.Event.create () in
+  let rec update_poll t =
+    if Sdl.poll_event (Some e) then
+      let t = update t e in
+      let t = update_mouse t in
+      update_poll t
+    else t
+  in
+  let t = update_poll t in
+  update_updown previous t

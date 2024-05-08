@@ -12,6 +12,7 @@
   text
   sound
   window
+  state
   replay)
  (libraries
   gamelle_common

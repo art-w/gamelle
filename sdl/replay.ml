@@ -35,34 +35,24 @@ let draw_progress ~io () =
   Draw.fill_rect ~io ~color:Color.red
     (Box2.v (V2.v 10.0 10.0) (Size2.v (percent *. (width -. 20.0)) 30.0))
 
-let replay ~backend ~events ~latest_io current_run =
+let replay ~backend ~events ~latest_io =
   let lst = !must_replay in
   if lst = [] then false
   else
-    match !current_run with
-    | No_run -> invalid_arg "No game currently running"
-    | Run { state; update; clean } ->
-        let t0 = now () in
-        let to_clean = ref clean in
-        let rec go ~state = function
-          | [] ->
-              must_replay := [];
-              state
-          | (_, 0) :: es -> go ~state es
-          | rest when now () -. t0 > max_refresh_time ->
-              must_replay := List.rev rest;
-              draw_progress ~io:!latest_io ();
-              state
-          | (e, count) :: es ->
-              let e = { e with clock = !clock } in
-              events := e;
-              add e;
-              let io = { (Gamelle_common.make_io backend) with event = e } in
-              latest_io := io;
-              let state = update ~io state in
-              to_clean := List.rev_append !(io.clean) !to_clean;
-              go ~state ((e, count - 1) :: es)
-        in
-        let state = go ~state (List.rev lst) in
-        current_run := Run { state; update; clean = !to_clean };
-        true
+    let t0 = now () in
+    let rec go = function
+      | [] -> must_replay := []
+      | (_, 0) :: es -> go es
+      | rest when State.crashed () || now () -. t0 > max_refresh_time ->
+          must_replay := List.rev rest
+      | (e, count) :: es ->
+          let e = { e with clock = !clock } in
+          events := e;
+          add e;
+          let io = { (Gamelle_common.make_io backend) with event = e } in
+          latest_io := io;
+          State.unsafe_update ~io;
+          go ((e, count - 1) :: es)
+    in
+    go (List.rev lst);
+    true

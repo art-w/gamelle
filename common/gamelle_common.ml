@@ -47,5 +47,4 @@ let finalize_frame ~io =
   !(io.draws)
   |> List.stable_sort (fun (z, _) (z', _) -> -Int.compare z z')
   |> List.rev
-  |> List.iter (fun (_z, f) -> f ());
-  io.draws := []
+  |> List.iter (fun (_z, f) -> f ())

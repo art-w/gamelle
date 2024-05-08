@@ -10,9 +10,16 @@ module Tsdl_image = Tsdl_image.Image
 module Ttf = Tsdl_ttf.Ttf
 module Window = Window
 
-let lock = Mutex.create ()
-let current_run = ref No_run
 let desired_time = 1.0 /. 60.0
+
+let await_event () =
+  Sdl.flush_events min_int max_int;
+  let run = State.get_current_run () in
+  while
+    (not (Sdl.wait_event_timeout None 20)) && run == State.get_current_run ()
+  do
+    ()
+  done
 
 let run () =
   let& () = Sdl.init Sdl.Init.(video + audio) in
@@ -41,8 +48,6 @@ let run () =
     { window; renderer; font = Font.default; font_size = Font.default_size }
   in
 
-  let& _ = Sdl.show_cursor false in
-
   let t0 = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
   let start_time = t0 in
   let now_prev = ref t0 in
@@ -60,57 +65,27 @@ let run () =
     now := t0;
 
     let was_replayed =
-      mutex_protect lock @@ fun () ->
-      Replay.replay ~backend ~events ~latest_io current_run
+      mutex_protect State.lock @@ fun () ->
+      Replay.replay ~backend ~events ~latest_io
     in
 
-    let previous = !events in
-    events := Events_sdl.reset ~now:!Replay.clock !events;
     Sdl.pump_events ();
-    let has_focus =
-      (not was_replayed)
-      &&
-      let flags = Sdl.get_window_flags window in
-      Sdl.Window.(test input_focus) flags
-    in
-    if has_focus then (
-      let e = Sdl.Event.create () in
-      while Sdl.poll_event (Some e) do
-        events := Events_sdl.update !events e;
-        events := Events_sdl.update_mouse !events
-      done;
-      events := Events_backend.update_updown previous !events)
-    else if not was_replayed then (
-      Sdl.flush_events min_int max_int;
-      let run = !current_run in
-      while
-        (not (Sdl.wait_event_timeout None 20))
-        && mutex_protect lock (fun () -> run == !current_run)
-      do
-        ()
-      done;
-      (* let& () = Sdl.wait_event None in *)
-      ());
+    let event = Events_sdl.update ~clock:!Replay.clock !latest_io.event in
+    let has_focus = Window.has_focus window in
 
-    mutex_protect lock (fun () ->
-        match !current_run with
-        | No_run -> invalid_arg "No game currently running"
-        | Run { state; update; clean } when has_focus ->
-            Replay.add !events;
-            let io = { (make_io backend) with event = !events } in
-            latest_io := io;
-            let state = update ~io state in
-            let clean = List.rev_append !(io.clean) clean in
-            current_run := Run { state; update; clean }
-        | Run _ -> ());
+    if (not was_replayed) && (not (State.crashed ())) && has_focus then (
+      let io = { (make_io backend) with event } in
+      latest_io := io;
+      Replay.add event;
+      State.update_frame ~io);
 
-    (let io = !latest_io in
-     let draw_calls = !(io.draws) in
-     Window.finalize_frame ~io;
-     io.draws := draw_calls;
-     Sdl.render_present renderer);
+    if Events_backend.is_pressed event `quit then raise Exit;
 
-    if Events_backend.is_pressed !events `quit then raise Exit;
+    Window.finalize_frame ~io:!latest_io;
+    Sdl.render_present renderer;
+
+    if State.crashed () || ((not has_focus) && not was_replayed) then
+      await_event ();
 
     let now = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
     let frame_elapsed = now -. t0 in
@@ -122,26 +97,11 @@ let run () =
     loop ()
   in
   (try loop () with Exit -> ());
-  (match !current_run with
-  | No_run -> assert false
-  | Run { clean; _ } ->
-      List.iter (fun fn -> fn ()) clean;
-      current_run := No_run);
+  State.clean ();
   Tsdl_mixer.Mixer.close_audio ();
   Tsdl_mixer.Mixer.quit ();
   Tsdl_image.quit ();
   Sdl.destroy_renderer renderer;
   Sdl.destroy_window window
 
-let run state update =
-  Mutex.lock lock;
-  let prev = !current_run in
-  current_run := Run { state; update; clean = [] };
-  match prev with
-  | No_run ->
-      Mutex.unlock lock;
-      run ()
-  | Run { clean; _ } ->
-      List.iter (fun fn -> fn ()) clean;
-      Replay.reload ();
-      Mutex.unlock lock
+let run state update = State.run state update ~start:run ~reload:Replay.reload

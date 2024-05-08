@@ -22,18 +22,14 @@ type music = (io, Mixer.music) Delayed.t
 
 let load_music binstring =
   Delayed.make @@ fun ~io ->
-  Format.printf "load musique@.";
   let rw = Sdl_buffer.load ~io binstring in
   let& music = Mixer.load_mus_rw (Sdl_buffer.get rw) 1 in
   let _ = Sys.opaque_identity rw in
   music
 
 let play_music ~io music =
-  Format.printf "play_music@.";
   let music = Delayed.force ~io music in
-  Format.printf "play_music: loaded@.";
   let& _ = Tsdl_mixer.Mixer.play_music music (-1) in
-  Format.printf "play_music: OK@.";
   ()
 
 type t = { sound : sound; music : music }

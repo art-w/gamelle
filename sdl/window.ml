@@ -24,3 +24,7 @@ let finalize_frame ~io =
   let& () = Sdl.set_render_draw_color io.backend.renderer 0 0 0 255 in
   let& () = Sdl.render_clear io.backend.renderer in
   Gamelle_common.finalize_frame ~io
+
+let has_focus window =
+  let flags = Sdl.get_window_flags window in
+  Sdl.Window.(test input_focus) flags

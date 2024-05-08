@@ -100,6 +100,7 @@ let watch ~lock cmxs_file =
   ()
 
 let run cmxs_file =
+  Printexc.record_backtrace true;
   let lock = Mutex.create () in
   Mutex.lock lock;
   let init = ref true in
