@@ -55,8 +55,6 @@ let () =
 
 (** {2 Linear Algebra} *)
 
-(** Gamelle extends the {!Gg} maths library. *)
-
 module Color : sig
   (** Colors. *)
 
@@ -86,29 +84,20 @@ module Color : sig
   val black : t
 end
 
-module Transform : sig
-  (** Rotations, scaling, translations. *)
-
-  type t
-
-  val default : t
-  val translate : Gg.v2 -> t -> t
-  val scale : float -> t -> t
-  val rotate : float -> t -> t
-  val project : t -> Gg.p2 -> Gg.p2
-end
+type xy = { x : float; y : float }
+(** The type of points and vectors: [x] and [y] coordinates. *)
 
 module Point : sig
   (** Points: [x] and [y] positions in 2D. *)
 
-  type t = Gg.p2
+  type t = xy
   (** The type of positions. *)
 
   val v : float -> float -> t
   (** [v x y] returns a point at coordinates [x] and [y]. *)
 
-  val o : t
-  (** [o] is the point at the zero origin [v 0.0 0.0] *)
+  val zero : t
+  (** [zero] is the point at the origin [v 0.0 0.0] *)
 
   (** {2 Accessors} *)
 
@@ -130,7 +119,7 @@ end
 module Vec : sig
   (** Vectors: directions in 2D. *)
 
-  type t = Gg.v2
+  type t = xy
   (** The type of directional vectors. *)
 
   val v : float -> float -> t
@@ -178,7 +167,7 @@ end
 module Size : sig
   (** Sizes: [width] and [height] dimensions. *)
 
-  type t = Gg.size2
+  type t = xy
   (** The type of sizes in 2D. *)
 
   val v : float -> float -> t
@@ -186,11 +175,11 @@ module Size : sig
 
   (** {2 Accessors} *)
 
-  val w : t -> float
-  (** [w s] is the width of [s]. *)
+  val width : t -> float
+  (** [width s] is the width of [s]. *)
 
-  val h : t -> float
-  (** [h s] is the height of [s]. *)
+  val height : t -> float
+  (** [height s] is the height of [s]. *)
 end
 
 module Segment : sig
@@ -222,7 +211,7 @@ end
 module Box : sig
   (** Axis-aligned bounding boxes. *)
 
-  type t = Gg.box2
+  type t
   (** The type of axis-aligned bounding boxes (rectangles without a rotation). *)
 
   val v : Point.t -> Size.t -> t
@@ -241,11 +230,20 @@ module Box : sig
 
   (** {2 Accessors} *)
 
-  val o : t -> Point.t
-  (** [o b] returns the top-left point of the box [b]. *)
-
   val size : t -> Size.t
   (** [size b] returns the dimension of the box [b]. *)
+
+  val top_left : t -> Point.t
+  (** [top_left b] returns the top-left point of the box [b]. *)
+
+  val top_right : t -> Point.t
+  (** [top_right b] returns the top-right point of the box [b]. *)
+
+  val bottom_left : t -> Point.t
+  (** [bottom_left b] returns the bottom-left point of the box [b]. *)
+
+  val bottom_right : t -> Point.t
+  (** [bottom_right b] returns the bottom-right point of the box [b]. *)
 
   val x_left : t -> float
   (** [x_left b] is the left-most [x] coordinate of the box [b]. *)
@@ -276,6 +274,8 @@ module Box : sig
 
   val bottom : t -> Segment.t
   (** [bottom b] returns the bottom segment of the box [b]. *)
+
+  (** {2 Collisions} *)
 
   val mem : Point.t -> t -> bool
   (** [mem pt b] returns [true] if the point [pt] lies inside the box [b], [false] otherwise. *)
@@ -548,7 +548,7 @@ Examples:
 {[
 draw_string ~io "Hello World" ~at:(Input.mouse_pos ~io) ;
 draw_string ~io ~color:Color.red ~at:(Point.v 200. 100.) "Bloody!" ;
-draw_string ~io ~at:Point.o "Why so serious?" ~font:Assets.comic_sans ~size:50 ;
+draw_string ~io ~at:Point.zero "Why so serious?" ~font:Assets.comic_sans ~size:50 ;
 ]}
 
  *)
@@ -626,8 +626,13 @@ end
 module Ui : sig
   (** Graphical user interface: buttons, checkboxes, text inputs. *)
 
-  include Ui.S with type io := io
   (** @inline *)
+  include
+    Ui.S
+      with type io := io
+       and type point := Point.t
+       and type size := Size.t
+       and type box := Box.t
 end
 
 (** {1 Camera} *)
@@ -718,7 +723,7 @@ Gamelle.run 0. @@ fun ~io last_click ->
 let now = clock ~io in
 let last_click = if Input.is_up ~io `click_left then now else last_click in
 let elapsed = now -. last_click in
-draw_string ~io ~at:Point.o (Printf.sprintf "Time since clicked: %fs" elapsed);
+draw_string ~io ~at:Point.zero (Printf.sprintf "Time since clicked: %fs" elapsed);
 last_click
 ]}
 
@@ -731,10 +736,9 @@ Example:
 
 {[
 Gamelle.run (Point.v 200. 200., Vec.zero) @@ fun ~io (position, velocity) ->
-let acceleration = Vec.v 0. 9.81 in
-(* gravity *)
-let velocity = Vec.(velocity + (dt ~io * acceleration)) in
-let position = Vec.(position + (dt ~io * velocity)) in
+let acceleration = Vec.v 0. 9.81 in (* gravity *)
+let velocity = Vec.(velocity + dt ~io * acceleration) in
+let position = Vec.(position + dt ~io * velocity) in
 Circle.draw ~io (Circle.v position 20.0);
 (position, velocity)
 ]}

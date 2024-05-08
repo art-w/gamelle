@@ -1,22 +1,41 @@
-open Gg
-include Box2
+open Xy
 
-let top box = Segment.v (tl_pt box) (tr_pt box)
-let left box = Segment.v (tl_pt box) (bl_pt box)
-let right box = Segment.v (tr_pt box) (br_pt box)
-let bottom box = Segment.v (bl_pt box) (br_pt box)
+type t = { tl : Point.t; size : Size.t }
+
+let v tl size = { tl; size }
+
+let v_center center size =
+  let half = Size.(0.5 * size) in
+  { tl = Point.(center - half); size }
+
+let center t = Point.(t.tl + (0.5 * t.size))
+let size t = t.size
+let zero = { tl = Point.zero; size = Size.zero }
+let top_left t = t.tl
+let top_right t = Point.(t.tl + v (Size.width t.size) 0.0)
+let bottom_left t = Point.(t.tl + v 0.0 (Size.height t.size))
+let bottom_right t = Point.(t.tl + t.size)
+let top box = Segment.v (top_left box) (top_right box)
+let left box = Segment.v (top_left box) (bottom_left box)
+let right box = Segment.v (top_right box) (bottom_right box)
+let bottom box = Segment.v (bottom_left box) (bottom_right box)
+let height box = Size.height box.size
+let width box = Size.width box.size
+let translate vec box = { tl = Point.translate vec box.tl; size = box.size }
+let v_corners p1 p2 = v p1 Vec.(p2 - p1)
+let x_left t = t.tl.x
+let x_right t = t.tl.x +. t.size.x
+let x_middle t = t.tl.x +. (t.size.x /. 2.0)
+let y_top t = t.tl.y
+let y_bottom t = t.tl.y +. t.size.y
+let y_middle t = t.tl.y +. (t.size.y /. 2.0)
+
+let mem pt box =
+  pt.x >= box.tl.x && pt.y >= box.tl.y
+  && pt.x <= box.tl.x +. box.size.x
+  && pt.y <= box.tl.y +. box.size.y
 
 let random_mem box =
-  let x = Random.float (Box2.w box) +. Box2.ox box
-  and y = Random.float (Box2.h box) +. Box2.oy box in
+  let x = Random.float (width box) +. x_left box
+  and y = Random.float (height box) +. y_top box in
   Point.v x y
-
-let translate box vec = v Vec.(o box + vec) (size box)
-let centered b1 b2 = v_mid (mid b2) (size b1)
-let v_corners p1 p2 = v p1 Vec.(p2 - p1)
-let x_left = ox
-let x_right b = ox b +. w b
-let x_middle b = ox b +. (w b /. 2.0)
-let y_top = oy
-let y_bottom b = oy b +. h b
-let y_middle b = oy b +. (h b /. 2.0)

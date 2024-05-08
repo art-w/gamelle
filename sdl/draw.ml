@@ -22,13 +22,13 @@ let draw_clip ~io renderer f =
   let* () =
     Option.map
       (fun clip ->
-        let clip = Box.translate clip io.centering_translation in
+        let clip = Box.translate io.centering_translation clip in
         let clip_rect =
           Sdl.Rect.create
-            ~x:((int @@ Box.minx clip) + 1)
-            ~y:((int @@ Box.miny clip) + 1)
-            ~w:((int @@ Box.w clip) - 1)
-            ~h:((int @@ Box.h clip) - 1)
+            ~x:((int @@ Box.x_left clip) + 1)
+            ~y:((int @@ Box.y_top clip) + 1)
+            ~w:((int @@ Box.width clip) - 1)
+            ~h:((int @@ Box.height clip) - 1)
         in
         Sdl.render_set_clip_rect renderer (Some clip_rect))
       clip
@@ -42,10 +42,10 @@ let draw_clip ~io renderer f =
       let win = Window.box ~io in
       let clip_rect =
         Sdl.Rect.create
-          ~x:(int @@ Box.minx win)
-          ~y:(int @@ Box.miny win)
-          ~w:(int @@ Box.w win)
-          ~h:(int @@ Box.h win)
+          ~x:(int @@ Box.x_left win)
+          ~y:(int @@ Box.y_top win)
+          ~w:(int @@ Box.width win)
+          ~h:(int @@ Box.height win)
       in
       Sdl.render_set_clip_rect renderer (Some clip_rect)
     else Ok ()
@@ -116,10 +116,10 @@ let fill_poly ~io ?color poly =
   ()
 
 let fill_rect ~io ?color rect =
-  let p0 = Box.tl_pt rect
-  and p1 = Box.tr_pt rect
-  and p2 = Box.br_pt rect
-  and p3 = Box.bl_pt rect in
+  let p0 = Box.top_left rect
+  and p1 = Box.top_right rect
+  and p2 = Box.bottom_right rect
+  and p3 = Box.bottom_left rect in
   let pts = Polygon.v [ p0; p1; p2; p3 ] in
   fill_poly ~io ?color pts
 

@@ -3,6 +3,7 @@ open Gamelle_backend
 
 type bitmap := Bitmap_.t
 type font := Gamelle_backend.Font.t
+type xy = Xy.t = { x : float; y : float }
 
 module Color : sig
   include module type of Color
@@ -12,13 +13,13 @@ end
 type color = Color.t
 
 module Point : sig
-  include module type of Point
+  include module type of Point with type t = xy
 end
 
 type point = Point.t
 
 module Vec : sig
-  include module type of Vec
+  include module type of Vec with type t = xy
 end
 
 type vec = Vec.t
@@ -31,7 +32,7 @@ end
 
 type segment = Segment.t
 
-module Size : module type of Size
+module Size : module type of Size with type t = xy
 
 type size = Size.t
 

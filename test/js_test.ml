@@ -76,7 +76,7 @@ let update ~io { x; y; vx; vy; _ } =
     ~at:Vec.zero;
 
   Segment.draw ~io ~color:(Color.v 1.0 1.0 1.0 0.2)
-    (Segment.v Point.o (Window.size ~io));
+    (Segment.v Point.zero (Window.size ~io));
 
   Circle.fill
     ~io:(View.translate (Vec.v mx my) io)
@@ -92,7 +92,7 @@ let update ~io { x; y; vx; vy; _ } =
   in
   Box.fill ~io ~color:blue (Box.v (Point.v 0. 0.) (Size.v 75. 59.));
   Box.draw ~io ~color:red (Box.v (Point.v 0. 0.) (Size.v 75. 59.));
-  draw ~io img ~at:Point.o;
+  draw ~io img ~at:Point.zero;
   Segment.draw ~io ~color:red (Segment.v (Point.v 0. 0.) (Point.v 75. 59.));
   Polygon.fill
     ~io:(View.translate (Vec.v 5. 5.) io)

@@ -52,7 +52,7 @@ let default_size = Gamelle_common.Font.default_size
 let draw_at ~io ?color ?font ?size ~at text =
   let font_name, size = get_font ~io font size in
   Draw.set_color ~io color;
-  let x, y = Gg.V2.to_tuple at in
+  let x, y = Point.to_tuple at in
   C.set_font io.backend.ctx
     (Jstr.of_string (string_of_int size ^ "px " ^ font_name));
   let text = Jstr.of_string text in

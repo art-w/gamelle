@@ -11,27 +11,26 @@ let destruct_state s = match s with VScroll s -> s | _ -> raise IdTypeMismatch
 let scroll_bar_width = 10.
 
 let size ~ts:_ ~children_size { height; f = _ } =
-  let height = height in
   let width =
     (* Float.max space_available *)
-    Size.w children_size +. scroll_bar_width
+    Size.width children_size +. scroll_bar_width
   in
-  Size.(v width height)
+  Size.v width height
 
 let render ~io { height = _; f = _ } state box =
-  let height = Box.h box in
+  let height = Box.height box in
   let { size = _; offset; grasped = _; real_height } = state in
   let scroll_rail_box =
     Box.v
-      (Point.v (Box.maxx box -. scroll_bar_width) (Box.miny box))
+      (Point.v (Box.x_right box -. scroll_bar_width) (Box.y_top box))
       (Size.v scroll_bar_width height)
   in
   let scroll_bar_height = height *. height /. real_height in
   let scroll_bar_box =
     Box.v
       (Point.v
-         (Box.maxx box -. scroll_bar_width)
-         ((offset *. height /. state.real_height) +. Box.miny box))
+         (Box.x_right box -. scroll_bar_width)
+         ((offset *. height /. state.real_height) +. Box.y_top box))
       (Size.v scroll_bar_width scroll_bar_height)
   in
   Box.draw ~io ~color:fg box;
@@ -40,11 +39,11 @@ let render ~io { height = _; f = _ } state box =
 
 let update ~io ~children_size box state { height = _; f = _ } =
   let { size; offset; grasped; real_height = _ } = state in
-  let height = Box.h box in
-  let real_height = Size.h children_size in
+  let height = Box.height box in
+  let real_height = Size.height children_size in
   let scroll_rail_box =
     Box.v
-      (Point.v (Box.maxx box -. scroll_bar_width) (Box.miny box))
+      (Point.v (Box.x_right box -. scroll_bar_width) (Box.y_top box))
       (Size.v scroll_bar_width height)
   in
   let scroll_bar_height = height *. height /. real_height in
@@ -62,7 +61,7 @@ let update ~io ~children_size box state { height = _; f = _ } =
     if grasped then
       max_offset
       *. (height /. (height -. scroll_bar_height))
-      *. (Point.y mouse_pos -. Box.miny scroll_rail_box)
+      *. (mouse_pos.y -. Box.y_top scroll_rail_box)
       /. height
       -. (height /. 2.)
     else if Event.is_pressed ~io `wheel then

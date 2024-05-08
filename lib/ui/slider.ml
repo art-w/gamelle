@@ -16,19 +16,19 @@ let size ~ts:_ { w; min = _; max = _ } =
 
 let render ~io { w = _; min; max } state box =
   let radius = 8. in
-  let w = Box.w box -. (2. *. padding) in
+  let w = Box.width box -. (2. *. padding) in
   let sval = state.v in
-  let line = Box.v_mid (Box.mid box) (Size.v w 4.) in
+  let line = Box.v_center (Box.center box) (Size.v w 4.) in
   Box.fill ~io ~color:lowlight line;
   let pos =
     radius +. ((sval -. min) *. (w -. (2. *. radius)) /. (max -. min))
   in
-  Box.fill ~io ~color:highlight (Box.v (Box.o line) (Size.v pos 4.));
+  Box.fill ~io ~color:highlight (Box.v (Box.top_left line) (Size.v pos 4.));
   Circle.fill ~io ~color:highlight
-    (Circle.v (Point.v (Box.minx line +. pos) (Box.midy line)) radius)
+    (Circle.v (Point.v (Box.x_left line +. pos) (Box.y_middle line)) radius)
 
 let update ~io { w = _; min; max } state box =
-  let w = Box.w box -. (2. *. padding) in
+  let w = Box.width box -. (2. *. padding) in
   let { v; grasped } = state in
   let grasped =
     if grasped then
@@ -39,7 +39,7 @@ let update ~io { w = _; min; max } state box =
   let v =
     if grasped then
       Float.max min @@ Float.min max
-      @@ ((Vec.x (Event.mouse_pos ~io) -. Box.minx box) *. (max -. min) /. w)
+      @@ (((Event.mouse_pos ~io).x -. Box.x_left box) *. (max -. min) /. w)
          +. min
     else v
   in

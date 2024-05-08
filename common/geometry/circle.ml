@@ -21,8 +21,8 @@ let intersections { center = c0; radius = r0 } { center = c1; radius = r1 } =
     let d = sqrt dist2 in
     let l = (square r0 -. square r1 +. dist2) /. (2.0 *. d) in
     let h = sqrt (square r0 -. square l) in
-    let x1, y1 = Vec.to_tuple c0 in
-    let x2, y2 = Vec.to_tuple c1 in
+    let x1, y1 = (c0.x, c0.y) in
+    let x2, y2 = (c1.x, c1.y) in
     let ld = l /. d in
     let hd = h /. d in
     let base_x = (ld *. (x2 -. x1)) +. x1 in

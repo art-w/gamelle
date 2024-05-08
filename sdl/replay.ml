@@ -1,5 +1,5 @@
-open Gg
 open Common
+open Gamelle_common.Geometry
 
 let clock = ref 0
 let replay_events = ref []
@@ -29,11 +29,11 @@ let draw_progress ~io () =
   assert (count_done = !clock);
   let total = count_done + count_todo in
   let percent = if total = 0 then 1.0 else float count_done /. float total in
-  let width = Box2.w (Window.box ~io) in
+  let width = Box.width (Window.box ~io) in
   Gamelle_common.z ~io @@ fun ~io ->
-  Draw.fill_rect ~io ~color:Color.black (Box2.v V2.zero (Size2.v width 50.0));
+  Draw.fill_rect ~io ~color:Color.black (Box.v Point.zero (Size.v width 50.0));
   Draw.fill_rect ~io ~color:Color.red
-    (Box2.v (V2.v 10.0 10.0) (Size2.v (percent *. (width -. 20.0)) 30.0))
+    (Box.v (Point.v 10.0 10.0) (Size.v (percent *. (width -. 20.0)) 30.0))
 
 let replay ~backend ~events ~latest_io =
   let lst = !must_replay in

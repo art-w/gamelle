@@ -44,7 +44,7 @@ let main ~io st =
   Box.fill ~io ~color:Color.black (Box.v (Point.v 0. 0.) (Point.v 500. 500.));
   Window.show_cursor ~io true;
   let io = View.scale st.scale io in
-  draw ~io st.bmp ~at:Point.o;
+  draw ~io st.bmp ~at:Point.zero;
   Option.iter
     (fun pos ->
       let rect = compute_rect (pos, st.mouse) in
@@ -63,7 +63,7 @@ let print_rects ~file { rects; _ } =
   List.iter
     (fun poss ->
       let rect = compute_rect poss in
-      let x, y = Vec.to_tuple (Box.o rect) in
+      let x, y = Vec.to_tuple (Box.top_left rect) in
       let w, h = Vec.to_tuple (Box.size rect) in
       Printf.fprintf oc "%.0f %.0f %.0f %.0f\n%!" x y w h)
     rects;

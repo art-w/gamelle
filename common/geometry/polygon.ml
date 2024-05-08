@@ -1,3 +1,5 @@
+open Xy
+
 type t = Point.t list
 
 let v li = li
@@ -11,12 +13,10 @@ let center = function
             let area6 = 3.0 *. area in
             Vec.v (cx /. area6) (cy /. area6)
         | p0 :: p1 :: ps ->
-            let x0, y0 = Vec.to_tuple p0 in
-            let x1, y1 = Vec.to_tuple p1 in
-            let delta = (x0 *. y1) -. (x1 *. y0) in
+            let delta = Vec.cross p0 p1 in
             go ~area:(area +. delta)
-              ~cx:(cx +. ((x0 +. x1) *. delta))
-              ~cy:(cy +. ((y0 +. y1) *. delta))
+              ~cx:(cx +. ((p0.x +. p1.x) *. delta))
+              ~cy:(cy +. ((p0.y +. p1.y) *. delta))
               (p1 :: ps)
       in
       go ~area:0.0 ~cx:0.0 ~cy:0.0 (hd :: List.rev ps)
@@ -27,9 +27,7 @@ let signed_area = function
       let rec go ~area = function
         | [] | [ _ ] -> area /. 2.0
         | p0 :: p1 :: ps ->
-            let x0, y0 = Vec.to_tuple p0 in
-            let x1, y1 = Vec.to_tuple p1 in
-            let delta = (x0 *. y1) -. (x1 *. y0) in
+            let delta = Vec.cross p0 p1 in
             go ~area:(area +. delta) (p1 :: ps)
       in
       go ~area:0.0 (hd :: List.rev ps)
@@ -52,10 +50,10 @@ let bounding_box poly =
   let x_min, x_max, y_min, y_max =
     List.fold_left
       (fun (x_min, x_max, y_min, y_max) p ->
-        ( Float.min (Point.x p) x_min,
-          Float.max (Point.x p) x_max,
-          Float.min (Point.y p) y_min,
-          Float.max (Point.y p) y_max ))
+        ( Float.min p.x x_min,
+          Float.max p.x x_max,
+          Float.min p.y y_min,
+          Float.max p.y y_max ))
       (Float.infinity, Float.neg_infinity, Float.infinity, Float.neg_infinity)
       poly
   in

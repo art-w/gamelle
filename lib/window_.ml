@@ -7,7 +7,8 @@ let size ~io =
   Size.v (float w) (float h)
 
 let set_size ~io s =
-  let w = s |> Size.w |> int_of_float and h = s |> Size.h |> int_of_float in
+  let w = s |> Size.width |> int_of_float
+  and h = s |> Size.height |> int_of_float in
   io.window_size := (w, h)
 
 let box ~io = Box.v Vec.zero (size ~io)

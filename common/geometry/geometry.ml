@@ -1,3 +1,4 @@
+module Xy = Xy
 module Point = Point
 module Vec = Vec
 module Segment = Segment

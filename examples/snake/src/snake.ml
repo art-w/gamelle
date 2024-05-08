@@ -81,10 +81,10 @@ let () =
   Window.set_size ~io (Size.v (width +. 20.0) (60.0 +. width));
   Box.fill ~io ~color:Color.black (Window.box ~io);
   let io = View.translate (Vec.v 10.0 10.0) io in
-  draw_string ~io ~at:Point.o
+  draw_string ~io ~at:Point.zero
     (Printf.sprintf "Score: %i" (List.length state.snake.cells));
   let io = View.translate (Vec.v 0.0 40.0) io in
-  Box.draw ~io (Box.v Point.o (Size.v width width));
+  Box.draw ~io (Box.v Point.zero (Size.v width width));
   Box.fill ~io:(View.color Color.red io) (cell state.apple);
   List.iter (fun at -> Box.fill ~io (cell at)) state.snake.cells;
   let grey = Color.v 0.1 0.1 0.0 0.4 in

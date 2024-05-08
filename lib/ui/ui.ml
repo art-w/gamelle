@@ -89,3 +89,6 @@ let window ?(debug = false) ~io pos f =
          ()));
   if debug then ui.debug_render ();
   (r, box)
+
+module type Widget = Widget_builder.Widget
+module type Inert_widget = Widget_builder.Inert_widget

@@ -8,25 +8,25 @@ let apply_style style box size =
   let open Style in
   let h =
     match style.vertical with
-    | Center | Start | End -> Size.h size
-    | Fill -> Box.h box
+    | Center | Start | End -> Size.height size
+    | Fill -> Box.height box
   in
   let w =
     match style.horizontal with
-    | Center | Start | End -> Size.w size
-    | Fill -> Box.w box
+    | Center | Start | End -> Size.width size
+    | Fill -> Box.width box
   in
   let x =
     match style.horizontal with
-    | Start | Fill -> Box.minx box
-    | End -> Box.maxx box -. w
-    | Center -> Box.midx box -. (w /. 2.)
+    | Start | Fill -> Box.x_left box
+    | End -> Box.x_right box -. w
+    | Center -> Box.x_middle box -. (w /. 2.)
   in
   let y =
     match style.vertical with
-    | Start | Fill -> Box.miny box
-    | End -> Box.maxy box -. h
-    | Center -> Box.midy box -. (h /. 2.)
+    | Start | Fill -> Box.y_top box
+    | End -> Box.y_bottom box -. h
+    | Center -> Box.y_middle box -. (h /. 2.)
   in
   Box.v (Point.v x y) (Size.v w h)
 
@@ -126,8 +126,8 @@ let debug_box ~ui ~color box =
 let renderer_size ({ size; _ } : renderer) = size
 
 let aggregate_sizes ~dir sizes =
-  let ws = List.map Size.w sizes in
-  let hs = List.map Size.h sizes in
+  let ws = List.map Size.width sizes in
+  let hs = List.map Size.height sizes in
   let add s s' = s +. s' in
   let w_op, h_op = match dir with V -> (Float.max, add) | H -> (add, max) in
   Size.v (List.fold_left w_op 0. ws) (List.fold_left h_op 0. hs)
@@ -136,8 +136,8 @@ let total_size ~dir renderers =
   aggregate_sizes ~dir (List.map renderer_size renderers)
 
 let renderer_growth = function { style = { growth; _ }; _ } -> growth
-let size_dir ~dir = match dir with V -> Size.h | H -> Size.w
-let box_size_dir ~dir = match dir with V -> Box.h | H -> Box.w
+let size_dir ~dir = match dir with V -> Size.height | H -> Size.width
+let box_size_dir ~dir = match dir with V -> Box.height | H -> Box.width
 let basis_dir ~dir = match dir with V -> Vec.v 0. 1. | H -> Vec.v 1. 0.
 
 let layout_boxes ~dir box weights sizes =
@@ -152,18 +152,20 @@ let layout_boxes ~dir box weights sizes =
       List.map
         (fun min_size ->
           match dir with
-          | V -> Size.(v (Box.w box) (h min_size))
-          | H -> Size.(v (w min_size) (Box.h box)))
+          | V -> Size.(v (Box.width box) (height min_size))
+          | H -> Size.(v (width min_size) (Box.height box)))
         sizes
     else
       List.map2
         (fun min_size coeff ->
           match dir with
-          | V -> Size.(v (Box.w box) (h min_size +. (leftovers *. coeff)))
-          | H -> Size.(v (w min_size +. (leftovers *. coeff)) (Box.h box)))
+          | V ->
+              Size.(v (Box.width box) (height min_size +. (leftovers *. coeff)))
+          | H ->
+              Size.(v (width min_size +. (leftovers *. coeff)) (Box.height box)))
         sizes coeffs
   in
-  let origin = Box.o box in
+  let origin = Box.top_left box in
   let _taken, boxes =
     List.fold_left_map
       (fun space_taken child_size ->
@@ -190,7 +192,9 @@ and node_renderer ~ui ?id ~size ~style ~dir ~children_offset ~children_io
     let old_io = ui.io in
     ui.io <- children_io;
     let children_box =
-      Box.(v Vec.(o box + children_offset) Vec.(size box - size_for_self))
+      Box.v
+        Vec.(Box.top_left box + children_offset)
+        Vec.(Box.size box - size_for_self)
     in
     let children = List.rev children in
     let children_sizes = children |> List.map renderer_size in
@@ -220,7 +224,7 @@ let is_clicked ~io box =
 
 let centered_text ~io ~color ?font ?size text box =
   let text_size = Text.size ~io ?font ?size text in
-  let pos = Box.(o (v_mid (mid box) text_size)) in
+  let pos = Box.(top_left (v_center (center box) text_size)) in
   Text.draw ~io ~color ?font ?size ~at:pos text
 
 let nest_loc (ui, loc) f =

@@ -6,7 +6,13 @@ let polygon pts = Polygon pts
 
 let rect box =
   polygon
-    (Polygon.v [ Box.tl_pt box; Box.tr_pt box; Box.br_pt box; Box.bl_pt box ])
+    (Polygon.v
+       [
+         Box.top_left box;
+         Box.top_right box;
+         Box.bottom_right box;
+         Box.bottom_left box;
+       ])
 
 let translate dxy = function
   | Segment s -> Segment (Segment.translate dxy s)
@@ -105,35 +111,11 @@ let intersection_segment_circle s c =
     let pt2 = if t2 >= 0. && t2 <= 1. then [ Vec.(p0 + (t2 * d)) ] else [] in
     pt1 @ pt2
 
-let segment_intersection p q =
-  let p0, p1 = Segment.to_tuple p and q0, q1 = Segment.to_tuple q in
-  let p0_x, p0_y = Vec.to_tuple p0 in
-  let p1_x, p1_y = Vec.to_tuple p1 in
-  let p2_x, p2_y = Vec.to_tuple q0 in
-  let p3_x, p3_y = Vec.to_tuple q1 in
-  let s1_x = p1_x - p0_x in
-  let s1_y = p1_y - p0_y in
-  let s2_x = p3_x - p2_x in
-  let s2_y = p3_y - p2_y in
-  let s =
-    ((-s1_y * (p0_x - p2_x)) + (s1_x * (p0_y - p2_y)))
-    / ((-s2_x * s1_y) + (s1_x * s2_y))
-  in
-  let t =
-    ((s2_x * (p0_y - p2_y)) - (s2_y * (p0_x - p2_x)))
-    / ((-s2_x * s1_y) + (s1_x * s2_y))
-  in
-  if s >= 0.0 && s <= 1.0 && t >= 0.0 && t <= 1.0 then
-    let i_x = p0_x + (t * s1_x) in
-    let i_y = p0_y + (t * s1_y) in
-    Some (Point.v i_x i_y)
-  else None
-
 let rec intersections a b =
   match (a, b) with
   | Segment s, Circle c | Circle c, Segment s -> intersection_segment_circle s c
   | Segment p, Segment q -> (
-      match segment_intersection p q with None -> [] | Some pt -> [ pt ])
+      match Segment.intersection p q with None -> [] | Some pt -> [ pt ])
   | Circle c, Circle c' -> Circle.intersections c c'
   | Polygon pts, other | other, Polygon pts ->
       List.concat_map
@@ -149,12 +131,12 @@ let mem pt = function
   | Circle c -> Circle.mem pt c
   | Segment _ -> false
   | Polygon pts ->
-      let x, y = Vec.to_tuple pt in
+      let x, y = (pt.x, pt.y) in
       List.fold_left
         (fun inside s ->
           let p0, p1 = Segment.to_tuple s in
-          let vx0, vy0 = Vec.to_tuple p0 in
-          let vx1, vy1 = Vec.to_tuple p1 in
+          let vx0, vy0 = (p0.x, p0.y) in
+          let vx1, vy1 = (p1.x, p1.y) in
           if
             vy0 > y <> (vy1 > y)
             && x < ((vx0 - vx1) * (y - vy1) / (vy0 - vy1)) + vx1
@@ -235,17 +217,7 @@ let separation_axis a b =
   | Some n when Vec.norm2 n = 0.0 -> None
   | found -> found
 
-module Set_v2 = Set.Make (struct
-  type t = Vec.t
-
-  let eps = 1.0 /. 0.01
-  let int = int_of_float
-
-  let compare a b =
-    let ax, ay = Vec.(to_tuple (eps * a)) in
-    let bx, by = Vec.(to_tuple (eps * b)) in
-    Stdlib.compare (int ax, int ay) (int bx, int by)
-end)
+module Set_v2 = Set.Make (Vec)
 
 let best_distance (x_dist, xs) (y_dist, ys) =
   if float_equal x_dist y_dist then (x_dist, Set_v2.union xs ys)

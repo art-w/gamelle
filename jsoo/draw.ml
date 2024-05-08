@@ -30,7 +30,7 @@ let draw ~io bmp p =
 
 let fill_rect ~io ?color rect =
   transform ~io;
-  let x, y = Vec.to_tuple (Box.o rect) in
+  let x, y = Vec.to_tuple (Box.top_left rect) in
   let w, h = Vec.to_tuple (Box.size rect) in
   set_color ~io color;
   let ctx = io.backend.ctx in
@@ -38,7 +38,7 @@ let fill_rect ~io ?color rect =
 
 let draw_rect ~io ?color rect =
   transform ~io;
-  let x, y = Vec.to_tuple (Box.o rect) in
+  let x, y = Vec.to_tuple (Box.top_left rect) in
   let w, h = Vec.to_tuple (Box.size rect) in
   set_color ~io color;
   let ctx = io.backend.ctx in

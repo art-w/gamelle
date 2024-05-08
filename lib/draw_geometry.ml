@@ -1,6 +1,8 @@
 open Gamelle_common
 open Gamelle_backend
 
+type xy = Geometry.Xy.t = { x : float; y : float }
+
 module Point = struct
   include Geometry.Point
 end
@@ -91,25 +93,24 @@ module Text = struct
       ?size (text : t) =
     let pos = Vec.zero in
     let text_size = Gamelle_backend.Text.size ~io ?font ?size in
-    let limx = width +. Point.x pos in
-    let startx = Point.x pos in
+    let limx = width +. pos.x in
+    let startx = pos.x in
     let lines = split_on_char '\n' text in
-    let hline = Size.h (text_size (Text.of_string "a")) +. interline in
-    let udpate_cpos maxw cpos = (Float.max maxw (Size.w cpos), cpos) in
+    let hline = Size.height (text_size (Text.of_string "a")) +. interline in
+    let udpate_cpos maxw cpos = (Float.max maxw (Size.width cpos), cpos) in
     let print_line (maxw, cpos) line =
       let words = split_on_char ' ' line in
       let print_word (maxw, cpos) word =
         let size = text_size (word ^ of_string " ") in
-        let w = Size.w size in
+        let w = Size.width size in
         let split_word word cpos =
           let chars = chars word in
           List.fold_left
             (fun (maxw, cpos) char ->
               let size = text_size char in
-              let w = Size.w size in
+              let w = Size.width size in
               let cpos =
-                if w +. Point.x cpos >= limx then
-                  Point.v startx (Point.y cpos +. hline)
+                if w +. cpos.x >= limx then Point.v startx (cpos.y +. hline)
                 else cpos
               in
               udpate_cpos maxw Vec.(cpos + v w 0.))
@@ -117,8 +118,8 @@ module Text = struct
         in
         let maxw, cpos =
           if w >= width then split_word word cpos
-          else if w +. Point.x cpos >= limx then
-            let cpos = Point.v startx (Point.y cpos +. hline) in
+          else if w +. cpos.x >= limx then
+            let cpos = Point.v startx (cpos.y +. hline) in
             (maxw, cpos)
           else (maxw, cpos)
         in
@@ -126,10 +127,10 @@ module Text = struct
       in
 
       let maxw, cpos = List.fold_left print_word (maxw, cpos) words in
-      (maxw, Point.v startx (Point.y cpos +. hline))
+      (maxw, Point.v startx (cpos.y +. hline))
     in
     let maxw, end_pos = List.fold_left print_line (0., pos) lines in
-    Size.v maxw (Point.y end_pos)
+    Size.v maxw end_pos.y
 
   let size_multiline ~io ?width ?interline ?font ?size str =
     size_multiline_t ~io ?width ?interline ?font ?size (of_string str)
@@ -138,24 +139,23 @@ module Text = struct
       ?color ?size ~at:pos text =
     let text_size = Gamelle_backend.Text.size ~io ?font ?size in
     let draw_string = draw_t ~io ?color ?size ?font in
-    let limx = width +. Point.x pos in
-    let startx = Point.x pos in
+    let limx = width +. pos.x in
+    let startx = pos.x in
     let lines = split_on_char '\n' text in
-    let hline = Size.h (text_size (of_string "a")) +. interline in
+    let hline = Size.height (text_size (of_string "a")) +. interline in
     let print_line cpos line =
       let words = split_on_char ' ' line in
       let print_word cpos word =
         let size = text_size (word ^ of_string " ") in
-        let w = Size.w size in
+        let w = Size.width size in
         let split_word word cpos =
           let chars = chars word in
           List.fold_left
             (fun cpos char ->
               let size = text_size char in
-              let w = Size.w size in
+              let w = Size.width size in
               let cpos =
-                if w +. Point.x cpos >= limx then
-                  Point.v startx (Point.y cpos +. hline)
+                if w +. cpos.x >= limx then Point.v startx (cpos.y +. hline)
                 else cpos
               in
               draw_string char ~at:cpos;
@@ -164,8 +164,8 @@ module Text = struct
         in
         let cpos =
           if w >= width then split_word word cpos
-          else if w +. Point.x cpos >= limx then (
-            let cpos = Point.v startx (Point.y cpos +. hline) in
+          else if w +. cpos.x >= limx then (
+            let cpos = Point.v startx (cpos.y +. hline) in
             draw_string word ~at:cpos;
             cpos)
           else (
@@ -175,7 +175,7 @@ module Text = struct
         Vec.(cpos + v w 0.)
       in
       let cpos = List.fold_left print_word cpos words in
-      Point.v startx (Point.y cpos +. hline)
+      Point.v startx (cpos.y +. hline)
     in
     ignore (List.fold_left print_line pos lines);
     ()

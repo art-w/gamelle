@@ -2,6 +2,8 @@ open Draw_geometry
 open Ui_backend
 open Widget_builder
 
+type params = string
+
 let size ~io text = Text.size ~io text
 let render ~io text box = centered_text ~io ~color:fg text box
 

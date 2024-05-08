@@ -119,11 +119,6 @@ let separate a b =
       let normal = Vec.(-1.0 * unit collision) in
       Some (normal, a, b)
 
-let cross p0 p1 =
-  let a, b = Vec.to_tuple p0 in
-  let c, d = Vec.to_tuple p1 in
-  (a *. d) -. (b *. c)
-
 let contact_collision ~n ~normal ~e ~static_friction ~dynamic_friction a b
     contact_point =
   let ra = Vec.(contact_point - a.pos) in
@@ -149,8 +144,8 @@ let contact_collision ~n ~normal ~e ~static_friction ~dynamic_friction a b
     let j = j /. denom in
     let j = j /. n in
     let impulse = Vec.(j * normal) in
-    let a_rot_speed = -.a.inv_inertia *. cross ra impulse in
-    let b_rot_speed = b.inv_inertia *. cross rb impulse in
+    let a_rot_speed = -.a.inv_inertia *. Vec.cross ra impulse in
+    let b_rot_speed = b.inv_inertia *. Vec.cross rb impulse in
     let friction_impulse, a_friction_rot, b_friction_rot =
       let tangeant = Vec.(rel_velocity - (dot rel_velocity normal * normal)) in
       if Vec.(norm2 tangeant) < 0.1 then (Vec.zero, 0.0, 0.0)
@@ -171,8 +166,8 @@ let contact_collision ~n ~normal ~e ~static_friction ~dynamic_friction a b
           else -.j *. dynamic_friction
         in
         let impulse = Vec.(jt * tangeant) in
-        let a_rot_speed = -.a.inv_inertia *. cross ra impulse in
-        let b_rot_speed = b.inv_inertia *. cross rb impulse in
+        let a_rot_speed = -.a.inv_inertia *. Vec.cross ra impulse in
+        let b_rot_speed = b.inv_inertia *. Vec.cross rb impulse in
         (impulse, a_rot_speed, b_rot_speed)
     in
     Some

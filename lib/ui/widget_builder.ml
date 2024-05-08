@@ -35,7 +35,7 @@ end
 module type Inert_widget = sig
   type params
 
-  val size : ts:(string -> size) -> params -> size
+  val size : io:io -> params -> size
   val render : io:io -> params -> box -> unit
 
   val v :

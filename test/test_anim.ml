@@ -100,7 +100,7 @@ let () =
   if abs_float (r -. r') > 0.0001 then Format.printf "r=%f r'=%f@." r r';
   Circle.(fill ~io ~color:c @@ v at r);
 
-  draw_string ~io ~at:Point.o
+  draw_string ~io ~at:Point.zero
   @@ Printf.sprintf "durations: %.3f %.3f" (Anim.duration pos)
        (Anim.duration color);
 

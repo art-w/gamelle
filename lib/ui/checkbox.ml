@@ -14,15 +14,16 @@ let destruct_state s =
 
 let size ~ts text =
   let text_size = ts text in
-  let check'box'_size = Size.h text_size in
+  let check'box'_size = Size.height text_size in
   Vec.(text_size + (2. * padding_xy) + Size.v (check'box'_size +. padding) 0.)
 
 let render ~io text is_checked box =
-  let pos = Box.o box in
-  let check'box'_size = Box.h box -. (2. *. padding) in
+  let pos = Box.top_left box in
+  let check'box'_size = Box.height box -. (2. *. padding) in
   let pos = Vec.(pos + padding_y) in
   let check'box' =
-    Box.(v Vec.(o box + padding_xy) Size.(v check'box'_size check'box'_size))
+    Box.(
+      v Vec.(top_left box + padding_xy) Size.(v check'box'_size check'box'_size))
   in
   Box.fill ~io ~color:bg' box;
   Box.draw ~io ~color:fg box;
@@ -32,7 +33,7 @@ let render ~io text is_checked box =
      let ticked'box' =
        Box.(
          v
-           Vec.(o check'box' + padding_xy)
+           Vec.(top_left check'box' + padding_xy)
            Vec.(Box.size check'box' - (2. * padding_xy)))
      in
      Box.fill ~io ~color:highlight ticked'box');

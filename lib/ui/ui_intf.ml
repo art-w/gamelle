@@ -1,10 +1,14 @@
-open Gamelle_common.Geometry
+(* open Gamelle_common.Geometry *)
 
 module type S = sig
   type io
   type ui
 
   val update_loc : ui -> string -> ui
+
+  type point
+  type box
+  type size
 
   module Style : sig
     type alignment = Start | End | Center | Fill
@@ -60,11 +64,43 @@ module type S = sig
 
   val nest_loc : ui -> (unit -> 'a) -> 'a
 
+  module type Widget = sig
+    type params
+    type state
+    type return
+
+    val size : ts:(string -> size) -> params -> size
+    val render : io:io -> params -> state -> box -> unit
+    val update : io:io -> params -> state -> box -> state
+    val result : params -> state -> return
+
+    val v :
+      ui ->
+      ?id:int ->
+      ?init:return ->
+      ?size:(ts:(string -> size) -> params -> size) ->
+      ?style:Style.t ->
+      ?render:(io:io -> params -> state -> box -> unit) ->
+      params ->
+      return
+  end
+
   module Customize : sig
-    module Button = Button
-    module Checkbox = Checkbox
+    module Button :
+      Widget
+        with type params = string
+         and type state = bool
+         and type return = bool
+
+    module Checkbox :
+      Widget
+        with type params = string
+         and type state = bool
+         and type return = bool
+
     module Horizontal = Horizontal
-    module Label = Label
+
+    (* module Label : Inert_widget with type params = string *)
     module Radio = Radio
     module Slider = Slider
     module Int_slider = Int_slider

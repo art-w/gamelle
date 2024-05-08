@@ -18,8 +18,8 @@ let render ~io text _is_clicked box =
   Box.fill ~io ~color:bg' box;
   Box.draw ~io ~color:fg box;
   let text_size = Text.size ~io text in
-  let text_box = Box.(v_mid (mid box) text_size) in
-  Text.draw ~io ~color:fg ~at:(Box.o text_box) text
+  let text_box = Box.(v_center (center box) text_size) in
+  Text.draw ~io ~color:fg ~at:(Box.top_left text_box) text
 
 let update ~io _text _old_state box = is_clicked ~io box
 let result _ b = b
