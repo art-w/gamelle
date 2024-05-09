@@ -6,7 +6,7 @@ let ( ^ ) = append
 let draw ~io ?color ?font ?size ~at txt =
   transform ~io;
   set_color ~io color;
-  Font_.draw_at ~io ?font ?size (Jstr.to_string txt) ~at
+  Font_.draw_at ~io ?color ?font ?size (Jstr.to_string txt) ~at
 
 let size ~io ?font ?size txt =
   Font_.text_size ~io ?font ?size (Jstr.to_string txt)
