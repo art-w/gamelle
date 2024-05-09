@@ -58,7 +58,7 @@ let window ?(debug = false) ~io pos f =
   if not (Hashtbl.mem state id) then Hashtbl.add state id (new_state ());
   let state = ui_state ~ui in
   Hashtbl.reset state.used_ids;
-  let r = f (ui,"") in
+  let r = f (ui, "") in
   let dir = V in
   let children =
     [

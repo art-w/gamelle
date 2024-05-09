@@ -19,10 +19,7 @@ module type S = sig
 
   val window : ?debug:bool -> io:io -> point -> (ui -> 'a) -> 'a * box
   val button : ui -> ?id:int -> ?init:bool -> ?style:Style.t -> string -> bool
-
-  val checkbox :
-    ui -> ?id:int -> ?init:bool -> ?style:Style.t -> string -> bool
-
+  val checkbox : ui -> ?id:int -> ?init:bool -> ?style:Style.t -> string -> bool
   val label : ui -> ?style:Style.t -> string -> unit
   val text_area : ui -> ?style:Style.t -> ?width:float -> string -> unit
 

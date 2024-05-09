@@ -37,7 +37,9 @@ let traverse_ui =
       | [%expr fun [%ui] -> [%e? subexpr]] ->
           let args, body = extract_args subexpr in
           let loc = subexpr.pexp_loc in
-          let body = [%expr Ui.nest_loc [%e expr_ui ~loc] (fun () -> [%e body])] in
+          let body =
+            [%expr Ui.nest_loc [%e expr_ui ~loc] (fun () -> [%e body])]
+          in
           let func = build_func args body in
           let loc = e.pexp_loc in
           [%expr fun [%p pat_ui ~loc] -> [%e func]]
