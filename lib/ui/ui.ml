@@ -8,8 +8,9 @@ type t = Ui_backend.t
 
 module Style = Style
 
-type cap = t * string
+type ui = t * string
 
+let update_loc (ui, _loc) loc = (ui, loc)
 let nest_loc = nest_loc
 let button cap ?id ?init ?style text = Button.v cap ?id ?init ?style text
 
@@ -57,7 +58,7 @@ let window ?(debug = false) ~io pos f =
   if not (Hashtbl.mem state id) then Hashtbl.add state id (new_state ());
   let state = ui_state ~ui in
   Hashtbl.reset state.used_ids;
-  let r = f ui in
+  let r = f (ui,"") in
   let dir = V in
   let children =
     [

@@ -2,8 +2,9 @@ open Gamelle_common.Geometry
 
 module type S = sig
   type io
-  type t
-  type cap = t * string
+  type ui
+
+  val update_loc : ui -> string -> ui
 
   module Style : sig
     type alignment = Start | End | Center | Fill
@@ -16,21 +17,21 @@ module type S = sig
     val ( & ) : t -> t -> t
   end
 
-  val window : ?debug:bool -> io:io -> point -> (t -> 'a) -> 'a * box
-  val button : cap -> ?id:int -> ?init:bool -> ?style:Style.t -> string -> bool
+  val window : ?debug:bool -> io:io -> point -> (ui -> 'a) -> 'a * box
+  val button : ui -> ?id:int -> ?init:bool -> ?style:Style.t -> string -> bool
 
   val checkbox :
-    cap -> ?id:int -> ?init:bool -> ?style:Style.t -> string -> bool
+    ui -> ?id:int -> ?init:bool -> ?style:Style.t -> string -> bool
 
-  val label : cap -> ?style:Style.t -> string -> unit
-  val text_area : cap -> ?style:Style.t -> ?width:float -> string -> unit
+  val label : ui -> ?style:Style.t -> string -> unit
+  val text_area : ui -> ?style:Style.t -> ?width:float -> string -> unit
 
   val slider :
     ?id:int ->
     ?init:float ->
     ?style:Style.t ->
     ?width:float ->
-    cap ->
+    ui ->
     min:float ->
     max:float ->
     float
@@ -40,17 +41,17 @@ module type S = sig
     ?init:int ->
     ?style:Style.t ->
     ?width:float ->
-    cap ->
+    ui ->
     min:int ->
     max:int ->
     int
 
-  val vertical : cap -> ?style:Style.t -> (unit -> 'a) -> 'a
-  val horizontal : cap -> ?style:Style.t -> (unit -> 'a) -> 'a
-  val vscroll : cap -> ?style:Style.t -> height:float -> (unit -> 'a) -> 'a
+  val vertical : ui -> ?style:Style.t -> (unit -> 'a) -> 'a
+  val horizontal : ui -> ?style:Style.t -> (unit -> 'a) -> 'a
+  val vscroll : ui -> ?style:Style.t -> height:float -> (unit -> 'a) -> 'a
 
   val radio :
-    cap ->
+    ui ->
     ?id:int ->
     ?init:'a option ->
     ?style:Style.t ->
@@ -58,9 +59,9 @@ module type S = sig
     'a option
 
   val text_input :
-    cap -> ?id:int -> ?init:string -> ?style:Style.t -> float -> string
+    ui -> ?id:int -> ?init:string -> ?style:Style.t -> float -> string
 
-  val nest_loc : cap -> (unit -> 'a) -> 'a
+  val nest_loc : ui -> (unit -> 'a) -> 'a
 
   module Customize : sig
     module Button = Button

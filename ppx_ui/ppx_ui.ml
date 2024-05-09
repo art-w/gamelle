@@ -1,4 +1,8 @@
 open Ppxlib
+module B = Ast_builder.Default
+
+let pat_ui ~loc = B.ppat_var ~loc (Loc.make ~loc "[%ui]")
+let expr_ui ~loc = B.pexp_ident ~loc (Loc.make ~loc (Lident "[%ui]"))
 
 let ui =
   Context_free.Rule.extension
@@ -6,7 +10,9 @@ let ui =
        Ast_pattern.(pstr nil)
        (fun ~loc ~path:_ ->
          let loc_string = Format.asprintf "%a" Location.print loc in
-         [%expr ui, [%e Ast_builder.Default.(estring ~loc loc_string)]])
+         [%expr
+           Ui.update_loc [%e expr_ui ~loc]
+             [%e Ast_builder.Default.(estring ~loc loc_string)]])
 
 let rec extract_args = function
   | [%expr fun [%p? arg] -> [%e? e]] ->
@@ -31,10 +37,10 @@ let traverse_ui =
       | [%expr fun [%ui] -> [%e? subexpr]] ->
           let args, body = extract_args subexpr in
           let loc = subexpr.pexp_loc in
-          let body = [%expr Ui.nest_loc (ui, myloc) (fun () -> [%e body])] in
+          let body = [%expr Ui.nest_loc [%e expr_ui ~loc] (fun () -> [%e body])] in
           let func = build_func args body in
           let loc = e.pexp_loc in
-          [%expr fun (ui, myloc) -> [%e func]]
+          [%expr fun [%p pat_ui ~loc] -> [%e func]]
       | _ -> e
   end
 
