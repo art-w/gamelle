@@ -98,4 +98,5 @@ let run state update =
           run ~canvas state update))
       (El.as_target canvas)
   in
+  El.set_has_focus true canvas ;
   ()
