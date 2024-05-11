@@ -1,7 +1,9 @@
 open Gamelle_common.Geometry
 
+type constrain = { min : float; flex : float }
+
 module C1 = struct
-  type t = { min : float; flex : float }
+  type t = constrain
 
   let exact min = { min; flex = 0.0 }
   let zero = { min = 0.0; flex = 0.0 }
@@ -9,26 +11,59 @@ module C1 = struct
   let add cst t = { t with min = t.min +. cst }
   let concat a b = { min = a.min +. b.min; flex = a.flex +. b.flex }
   let max a b = { min = max a.min b.min; flex = max a.flex b.flex }
+
+  let rec solve space lst =
+    let used_space, total_flex =
+      List.fold_left
+        (fun (used_space, total_flex) t ->
+          if t.flex = 0.0 then (used_space +. t.min, total_flex)
+          else (used_space, total_flex +. t.flex))
+        (0.0, 0.0) lst
+    in
+    let remaining_space = space -. used_space in
+    if remaining_space <= 0.0 || total_flex = 0.0 then
+      List.map (fun t -> t.min) lst
+    else
+      let unhappy = ref 0 in
+      let lst =
+        List.map
+          (fun t ->
+            if t.flex = 0.0 then t
+            else
+              let desired = remaining_space *. t.flex /. total_flex in
+              if desired < t.min then (
+                incr unhappy;
+                { t with flex = 0.0 })
+              else t)
+          lst
+      in
+      if !unhappy = 0 then
+        List.map
+          (fun t ->
+            if t.flex = 0.0 then t.min
+            else remaining_space *. t.flex /. total_flex)
+          lst
+      else solve space lst
 end
 
 type h = C1.t * (Box.t -> unit)
 type t = C1.t * (float -> h)
 (* width constraint, then height constraint, then render *)
 
-let width ?(min = 0.0) ?(flex = 0.0) fn : t = ({ C1.min; flex }, fn)
-let height ?(min = 0.0) ?(flex = 0.0) fn : h = ({ C1.min; flex }, fn)
+let width ?(min = 0.0) ?(flex = 0.0) fn : t = ({ min; flex }, fn)
+let height ?(min = 0.0) ?(flex = 0.0) fn : h = ({ min; flex }, fn)
 
 let solve ?(width = fun w -> w) ?(height = fun h -> h) layout =
-  let { C1.min = w; _ }, fn = layout in
+  let { min = w; _ }, fn = layout in
   let w = max w (width w) in
-  let { C1.min = h; _ }, fn = fn w in
+  let { min = h; _ }, fn = fn w in
   let h = max h (height h) in
   fn (Box.v Point.zero (Size.v w h))
 
 let v ?(min_width = 0.0) ?(flex_width = 0.0) ?(min_height = 0.0)
     ?(flex_height = 0.0) fn =
-  ( { C1.min = min_width; flex = flex_width },
-    fun _ -> ({ C1.min = min_height; flex = flex_height }, fn) )
+  ( { min = min_width; flex = flex_width },
+    fun _ -> ({ min = min_height; flex = flex_height }, fn) )
 
 let fixed ?(width = 0.0) ?(height = 0.0) fn =
   (C1.exact width, fun _ -> (C1.exact height, fn))
@@ -53,15 +88,13 @@ let horizontal lst =
   in
   ( width,
     fun actual_width ->
-      let inv_flex = if width.flex = 0.0 then 1.0 else 1.0 /. width.flex in
-      let remaining_space = max 0.0 (actual_width -. width.C1.min) in
+      let widths = C1.solve actual_width (List.map fst lst) in
       let height, rev_lst =
-        List.fold_left
-          (fun (acc_height, rev_lst) (w, fn) ->
-            let w = w.C1.min +. (remaining_space *. w.C1.flex *. inv_flex) in
+        List.fold_left2
+          (fun (acc_height, rev_lst) (_, fn) w ->
             let h, fn = fn w in
             (C1.max acc_height h, (w, fn) :: rev_lst))
-          (C1.zero, []) lst
+          (C1.zero, []) lst widths
       in
       let lst = List.rev rev_lst in
       ( height,
@@ -96,23 +129,16 @@ let vertical lst =
       let lst = List.rev rev_lst in
       ( height,
         fun box ->
-          let inv_flex =
-            if height.flex = 0.0 then 1.0 else 1.0 /. height.flex
-          in
-          let remaining_space = max 0.0 (Box.height box -. height.C1.min) in
+          let heights = C1.solve (Box.height box) (List.map fst lst) in
           let _ =
-            List.fold_left
-              (fun box (h, fn) ->
-                let h =
-                  h.C1.min +. (remaining_space *. h.C1.flex *. inv_flex)
-                in
-                fn (Box.v (Box.top_left box) (Size.v actual_width h));
-
+            List.fold_left2
+              (fun box (_, fn) h ->
+                fn (Box.v (Box.top_left box) (Size.v (Box.width box) h));
                 let offset = Size.v 0.0 h in
                 Box.v
                   Point.(Box.top_left box + offset)
                   Size.(Box.size box - offset))
-              box lst
+              box lst heights
           in
           () ) )
 
@@ -154,10 +180,12 @@ let over lst =
       let lst = List.rev rev_lst in
       (height, fun box -> List.iter (fun fn -> fn box) lst) )
 
-let padded p = function
-  | [] -> empty ()
-  | [ single ] -> pad p single
-  | _ -> invalid_arg "Layout.padded"
+let reshape ?(width = fun t -> t) ?(height = fun t -> t) layout =
+  let w_constraint, fn = layout in
+  ( width w_constraint,
+    fun actual_width ->
+      let h_constraint, fn = fn actual_width in
+      (height h_constraint, fn) )
 
 let vclip height layout =
   let w_constraint, fn = layout in
@@ -168,8 +196,7 @@ let vclip height layout =
         fun box ->
           let box =
             Box.v (Box.top_left box)
-              (Size.v (Box.width box)
-                 (max h_constraint.C1.min (Box.height box)))
+              (Size.v (Box.width box) (max h_constraint.min (Box.height box)))
           in
           fn box ) )
 
@@ -180,8 +207,8 @@ let center layout =
       let h, fn = fn actual_width in
       ( C1.max h C1.flex,
         fun box ->
-          let width = if w.C1.flex = 0.0 then w.C1.min else Box.width box in
-          let height = if h.C1.flex = 0.0 then h.C1.min else Box.height box in
+          let width = if w.flex = 0.0 then w.min else Box.width box in
+          let height = if h.flex = 0.0 then h.min else Box.height box in
           let box = Box.v_center (Box.center box) (Size.v width height) in
           fn box ) )
 

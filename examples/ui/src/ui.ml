@@ -33,10 +33,10 @@ let () =
     let open Ui in
     window ~io
       ~width:(fun w ->
-        wr := 1.2 *. w;
+        wr := 1.1 *. w;
         !wr)
       ~height:(fun h ->
-        hr := 1.2 *. h;
+        hr := 1.1 *. h;
         !hr)
     @@ fun [%ui] ->
     let text = text_input [%ui] text in

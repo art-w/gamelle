@@ -76,6 +76,9 @@ let parent (ui, loc) layout fn =
   ui.renderers <- self :: siblings;
   result
 
+let parent1 ui layout fn =
+  parent ui (function [ single ] -> layout single | _ -> assert false) fn
+
 let vclip (ui, _loc) ?(offset = Vec.zero) box f =
   let io = !(ui.io) in
   ui.io :=

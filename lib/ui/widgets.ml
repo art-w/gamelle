@@ -6,8 +6,9 @@ type ui = Ui_backend.ui
 let horizontal ui ?(gap = 8.0) f = parent ui (Layout.horizontal ~gap) f
 let vertical ui ?(gap = 8.0) f = parent ui (Layout.vertical ~gap) f
 let over ui f = parent ui Layout.over f
-let padding ui p f = parent ui (Layout.padded p) f
 let center ui fn = parent ui Layout.center fn
+let padding ui p f = parent1 ui (Layout.pad p) f
+let reshape ui ?width ?height fn = parent1 ui (Layout.reshape ?width ?height) fn
 
 module Boxes = Ui_backend.State (struct
   type t = Box.t
@@ -72,6 +73,7 @@ let on_click ui fn =
   fn st
 
 let button ui text =
+  reshape ui ~height:(fun h -> { h with Layout.flex = 0.1 }) @@ fun () ->
   on_click ui @@ fun state ->
   let bg =
     match state with

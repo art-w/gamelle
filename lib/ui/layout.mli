@@ -23,6 +23,11 @@ val horizontal : ?gap:float -> t list -> t
 val vertical : ?gap:float -> t list -> t
 val over : t list -> t
 val vclip : float -> t -> t
-val padded : float -> t list -> t
+val pad : float -> t -> t
 val center : t list -> t
 val solve : ?width:(float -> float) -> ?height:(float -> float) -> t -> unit
+
+type constrain = { min : float; flex : float }
+
+val reshape :
+  ?width:(constrain -> constrain) -> ?height:(constrain -> constrain) -> t -> t
