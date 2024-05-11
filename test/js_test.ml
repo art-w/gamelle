@@ -48,6 +48,15 @@ let update ~io { x; y; vx; vy; _ } =
     Window.show_cursor ~io !cursor;
     Sound.play ~io Assets.stick);
 
+  let origin = Point.v 100.0 300.0 in
+  Vec.draw ~io:(View.z_index 999 io) ~color:red ~at:origin
+    Vec.(Input.mouse_pos ~io - origin);
+
+  Size.fill ~io:(View.z_index 999 io)
+    ~color:Color.(with_alpha 0.2 blue)
+    ~at:origin
+    Vec.(Input.mouse_pos ~io - origin);
+
   let vx, vy =
     if Input.is_pressed ~io `click_left then
       let dx, dy = norm_max 100.0 (mx -. x, my -. y) in
@@ -78,10 +87,10 @@ let update ~io { x; y; vx; vy; _ } =
   Segment.draw ~io ~color:(Color.v 1.0 1.0 1.0 0.2)
     (Segment.v Point.zero (Window.size ~io));
 
-  Circle.fill
-    ~io:(View.translate (Vec.v mx my) io)
-    ~color:red
-    (Circle.v (Point.v 0.0 0.0) 10.0);
+  (* Circle.fill *)
+  (*   ~io:(View.translate (Vec.v mx my) io) *)
+  (*   ~color:red *)
+  (*   (Circle.v (Point.v 0.0 0.0) 10.0); *)
   let io = io |> View.translate (Vec.v x y) |> View.scale 3.0 in
   Box.draw ~io ~color:yellow (Box.v (Point.v 0. 0.) (Size.v 100.0 100.0));
   let io =
@@ -103,6 +112,7 @@ let update ~io { x; y; vx; vy; _ } =
   Circle.draw ~io ~color:green
     (Circle.v (Point.v (75.0 /. 2.) (59.0 /. 2.)) 10.);
   Window.set_size ~io (Size.v 800. 800.);
+
   { x; y; vx; vy; mx; my }
 
 let () = run { mx = 0.0; my = 0.0; x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 } update

@@ -4,6 +4,7 @@ val circle : Circle.t -> t
 val segment : Segment.t -> t
 val polygon : Polygon.t -> t
 val rect : Box.t -> t
+val pp : Format.formatter -> t -> unit
 
 (* *)
 val translate : Vec.t -> t -> t

@@ -99,6 +99,14 @@ module Point : sig
   val zero : t
   (** [zero] is the point at the origin [v 0.0 0.0] *)
 
+  (** {2 Draw} *)
+
+  val draw : io:io -> ?color:Color.t -> t -> unit
+  (** [draw ~io pt] draws the point [pt] on the screen. *)
+
+  val pp : Format.formatter -> t -> unit
+  (** [Format.printf "%a" pp t] pretty prints the point [t] coordinates. *)
+
   (** {2 Accessors} *)
 
   val x : t -> float
@@ -127,6 +135,14 @@ module Vec : sig
 
   val zero : t
   (** [zero] is the zero vector [v 0.0 0.0]. *)
+
+  (** {2 Draw} *)
+
+  val draw : io:io -> ?color:Color.t -> at:Point.t -> t -> unit
+  (** [draw ~io ~at vec] draws an arrow with origin [at] and direction [vec]. *)
+
+  val pp : Format.formatter -> t -> unit
+  (** [Format.printf "%a" pp t] pretty prints the vector [t] coordinates. *)
 
   (** {2 Accessors} *)
 
@@ -180,6 +196,17 @@ module Size : sig
 
   val height : t -> float
   (** [height s] is the height of [s]. *)
+
+  (** {2 Draw} *)
+
+  val draw : io:io -> ?color:Color.t -> at:Point.t -> t -> unit
+  (** [draw ~io ~at t] draws the box with top-left corner [at] and size [t]. *)
+
+  val fill : io:io -> ?color:Color.t -> at:Point.t -> t -> unit
+  (** [fill ~io ~at t] fills the box with top-left [at] and size [t]. *)
+
+  val pp : Format.formatter -> t -> unit
+  (** [Format.printf "%a" pp t] pretty prints the size [t] dimensions. *)
 end
 
 module Segment : sig
@@ -195,6 +222,9 @@ module Segment : sig
 
   val draw : io:io -> ?color:Color.t -> t -> unit
   (** [draw ~io s] draws the segment on the screen. *)
+
+  val pp : Format.formatter -> t -> unit
+  (** [Format.printf "%a" pp t] pretty prints the segment [t] end-points. *)
 
   (** {2 Accessors} *)
 
@@ -227,6 +257,9 @@ module Box : sig
 
   val fill : io:io -> ?color:Color.t -> t -> unit
   (** [fill ~io b] fills the inside of the box [b]. *)
+
+  val pp : Format.formatter -> t -> unit
+  (** [Format.printf "%a" pp t] pretty prints the box [t] shape. *)
 
   (** {2 Accessors} *)
 
@@ -301,6 +334,9 @@ module Circle : sig
   val fill : io:io -> ?color:Color.t -> t -> unit
   (** [fill ~io c] fills the inside of the circle [c]. *)
 
+  val pp : Format.formatter -> t -> unit
+  (** [Format.printf "%a" pp t] pretty prints the circle [t] shape. *)
+
   (** {2 Accessors} *)
 
   val center : t -> Point.t
@@ -343,6 +379,9 @@ module Polygon : sig
 
   val fill : io:io -> ?color:Color.t -> t -> unit
   (** [fill ~io p] fills the inside of the polygon [p]. *)
+
+  val pp : Format.formatter -> t -> unit
+  (** [Format.printf "%a" pp t] pretty prints the polygon [t] points. *)
 
   (** {2 Accessors} *)
 
@@ -389,6 +428,9 @@ module Shape : sig
 
   val fill : io:io -> ?color:Color.t -> t -> unit
   (** [fill ~io p] fills the inside of the shape [s]. *)
+
+  val pp : Format.formatter -> t -> unit
+  (** [Format.printf "%a" pp t] pretty prints the shape [t]. *)
 
   (** {2 Accessors} *)
 

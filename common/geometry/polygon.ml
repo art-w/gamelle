@@ -58,3 +58,8 @@ let bounding_box poly =
       poly
   in
   Box.v_corners (Point.v x_min y_min) (Point.v x_max y_max)
+
+let pp h lst =
+  Format.fprintf h "Polygon.v [ %a ]"
+    (Format.pp_print_list ~pp_sep:(fun h () -> Format.fprintf h " ; ") Point.pp)
+    lst

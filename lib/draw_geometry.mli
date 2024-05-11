@@ -14,12 +14,16 @@ type color = Color.t
 
 module Point : sig
   include module type of Point with type t = xy
+
+  val draw : io:io -> ?color:Color.t -> t -> unit
 end
 
 type point = Point.t
 
 module Vec : sig
   include module type of Vec with type t = xy
+
+  val draw : io:io -> ?color:Color.t -> at:point -> t -> unit
 end
 
 type vec = Vec.t
@@ -32,7 +36,12 @@ end
 
 type segment = Segment.t
 
-module Size : module type of Size with type t = xy
+module Size : sig
+  include module type of Size with type t = xy
+
+  val draw : io:io -> ?color:Color.t -> at:Point.t -> t -> unit
+  val fill : io:io -> ?color:Color.t -> at:Point.t -> t -> unit
+end
 
 type size = Size.t
 

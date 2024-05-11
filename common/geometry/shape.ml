@@ -264,3 +264,8 @@ let rec contact_points a b =
 let contact_points a b =
   let dist, lst = contact_points a b in
   (dist, Set_v2.elements lst)
+
+let pp h = function
+  | Segment t -> Segment.pp h t
+  | Circle t -> Circle.pp h t
+  | Polygon t -> Polygon.pp h t

@@ -11,3 +11,4 @@ val equal : t -> t -> bool
 val translate : Vec.t -> t -> t
 val map_points : (Point.t -> Point.t) -> t -> t
 val center : t -> Point.t
+val pp : Format.formatter -> t -> unit

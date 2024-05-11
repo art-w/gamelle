@@ -33,3 +33,6 @@ let translate vec { start; end_ } =
 
 let map_points f { start; end_ } = { start = f start; end_ = f end_ }
 let center { start; end_ } = Vec.(0.5 * (start + end_))
+
+let pp h { start; end_ } =
+  Format.fprintf h "Segment.v %a %a" Point.pp start Point.pp end_

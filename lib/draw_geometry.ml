@@ -5,6 +5,8 @@ type xy = Geometry.Xy.t = { x : float; y : float }
 
 module Point = struct
   include Geometry.Point
+
+  let draw ~io ?color pt = z ~io (fill_circle ?color (Geometry.Circle.v pt 3.0))
 end
 
 module Polygon = struct
@@ -34,6 +36,23 @@ end
 
 module Vec = struct
   include Geometry.Vec
+
+  let pi = 4.0 *. atan 1.0
+
+  let draw ~io ?color ~at vec =
+    Point.draw ~io ?color at;
+    z ~io (fun ~io ->
+        let stop = at + vec in
+        draw_line ~io ?color (Geometry.Segment.v at stop);
+        let stop1 = stop + (10. * unit vec) in
+        let angle = 90. /. pi in
+        let cos = cos angle and sin = sin angle in
+        let arrow = Point.rotate_around ~angle:(cos, sin) ~center:stop stop1 in
+        draw_line ~io ?color (Geometry.Segment.v stop arrow);
+        let arrow =
+          Point.rotate_around ~angle:(cos, -.sin) ~center:stop stop1
+        in
+        draw_line ~io ?color (Geometry.Segment.v stop arrow))
 end
 
 module Color = struct
@@ -60,7 +79,12 @@ module Box = struct
   let fill ~io ?color r = z ~io (fill_rect ?color r)
 end
 
-module Size = Geometry.Size
+module Size = struct
+  include Geometry.Size
+
+  let draw ~io ?color ~at t = Box.draw ~io ?color (Box.v at t)
+  let fill ~io ?color ~at t = Box.fill ~io ?color (Box.v at t)
+end
 
 type color = Geometry.color
 type point = Geometry.point

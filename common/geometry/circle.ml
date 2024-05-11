@@ -44,3 +44,6 @@ let intersect { center = c0; radius = r0 } { center = c1; radius = r1 } =
 let mem pt { center; radius } =
   let dist2 = Vec.(norm2 (center - pt)) in
   dist2 <= radius *. radius
+
+let pp h { center; radius } =
+  Format.fprintf h "Circle.v %a %f" Point.pp center radius

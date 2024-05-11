@@ -38,3 +38,4 @@ let rotate_around ~angle:(cos, sin) ~center pt =
 let to_tuple t = (t.x, t.y)
 let x t = t.x
 let y t = t.y
+let pp h { x; y } = Format.fprintf h "{ x = %f; y = %f }" x y

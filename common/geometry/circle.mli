@@ -9,3 +9,4 @@ val area : t -> float
 val intersections : t -> t -> Point.t list
 val intersect : t -> t -> bool
 val mem : Point.t -> t -> bool
+val pp : Format.formatter -> t -> unit

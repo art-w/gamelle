@@ -8,3 +8,4 @@ val segments : t -> Segment.t list
 val translate : Vec.t -> t -> t
 val map_points : (Point.t -> Point.t) -> t -> t
 val bounding_box : t -> Box.t
+val pp : Format.formatter -> t -> unit

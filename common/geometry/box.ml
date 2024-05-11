@@ -39,3 +39,5 @@ let random_mem box =
   let x = Random.float (width box) +. x_left box
   and y = Random.float (height box) +. y_top box in
   Point.v x y
+
+let pp h { tl; size } = Format.fprintf h "Box.v %a %a" Point.pp tl Size.pp size
