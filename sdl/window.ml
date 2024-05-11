@@ -3,16 +3,18 @@ open Geometry
 open Common
 
 let current_size = ref (0, 0)
+let get_size ~io = !(io.window_size)
 
 let set_size ~io =
-  let s = !(io.window_size) in
+  let w, h = get_size ~io in
+  let s = (w, h + int_of_float !Gamelle_common.ui_replay_height) in
   if s <> !current_size then (
     let w, h = s in
     Sdl.set_window_size io.backend.window ~w ~h;
     current_size := s)
 
 let box ~io =
-  let w, h = !(io.window_size) in
+  let w, h = get_size ~io in
   Box.v Vec.zero (Size.v (float w) (float h))
 
 let show_cursor ~io:_ b =

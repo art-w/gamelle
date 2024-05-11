@@ -10,4 +10,5 @@
   cmdliner
   dynlink
   inotify
-  tsdl-image))
+  tsdl-image)
+ (preprocess (pps gamelle.ppx_ui)))

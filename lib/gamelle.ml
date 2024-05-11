@@ -16,11 +16,7 @@ let clock = Gamelle_backend.clock
 module Sound = Gamelle_backend.Sound
 module Window = Window_
 
-let run init f =
-  Gamelle_backend.run init (fun ~io ->
-      let r = f ~io in
-      Gamelle_common.finalize_frame ~io;
-      r)
+let run init f = Gamelle_backend.run init f
 
 module Font = Gamelle_backend.Font
 
