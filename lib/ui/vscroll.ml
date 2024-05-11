@@ -53,7 +53,6 @@ let v ui fn =
   horizontal ui ~gap:0.0 @@ fun () ->
   let state = State.find ui default in
   let result =
-    let ui = update_loc ui "clip" in
     with_box ui @@ fun clip_box ->
     vclip ui clip_box ~offset:(Vec.v 0.0 !state.offset) @@ fun () ->
     with_box ui @@ fun child_box ->

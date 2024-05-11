@@ -123,16 +123,9 @@ let radio ui checked text =
   label ui text;
   checked
 
-let radios ui value options =
-  let value, _ =
-    List.fold_left
-      (fun (value, i) (value', text) ->
-        let checked = value = value' in
-        let value =
-          if radio (update_loc ui (string_of_int i)) checked text then value'
-          else value
-        in
-        (value, i + 1))
-      (value, 0) options
-  in
-  value
+let radios ui ?(equal = ( = )) value options =
+  List.fold_left
+    (fun value (value', text) ->
+      let checked = equal value value' in
+      if radio ui checked text then value' else value)
+    value options

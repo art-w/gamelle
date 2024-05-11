@@ -1,7 +1,7 @@
 open Gamelle_backend
 open Draw_geometry
 
-type id = { loc_stack : string list; _hint : int option }
+type id = { loc_stack : string list; _hint : int option; counter : int }
 type renderer = Layout.t
 
 type t = {
@@ -11,20 +11,45 @@ type t = {
 }
 
 let update_loc (ui, _loc) loc = (ui, loc)
-let id (ui, loc) = { loc_stack = loc :: ui.loc_stack; _hint = None }
+
+module H = Hashtbl.Make (struct
+  type t = id
+
+  let equal = ( = )
+  let hash = Hashtbl.hash
+end)
+
+type persistent_state = State : _ H.t -> persistent_state
+
+let used_ids : int H.t = H.create 16
+let all_states : persistent_state list ref = ref []
+
+let clean_old_states () =
+  List.iter
+    (fun (State cache) ->
+      let to_remove = ref [] in
+      H.iter
+        (fun key _ ->
+          let id = { key with counter = 0 } in
+          let count = try H.find used_ids id with Not_found -> 0 in
+          if key.counter > count then to_remove := key :: !to_remove)
+        cache;
+      List.iter (H.remove cache) !to_remove)
+    !all_states;
+  H.reset used_ids
+
+let id (ui, loc) =
+  let id = { loc_stack = loc :: ui.loc_stack; _hint = None; counter = 0 } in
+  let counter = try H.find used_ids id with Not_found -> 0 in
+  H.replace used_ids id (counter + 1);
+  { id with counter }
 
 module State (Value : sig
   type t
 end) =
 struct
-  module H = Hashtbl.Make (struct
-    type t = id
-
-    let equal = ( = )
-    let hash = Hashtbl.hash
-  end)
-
   let state : Value.t ref H.t = H.create 16
+  let () = all_states := State state :: !all_states
 
   let find ui default =
     let key = id ui in

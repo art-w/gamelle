@@ -17,6 +17,7 @@ let window ~io ?width ?height fn =
   match t.renderers with
   | [ single ] ->
       Layout.solve ?width ?height single;
+      Ui_backend.clean_old_states ();
       result
   | _ -> assert false
 
