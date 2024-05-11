@@ -41,9 +41,11 @@ let get_io (ui, _loc) = !(ui.io)
 let push_renderer ~ui renderer = ui.renderers <- renderer :: ui.renderers
 let draw_layout (ui, _loc) layout = push_renderer ~ui layout
 
-let draw ui ?min_width ?min_height ?flex_width ?flex_height fn =
+let draw ui ?min_width ?max_width ?min_height ?max_height ?flex_width
+    ?flex_height fn =
   draw_layout ui
-    (Layout.v ?min_width ?min_height ?flex_width ?flex_height
+    (Layout.v ?min_width ?min_height ?flex_width ?flex_height ?max_width
+       ?max_height
        (fn ~io:(get_io ui)))
 
 let draw_size ui s fn =
