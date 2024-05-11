@@ -21,5 +21,8 @@ let window ~io ?width ?height fn =
       result
   | _ -> assert false
 
+type constrain = Layout.constrain = { min : float; flex : float; max : float }
+
+let draw = Ui_backend.draw
 let update_loc = Ui_backend.update_loc
 let nest_loc = Ui_backend.nest_loc

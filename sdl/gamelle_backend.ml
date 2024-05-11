@@ -57,6 +57,7 @@ let run () =
   let events = ref Events_backend.default in
 
   let latest_io = ref (make_io backend) in
+  let real_latest_io = ref !latest_io in
 
   let rec loop () : unit =
     let t0 = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
@@ -70,22 +71,31 @@ let run () =
     in
 
     Sdl.pump_events ();
-    let event = Events_sdl.update ~clock:!Replay.clock !latest_io.event in
-    let has_focus = Window.has_focus window in
-
-    if (not was_replayed) && (not (State.crashed ())) && has_focus then (
-      let io = { (make_io backend) with event } in
-      latest_io := io;
-      Replay.add event;
-      State.update_frame ~io);
-
+    let event = Events_sdl.update ~clock:!Replay.clock !real_latest_io.event in
     if Events_backend.is_pressed event `quit then raise Exit;
 
+    let has_focus = Window.has_focus window in
+    let io = { (make_io ~previous:!real_latest_io backend) with event } in
+    real_latest_io := io;
+
+    if
+      was_replayed = `not_replayed
+      && (not (State.crashed ()))
+      && ((has_focus && event.mouse_y > !Gamelle_common.ui_replay_height)
+         || !Replay.clock = 0)
+    then (
+      Replay.add event;
+      latest_io := io;
+      State.update_frame ~io);
+
+    Replay.draw_progress ~io ();
+
     Window.finalize_frame ~io:!latest_io;
+    if io != !latest_io then Gamelle_common.finalize_frame ~io;
     Sdl.render_present renderer;
 
-    if State.crashed () || ((not has_focus) && not was_replayed) then
-      await_event ();
+    if State.crashed () || ((not has_focus) && was_replayed <> `replay_progress)
+    then await_event ();
 
     let now = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
     let frame_elapsed = now -. t0 in

@@ -30,6 +30,7 @@ let v ui ~min:min_value ~max:max_value value =
   with_box ui @@ fun box ->
   let box = Box.shrink ~left:radius ~right:radius box in
   let range = max_value -. min_value in
+  let range = if range <= 0.0 then 1.0 else range in
   let percent = (value -. min_value) /. range in
   with_horizontal_drag ui box percent @@ fun percent ->
   let value = min_value +. (percent *. range) in

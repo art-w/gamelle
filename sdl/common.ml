@@ -37,6 +37,8 @@ let[@inline never] mutex_protect m f =
 type run =
   | No_run : run
   | Run : {
+      random_seed : Random.State.t;
+      init_state : 'a;
       state : 'a;
       update : io:io -> 'a -> 'a;
       clean : (unit -> unit) list;
