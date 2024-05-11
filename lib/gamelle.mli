@@ -679,7 +679,7 @@ module Ui : sig
 
   val button : ui -> string -> bool
   val checkbox : ui -> string -> bool -> bool
-  val radios : ui -> 'a -> ('a * string) list -> 'a
+  val radios : ui -> ?equal:('a -> 'a -> bool) -> 'a -> ('a * string) list -> 'a
   val slider : ui -> min:float -> max:float -> float -> float
   val text_input : ui -> string -> string
   val label : ui -> string -> unit
