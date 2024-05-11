@@ -668,6 +668,32 @@ end
 module Ui : sig
   (** Graphical user interface: buttons, checkboxes, text inputs. *)
 
+  type ui
+
+  val window :
+    io:io ->
+    ?width:(float -> float) ->
+    ?height:(float -> float) ->
+    (ui -> 'a) ->
+    'a
+
+  val button : ui -> string -> bool
+  val checkbox : ui -> string -> bool -> bool
+  val radios : ui -> 'a -> ('a * string) list -> 'a
+  val slider : ui -> min:float -> max:float -> float -> float
+  val text_input : ui -> string -> string
+  val label : ui -> string -> unit
+  val text_area : ui -> string -> unit
+  val vscroll : ui -> (unit -> 'a) -> 'a
+  val horizontal : ui -> ?gap:float -> (unit -> 'a) -> 'a
+  val vertical : ui -> ?gap:float -> (unit -> 'a) -> 'a
+
+  (**/**)
+
+  val update_loc : ui -> string -> ui
+  val nest_loc : ui -> (unit -> 'a) -> 'a
+
+  (*
   (** @inline *)
   include
     Ui.S
@@ -675,6 +701,7 @@ module Ui : sig
        and type point := Point.t
        and type size := Size.t
        and type box := Box.t
+*)
 end
 
 (** {1 Camera} *)

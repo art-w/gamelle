@@ -146,6 +146,8 @@ module Text : sig
     at:point ->
     string ->
     unit
+
+  val min_size : io:io -> ?font:font -> ?size:int -> string -> float * float
 end
 
 val draw : io:io -> at:point -> bitmap -> unit
