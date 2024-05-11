@@ -1,88 +1,78 @@
 open Draw_geometry
 open Ui_backend
-open Widget_builder
+open Widgets
 
-type 'a params = 'a vscroll_params
-type state = vscroll_state
-type Ui_backend.state += VScroll of state
+let scroll_bar_width = 12.
 
-let construct_state s = VScroll s
-let destruct_state s = match s with VScroll s -> s | _ -> raise IdTypeMismatch
-let scroll_bar_width = 10.
+type state = { child_height : float; offset : float }
 
-let size ~ts:_ ~children_size { height; f = _ } =
-  let width =
-    (* Float.max space_available *)
-    Size.width children_size +. scroll_bar_width
-  in
-  Size.v width height
+module State = Ui_backend.State (struct
+  type t = state
+end)
 
-let render ~io { height = _; f = _ } state box =
-  let height = Box.height box in
-  let { size = _; offset; grasped = _; real_height } = state in
-  let scroll_rail_box =
-    Box.v
-      (Point.v (Box.x_right box -. scroll_bar_width) (Box.y_top box))
-      (Size.v scroll_bar_width height)
-  in
-  let scroll_bar_height = height *. height /. real_height in
-  let scroll_bar_box =
-    Box.v
-      (Point.v
-         (Box.x_right box -. scroll_bar_width)
-         ((offset *. height /. state.real_height) +. Box.y_top box))
-      (Size.v scroll_bar_width scroll_bar_height)
-  in
-  Box.draw ~io ~color:fg box;
-  Box.fill ~io ~color:lowlight scroll_rail_box;
-  Box.fill ~io ~color:highlight scroll_bar_box
+let default = { child_height = 0.0; offset = 0.0 }
 
-let update ~io ~children_size box state { height = _; f = _ } =
-  let { size; offset; grasped; real_height = _ } = state in
-  let height = Box.height box in
-  let real_height = Size.height children_size in
-  let scroll_rail_box =
-    Box.v
-      (Point.v (Box.x_right box -. scroll_bar_width) (Box.y_top box))
-      (Size.v scroll_bar_width height)
+let with_vertical_drag ui box percent fn =
+  on_click ui @@ fun state ->
+  let percent =
+    match state with
+    | `normal | `hover -> percent
+    | `pressed | `clicked ->
+        let m = Event.mouse_pos ~io:(get_io ui) in
+        (m.y -. Box.y_top box) /. Box.height box
   in
-  let scroll_bar_height = height *. height /. real_height in
-  let max_offset = real_height -. height in
-  let mouse_pos = Event.mouse_pos ~io in
-  let grasped =
-    if grasped then
-      let io = View.clip_events false io in
-      not (Event.is_up ~io `click_left)
-    else Event.is_down ~io `click_left && Box.mem mouse_pos scroll_rail_box
+  let percent = max 0.0 (min 1.0 percent) in
+  fn percent
+
+let vscrollbar ui container_height state =
+  with_box ui @@ fun box ->
+  let h = max 1.0 container_height in
+  let child_height = state.child_height in
+  let child_height = max h child_height in
+  let relative_height = h *. h /. child_height in
+  let half = relative_height /. 2.0 in
+  let drag_box = Box.shrink ~top:half ~bottom:half box in
+  let max_height = child_height -. h in
+  let percent = if max_height <= 0.0 then 0.0 else state.offset /. max_height in
+  with_vertical_drag ui drag_box percent @@ fun percent ->
+  draw ui ~min_width:scroll_bar_width ~min_height:100.0 ~flex_height:1.0
+    (fun ~io box ->
+      let scrollbox =
+        Box.v
+          (Point.v (Box.x_left box)
+             (Box.y_top box +. (percent *. (Box.height box -. relative_height))))
+          (Size.v (Box.width box) relative_height)
+      in
+      Box.fill ~io ~color:lowlight box;
+      Box.fill ~io ~color:highlight scrollbox);
+  percent *. max_height
+
+let v ui fn =
+  boxed ~pad:0.0 ~border:Gruvbox.Light.fg2 ~bg:Gruvbox.Light.bg2 ui @@ fun () ->
+  with_box ui @@ fun container_box ->
+  horizontal ui ~gap:0.0 @@ fun () ->
+  let state = State.find ui default in
+  let result =
+    let ui = update_loc ui "clip" in
+    with_box ui @@ fun clip_box ->
+    vclip ui clip_box ~offset:(Vec.v 0.0 !state.offset) @@ fun () ->
+    with_box ui @@ fun child_box ->
+    padding ui 10.0 @@ fun () ->
+    state := { !state with child_height = Box.height child_box };
+    vertical ui fn
   in
+  let offset = vscrollbar ui (Box.height container_box) !state in
+  let io = get_io ui in
   let offset =
-    max 0. @@ min max_offset
-    @@
-    if grasped then
-      max_offset
-      *. (height /. (height -. scroll_bar_height))
-      *. (mouse_pos.y -. Box.y_top scroll_rail_box)
-      /. height
-      -. (height /. 2.)
-    else if Event.is_pressed ~io `wheel then
-      let amount = Event.wheel_delta ~io in
-      offset +. amount
+    if
+      Box.mem (Event.mouse_pos ~io) container_box
+      && Event.handle_clip_events ~io true
+    then
+      max 0.0
+        (min
+           (!state.child_height -. Box.height container_box)
+           (offset +. Event.wheel_delta ~io))
     else offset
   in
-  { size; offset; grasped; real_height }
-
-let result { height = _; f } = f ()
-
-let default _ =
-  { size = Size.zero; offset = 0.; grasped = false; real_height = 0. }
-
-let size_for_self = Size.(v scroll_bar_width 0.)
-let children_offset state = Vec.(zero - v 0. state.offset)
-let children_io ~io box = View.clip_events true @@ View.clip box io
-
-let v : type a. (_, a params, a) node =
- fun (ui, loc) ?id ?(style = Style.default) ?(size = size) ?(render = render)
-     params ->
-  node ~construct_state ~destruct_state ~dir:V ~default ~size ~size_for_self
-    ~children_io ~children_offset ~render ~update ~result () (ui, loc) ?id
-    ~style ~size ~render params
+  state := { !state with offset };
+  result

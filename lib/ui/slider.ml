@@ -1,54 +1,37 @@
 open Draw_geometry
 open Ui_backend
-open Widget_builder
+open Widgets
 
-type params = { w : float; min : float; max : float }
-type state = { v : float; grasped : bool }
-type return = float
-type Ui_backend.state += Slider of state
+let radius = 8.
+let r2 = 2.0 *. radius
 
-let construct_state s = Slider s
-let destruct_state s = match s with Slider s -> s | _ -> raise IdTypeMismatch
-
-let size ~ts:_ { w; min = _; max = _ } =
-  let height = 20. in
-  Size.v (w +. (2. *. padding)) height
-
-let render ~io { w = _; min; max } state box =
-  let radius = 8. in
-  let w = Box.width box -. (2. *. padding) in
-  let sval = state.v in
+let render ~io percent box =
+  let w = Box.width box in
   let line = Box.v_center (Box.center box) (Size.v w 4.) in
   Box.fill ~io ~color:lowlight line;
-  let pos =
-    radius +. ((sval -. min) *. (w -. (2. *. radius)) /. (max -. min))
-  in
+  let pos = radius +. (percent *. (w -. (2. *. radius))) in
   Box.fill ~io ~color:highlight (Box.v (Box.top_left line) (Size.v pos 4.));
   Circle.fill ~io ~color:highlight
     (Circle.v (Point.v (Box.x_left line +. pos) (Box.y_middle line)) radius)
 
-let update ~io { w = _; min; max } state box =
-  let w = Box.width box -. (2. *. padding) in
-  let { v; grasped } = state in
-  let grasped =
-    if grasped then
-      let io = View.clip_events false io in
-      not (Event.is_up ~io `click_left)
-    else Event.is_down ~io `click_left && Box.mem (Event.mouse_pos ~io) box
+let with_horizontal_drag ui box percent fn =
+  on_click ui @@ fun state ->
+  let percent =
+    match state with
+    | `normal | `hover -> percent
+    | `pressed | `clicked ->
+        let m = Event.mouse_pos ~io:(get_io ui) in
+        (m.x -. Box.x_left box) /. Box.width box
   in
-  let v =
-    if grasped then
-      Float.max min @@ Float.min max
-      @@ (((Event.mouse_pos ~io).x -. Box.x_left box) *. (max -. min) /. w)
-         +. min
-    else v
-  in
-  { v; grasped }
+  let percent = max 0.0 (min 1.0 percent) in
+  fn percent
 
-let destruct_result _ n = { v = n; grasped = false }
-let result _ state = state.v
-
-let v =
-  elt ~construct_state ~destruct_state
-    ~default:(fun { max; _ } -> { v = max; grasped = false })
-    ~size ~render ~update ~destruct_result ~result ()
+let v ui ~min:min_value ~max:max_value value =
+  with_box ui @@ fun box ->
+  let box = Box.shrink ~left:radius ~right:radius box in
+  let range = max_value -. min_value in
+  let percent = (value -. min_value) /. range in
+  with_horizontal_drag ui box percent @@ fun percent ->
+  let value = min_value +. (percent *. range) in
+  draw ui ~min_width:r2 ~min_height:r2 ~flex_width:1.0 (render percent);
+  value
