@@ -1,6 +1,6 @@
 open Gamelle
 
-type player = { shape : Physics.t; jumps : int }
+type player = { shape : Physics.t; jumps : int; grounded : bool }
 
 type state = {
   player1 : player;
@@ -26,6 +26,7 @@ let init_player pos =
       Physics.v ~restitution:0.8 ~kind:Movable ~mass:1000.0
         (Shape.circle (Circle.v pos player_radius));
     jumps = 0;
+    grounded = false;
   }
 
 let initial_state =
@@ -63,9 +64,17 @@ let block_player2 =
   @@ Shape.rect
   @@ Box.v (Point.v (-500.0) (-1000.0)) (Vec.v 1000.0 2000.0)
 
-let update_player ~io ~player:{ shape = player; jumps } ~gravity left right up
-    down =
+let update_player ~io ~player:{ shape = player; jumps; grounded } ~gravity left
+    right up down =
   let dt = dt ~io in
+  let grounded, player =
+    let touching_ground =
+      Vec.y (Physics.center player) >= bottom -. player_radius -. 10.0
+    in
+    if touching_ground && not grounded then
+      (true, Physics.(set_rot_velocity 0.0 @@ set_velocity Vec.zero player))
+    else (touching_ground, player)
+  in
   let player =
     if Input.is_pressed ~io left then
       Physics.add_velocity (Vec.v (-.horz_speed *. dt) 0.0) player
@@ -81,10 +90,7 @@ let update_player ~io ~player:{ shape = player; jumps } ~gravity left right up
       Physics.add_velocity (Vec.v 0.0 (10_000.0 *. dt)) player
     else player
   in
-  let jumps =
-    if Vec.y (Physics.center player) >= bottom -. player_radius -. 10.0 then 0
-    else jumps
-  in
+  let jumps = if grounded then 0 else jumps in
   let player, jumps =
     if Input.is_down ~io up && jumps < 2 then
       (Physics.add_velocity (Vec.v 0.0 (-60000.0 *. dt)) player, jumps + 1)
@@ -92,7 +98,7 @@ let update_player ~io ~player:{ shape = player; jumps } ~gravity left right up
   in
   let player = Physics.add_velocity gravity player in
   let player = Physics.update ~dt player in
-  { shape = player; jumps }
+  { shape = player; jumps; grounded }
 
 let () =
   Gamelle.run initial_state

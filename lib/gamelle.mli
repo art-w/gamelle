@@ -929,12 +929,25 @@ module Physics : sig
 
   (** {2 Accessors} *)
 
+  val shape : t -> Shape.t
+  (** [shape t] returns the shape of the rigid body [t]. *)
+
   val center : t -> Point.t
+  (** [center t] returns the center of mass of the shape [t]. *)
+
+  val velocity : t -> Vec.t
+  (** [velocity t] returns the current velocity of the rigid body [t]. *)
+
+  val rotation : t -> float
+  (** [center t] returns the rotation of the rigid body [t]. *)
+
+  val rot_velocity : t -> float
+  (** [rot_velocity t] returns the current rotational velocity of the rigid body [t]. *)
 
   (** {2 Simulation} *)
 
   val add_velocity : Vec.t -> t -> t
-  (** [add_velocity v t] adds [v] to the rigid body [t] current velocity. *)
+  (** [add_velocity v t] adds [v] to the rigid body [t] current {!velocity}. *)
 
   val add_rot_velocity : float -> t -> t
   (** [add_rot_velocity r t] adds [r] to the rigid body [t] current rotational velocity. *)
@@ -944,6 +957,20 @@ module Physics : sig
 
   val fix_collisions : t list -> t list
   (** [fix_collisions lst] detects and repairs any collisions between the rigid bodies in the list [lst]. *)
+
+  (** {2 Teleportation} *)
+
+  val set_center : Point.t -> t -> t
+  (** [set_center pt t] teleports the rigid body [t] to have a center at point [pt]. *)
+
+  val set_rotation : float -> t -> t
+  (** [set_rotation r t] rotates the rigid body [t] to have a rotation [r]. *)
+
+  val set_velocity : Vec.t -> t -> t
+  (** [set_velocity speed t] sets the velocity of the rigid body [t] to the vector [speed]. *)
+
+  val set_rot_velocity : float -> t -> t
+  (** [set_rot_velocity dr t] sets the rotational velocity of the rigid body [t] to [dr]. *)
 
   (** {2 Draw} *)
 

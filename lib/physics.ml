@@ -18,7 +18,20 @@ type t = {
   dynamic_friction : float;
 }
 
+let shape t = t.shape
 let center t = t.pos
+let velocity t = t.speed
+let rotation t = t.rot
+let rot_velocity t = t.rot_speed
+
+let set_center pos t =
+  { t with pos; shape = Shape.translate Vec.(pos - t.pos) t.shape }
+
+let set_velocity speed t = { t with speed }
+let set_rot_velocity rot_speed t = { t with rot_speed }
+
+let set_rotation rot t =
+  { t with rot; shape = Shape.rotate (rot -. t.rot) t.shape }
 
 let add_velocity vec t =
   match t.kind with
