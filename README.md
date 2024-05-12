@@ -17,7 +17,7 @@ let () =
   x +. 1.0
 ```
 
-![Screenshots of sokoban, snake, physics, gui demo, tic-tac-toe, pong](https://art-w.github.io/gamelle/screenshots.png)
+![Screenshots of sokoban, snake, physics, gui demo, tic-tac-toe, pong](https://art-w.github.io/gamelle-assets/screenshots.png)
 
 ***This is a work in progress!** Only the most adventurous should try it at this point. While features should work, their implementation is super raw, not battle tested, with terrible code as we are learning along the way... so bugs, missing functionalities, api changes, etc etc are expected! Feel free to file an issue or open a PR if you want to help :)*
 
