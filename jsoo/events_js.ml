@@ -32,8 +32,10 @@ let keys_of_string kc =
 
 let keys_of_code kc =
   let kc = Jstr.to_string kc in
-  if String.length kc = 1 then [ `physical_char (Char.lowercase_ascii kc.[0]) ]
-  else []
+  let c = Scanf.sscanf_opt kc "Key%c" Fun.id in
+  match c with
+  | Some c -> [ `physical_char (Char.lowercase_ascii c) ]
+  | None -> []
 
 let keys_of_event e =
   keys_of_code (Ev.Keyboard.code e) @ keys_of_string (Ev.Keyboard.key e)
