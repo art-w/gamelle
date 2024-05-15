@@ -6,16 +6,15 @@ let ( let& ) x f = match x with Error (`Msg m) -> failwith m | Ok x -> f x
 
 type loader = Raw of string | Parts of string * string * string list
 
-let extension_loader ~sysname ~basename ~ext =
-  match (basename, ext) with
-  | _, "Ttf" -> Some (Raw "Gamelle.Font.load")
-  | _, ("Png" | "Jpeg" | "Jpg") ->
+let extension_loader ~sysname ~ext =
+  match ext with
+  | ".ttf" -> Some (Raw "Gamelle.Font.load")
+  | ".png" | ".jpeg" | ".jpg" ->
       let& img = Tsdl_image.load sysname in
       let w, h = Tsdl.get_surface_size img in
       Tsdl.free_surface img;
       let raw = Printf.sprintf "Gamelle.Bitmap.load ~w:%i ~h:%i" w h in
       let parts = sysname ^ ".parts" in
-      (* TODO: file_exists after readdir? ... *)
       if Sys.file_exists parts then
         let parts =
           file_contents parts |> String.split_on_char '\n'
@@ -33,78 +32,34 @@ let extension_loader ~sysname ~basename ~ext =
         in
         Some (Parts (raw, "Gamelle.Bitmap.sub", parts))
       else Some (Raw raw)
-  | _, ("Mp3" | "Wav") -> Some (Raw "Gamelle.Sound.load")
-  | "assets", _ | "dune", "No_ext" | _, "Parts" -> None
+  | ".mp3" | ".wav" -> Some (Raw "Gamelle.Sound.load")
   | _ -> Some (Raw "Fun.id")
 
-let split_file_ext filename =
-  let name = normalize_name @@ Filename.remove_extension filename in
-  let raw_ext = Filename.extension filename in
-  let ext =
-    String.capitalize_ascii
-    @@
-    if raw_ext = "" then "No_ext"
-    else if String.starts_with ~prefix:"." raw_ext then
-      String.(sub raw_ext 1 (length raw_ext - 1))
-    else raw_ext
+let rec traverse sysname =
+  let name =
+    normalize_name @@ Filename.remove_extension @@ Filename.basename sysname
   in
-  (name, ext)
-
-module StringMap = Map.Make (struct
-  type t = string
-
-  let compare = compare
-end)
-
-let list_files k =
-  let cwd = Sys.getcwd () in
-  Format.printf "(* %S *)@." cwd;
-  k (Sys.readdir cwd) cwd
-
-let rec output_file (full_name, basename, loader) =
-  if is_directory full_name then (
-    Format.printf "@.  (** Generated from %s *)\nmodule %s = struct@." basename
-      (String.capitalize_ascii basename);
-    gen_ml (Sys.readdir full_name) full_name;
-    Format.printf "\nend\n")
-  else if is_regular_file full_name then (
-    Format.printf "@.  (** Generated from %s *)@." basename;
-    match loader with
-    | Raw loader ->
-        Format.printf "  let %s = %s %S@." basename loader
-          (file_contents full_name)
-    | Parts (loader, extract, parts) ->
-        Format.printf "  let %s =\n" basename;
-        Format.printf "    let raw = %s %S in\n" loader
-          (file_contents full_name);
+  if is_directory sysname then (
+    let name = String.capitalize_ascii name in
+    Format.printf "module %s = struct@." name;
+    let lst = Sys.readdir sysname in
+    Array.iter (fun child -> traverse (Filename.concat sysname child)) lst;
+    Format.printf "end@.")
+  else if is_regular_file sysname then
+    let ext = Filename.extension sysname in
+    match extension_loader ~sysname ~ext with
+    | Some (Raw loader) ->
+        Format.printf "  let %s = %s %S@." name loader (file_contents sysname)
+    | Some (Parts (loader, extract, parts)) ->
+        Format.printf "  let %s =\n" name;
+        Format.printf "    let raw = %s %S in\n" loader (file_contents sysname);
         Format.printf "    [|\n";
         List.iter (Format.printf "      %s raw %s;\n" extract) parts;
-        Format.printf "    |]@.")
-
-and gen_ml files cwd =
-  let files =
-    Array.fold_left
-      (fun map sysname ->
-        let basename, ext = split_file_ext sysname in
-        match extension_loader ~sysname ~basename ~ext with
-        | Some loader ->
-            let old_data =
-              Option.value (StringMap.find_opt ext map) ~default:[]
-            in
-            StringMap.add ext
-              ((Filename.concat cwd sysname, basename, loader) :: old_data)
-              map
-        | None -> map)
-      StringMap.empty files
-  in
-  StringMap.iter
-    (fun ext files ->
-      Format.printf "module %s = struct@." ext;
-      List.iter output_file files;
-      Format.printf "end@.include %s@." ext)
-    files
+        Format.printf "    |]@."
+    | None -> ()
 
 let run () =
   let _ = Tsdl_image.init Tsdl_image.Init.(jpg + png) in
-  list_files gen_ml;
+  let cwd = Sys.getcwd () in
+  Array.iter traverse (Sys.readdir cwd);
   Tsdl_image.quit ()

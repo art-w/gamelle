@@ -1,5 +1,6 @@
 open Gamelle
 
+let _player : Bitmap.t = Assets.Unused.player
 let myfont = Font.default
 let img = Assets.camel
 let max_speed = 1000.045
