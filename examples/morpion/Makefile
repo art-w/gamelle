@@ -1,6 +1,11 @@
+.PHONY: run html
+
 run:
-	dune exec --root=. morpion
+	dune build --root=. --watch _build/default/src/morpion.cmxs & \
+		export DUNE_PID=$$! ; \
+		gamelle hotreload _build/default/src/morpion.cmxs ; \
+		kill $${DUNE_PID}
 
 html:
-	dune build --root=.
-	firefox _build/default/bin/index.html
+	dune build --root=. --profile=release
+	xdg-open _build/default/morpion.html
