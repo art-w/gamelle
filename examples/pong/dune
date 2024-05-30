@@ -1,0 +1,42 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))
+
+(executable
+ (public_name pong)
+ (name pong_bin)
+ (modules pong_bin)
+ (libraries pong gamelle.sdl))
+
+(rule
+ (target pong_bin.ml)
+ (action
+  (with-stdout-to
+   pong_bin.ml
+   (run echo "include Pong"))))
+
+(executable
+ (name pong_js)
+ (modules pong_js)
+ (modes js)
+ (libraries pong gamelle.jsoo))
+
+(rule
+ (target pong_js.ml)
+ (action
+  (with-stdout-to
+   pong_js.ml
+   (run echo "include Pong"))))
+
+(rule
+ (target pong.html)
+ (deps pong.template.html pong_js.bc.js)
+ (action
+  (with-stdout-to
+   pong.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=pong.template.html
+    --script=pong_js.bc.js))))

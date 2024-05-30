@@ -1,6 +1,8 @@
 (library
  (name pong)
- (libraries gamelle))
+ (libraries gamelle)
+ (preprocess
+  (pps gamelle.ppx_ui)))
 
 (rule
  (target assets.ml)
