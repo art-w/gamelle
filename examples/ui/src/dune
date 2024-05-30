@@ -1,8 +1,8 @@
 (library
  (name ui)
+ (libraries gamelle)
  (preprocess
-  (pps gamelle.ppx_ui))
- (libraries gamelle))
+  (pps gamelle.ppx_ui)))
 
 (rule
  (target assets.ml)

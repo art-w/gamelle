@@ -1,10 +1,10 @@
 .PHONY: run html
 
 run:
-	dune build --root=.
+	dune build
 	gamelle hotreload _build/default/src/ui.cmxs &
-	dune build --root=. --watch
+	dune build --watch
 
 html:
-	dune build --root=. --profile=release
+	dune build --profile=release
 	xdg-open _build/default/ui.html
