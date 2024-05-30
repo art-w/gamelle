@@ -82,6 +82,11 @@ module Color : sig
   val blue : t
   val white : t
   val black : t
+  val yellow : t
+  val cyan : t
+  val magenta : t
+  val gray : t
+  val orange : t
 end
 
 type xy = { x : float; y : float }
