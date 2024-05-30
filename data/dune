@@ -1,6 +1,8 @@
 (library
  (name gamelle_template))
 
+(data_only_dirs template)
+
 (rule
  (targets gamelle_template.ml)
  (deps
