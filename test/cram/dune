@@ -2,4 +2,5 @@
  (package gamelle)
  (deps
   %{bin:gamelle}
+  ./screenshot/screenshot.exe
   (package gamelle)))

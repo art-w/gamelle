@@ -1,0 +1,9 @@
+(lang dune 3.7)
+
+(name basic)
+
+(package
+  (name basic)
+  (synopsis "basic")
+  (depends
+    gamelle))

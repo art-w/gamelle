@@ -1,0 +1,42 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))
+
+(executable
+ (public_name basic)
+ (name basic_bin)
+ (modules basic_bin)
+ (libraries basic gamelle.sdl))
+
+(rule
+ (target basic_bin.ml)
+ (action
+  (with-stdout-to
+   basic_bin.ml
+   (run echo "include Basic"))))
+
+(executable
+ (name basic_js)
+ (modules basic_js)
+ (modes js)
+ (libraries basic gamelle.jsoo))
+
+(rule
+ (target basic_js.ml)
+ (action
+  (with-stdout-to
+   basic_js.ml
+   (run echo "include Basic"))))
+
+(rule
+ (target basic.html)
+ (deps basic.template.html basic_js.bc.js)
+ (action
+  (with-stdout-to
+   basic.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=basic.template.html
+    --script=basic_js.bc.js))))

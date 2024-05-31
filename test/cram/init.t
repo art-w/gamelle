@@ -1,6 +1,7 @@
   $ gamelle init funny_game
   $ ls
   funny_game
+  screenshot
   $ cd funny_game
   $ ls
   Makefile
