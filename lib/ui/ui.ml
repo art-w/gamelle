@@ -5,6 +5,7 @@ include Widgets
 let text_input = Text_input.v
 let vscroll = Vscroll.v
 let slider = Slider.v
+let int_slider = Int_slider.v
 
 let window ~io ?width ?height fn =
   let t = { io = ref io; renderers = []; loc_stack = [] } in

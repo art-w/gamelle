@@ -32,7 +32,7 @@ let v ui ~min:min_value ~max:max_value value =
   let range = max_value -. min_value in
   let range = if range <= 0.0 then 1.0 else range in
   let percent = (value -. min_value) /. range in
+  draw ui ~min_width:r2 ~min_height:r2 ~flex_width:1.0 (render percent);
   with_horizontal_drag ui box percent @@ fun percent ->
   let value = min_value +. (percent *. range) in
-  draw ui ~min_width:r2 ~min_height:r2 ~flex_width:1.0 (render percent);
   value

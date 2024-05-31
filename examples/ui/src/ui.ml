@@ -7,7 +7,7 @@ type state = {
   check1 : bool;
   check2 : bool;
   slider1 : float;
-  slider2 : float;
+  slider2 : int;
   rad : k;
 }
 
@@ -19,7 +19,7 @@ let initial_state =
     check1 = false;
     check2 = false;
     slider1 = 0.0;
-    slider2 = 15.0;
+    slider2 = 15;
     rad = A;
   }
 
@@ -79,8 +79,8 @@ let () =
     let slider1 = slider [%ui] ~min:10. ~max:20. slider1 in
     let slider2 =
       horizontal [%ui] @@ fun () ->
-      let slider2 = slider [%ui] ~min:10. ~max:20. slider2 in
-      label [%ui] (Printf.sprintf "The slider value is %f" slider2);
+      let slider2 = int_slider [%ui] ~min:10 ~max:20 slider2 in
+      label [%ui] (Printf.sprintf "The slider value is %i" slider2);
       slider2
     in
     let rad =

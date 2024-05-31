@@ -11,4 +11,5 @@
   dynlink
   inotify
   tsdl-image)
- (preprocess (pps gamelle.ppx_ui)))
+ (preprocess
+  (pps gamelle.ppx_ui)))
