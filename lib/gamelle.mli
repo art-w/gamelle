@@ -614,6 +614,23 @@ module Sound : sig
   type t
   (** The type of sounds and musics (mp3, ogg). *)
 
+
+  type playing
+  (** The type of sounds being played *)
+
+  val start_playing : io:io -> t -> playing
+
+  val continue_playing : io:io -> playing -> bool
+  (* continue_playing ~io p] Continue playing the sound p. If not called during
+     a given frame, [p] will be paused on that frame. Returns [true] when the
+     sound is finished playing. *)
+
+  val duration : t -> float
+
+  val sound_of_playing : playing -> t
+
+  val elapsed_duration : playing -> float
+
   val play : io:io -> t -> unit
   (** [play ~io t] plays the sound [t] once. *)
 
