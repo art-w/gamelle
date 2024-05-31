@@ -2,6 +2,8 @@
  (public_name gamelle)
  (name gamelle)
  (libraries gamelle_common)
+ (preprocess
+  (pps gamelle.ppx_ui))
  (virtual_modules gamelle_backend))
 
 (include_subdirs qualified)
