@@ -25,6 +25,16 @@ end
 
 module Sound : sig
   type t
+  type playing
+  val start_playing : io:io -> t -> playing
+
+  val continue_playing : io:io -> playing -> bool
+
+  val duration : t -> float
+
+  val sound_of_playing : playing -> t
+
+  val elapsed_duration : playing -> float
 
   val load : string -> t
   val play : io:io -> t -> unit
