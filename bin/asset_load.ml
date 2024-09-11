@@ -1,8 +1,4 @@
-module Tsdl = Tsdl.Sdl
-module Tsdl_image = Tsdl_image.Image
 open Utils
-
-let ( let& ) x f = match x with Error (`Msg m) -> failwith m | Ok x -> f x
 
 type loader = Raw of string | Parts of string * string * string list
 
@@ -10,9 +6,8 @@ let extension_loader ~sysname ~ext =
   match ext with
   | ".ttf" -> Some (Raw "Gamelle.Font.load")
   | ".png" | ".jpeg" | ".jpg" ->
-      let& img = Tsdl_image.load sysname in
-      let w, h = Tsdl.get_surface_size img in
-      Tsdl.free_surface img;
+      let chunk_reader = ImageUtil_unix.chunk_reader_of_path sysname in
+      let w, h = ImageLib.size ~extension:(String.sub ext 1 (String.length ext - 1)) chunk_reader in
       let raw = Printf.sprintf "Gamelle.Bitmap.load ~w:%i ~h:%i" w h in
       let parts = sysname ^ ".parts" in
       if Sys.file_exists parts then
@@ -59,7 +54,5 @@ let rec traverse sysname =
     | None -> ()
 
 let run () =
-  let _ = Tsdl_image.init Tsdl_image.Init.(jpg + png) in
   let cwd = Sys.getcwd () in
-  Array.iter traverse (Sys.readdir cwd);
-  Tsdl_image.quit ()
+  Array.iter traverse (Sys.readdir cwd)

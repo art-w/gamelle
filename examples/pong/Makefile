@@ -6,5 +6,5 @@ run:
 	dune build --watch
 
 html:
-	dune build --profile=release
+	dune build --root=. --profile=release pong.html
 	xdg-open _build/default/pong.html

@@ -3,13 +3,18 @@
  (name gamelle_bin)
  (package gamelle)
  (libraries
-  gamelle.sdl
   gamelle_template
   unix
   str
   cmdliner
   dynlink
-  tsdl-image
+  imagelib
+  imagelib.unix
+  (select
+   asset_editor.ml
+   from
+   (gamelle.sdl -> asset_editor.available.ml)
+   (!gamelle.sdl -> asset_editor.unavailable.ml))
   (select
    hotreload.ml
    from

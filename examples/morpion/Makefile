@@ -7,5 +7,5 @@ run:
 		kill $${DUNE_PID}
 
 html:
-	dune build --root=. --profile=release
+	dune build --root=. --profile=release morpion.html
 	xdg-open _build/default/morpion.html

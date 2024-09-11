@@ -1,6 +1,7 @@
 (library
  (public_name gamelle.sdl)
  (name gamelle_sdl)
+ (optional)
  (private_modules
   bitmap
   common

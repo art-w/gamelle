@@ -6,5 +6,5 @@ run:
 	dune build --root=. --watch
 
 html:
-	dune build --root=. --profile=release
+	dune build --root=. --profile=release snake.html
 	xdg-open _build/default/snake.html

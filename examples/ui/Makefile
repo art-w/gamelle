@@ -6,5 +6,5 @@ run:
 	dune build --watch
 
 html:
-	dune build --profile=release
+	dune build --root=. --profile=release ui.html
 	xdg-open _build/default/ui.html
