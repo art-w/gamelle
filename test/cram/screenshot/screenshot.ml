@@ -2,7 +2,7 @@ open Webdriver_cohttp_lwt_unix
 open Infix
 
 let test =
-  let* () = goto (Printf.sprintf "file://%s/%s" (Sys.getcwd ())  Sys.argv.(1)) in
+  let* () = goto (Printf.sprintf "file://%s/%s" (Sys.getcwd ()) Sys.argv.(1)) in
   Unix.sleepf 0.5;
   let* img = screenshot () in
   return img
