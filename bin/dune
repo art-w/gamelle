@@ -9,5 +9,9 @@
   str
   cmdliner
   dynlink
-  inotify
-  tsdl-image))
+  tsdl-image
+  (select
+   hotreload.ml
+   from
+   (inotify -> hotreload.available.ml)
+   (!inotify -> hotreload.unavailable.ml))))

@@ -27,7 +27,8 @@
     (result (>= 1.5))
     (crunch (>= 3.3.1))
     (ppx_blob (>= 0.7.2))
-    (inotify (>= 2.1))
-    (uuseg (>= 15.1.0))))
+    (uuseg (>= 15.1.0)))
+  (depopts (inotify (>= 2.1)))
+)
 
 (package (name conf-sdl2-gfx) (allow_empty))
