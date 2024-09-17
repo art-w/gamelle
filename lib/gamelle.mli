@@ -252,6 +252,12 @@ module Box : sig
   val v : Point.t -> Size.t -> t
   (** [v topleft size] is a box with origin point [topleft] and dimension [size]. *)
 
+  val v_center : Point.t -> Size.t -> t
+  (** [v_center p size] is a box with center point [p] and dimension [size]. *)
+
+  val v_corners : Point.t -> Size.t -> t
+  (** [v_corner topleft bottomright] is a box with origin point [topleft] and bottom right point [bottomright]. *)
+
   val zero : t
   (** [zero] is the empty box located at the origin. *)
 
