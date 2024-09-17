@@ -22,7 +22,8 @@
     (result (>= 1.5))
     (crunch (>= 3.3.1))
     (ppx_blob (>= 0.7.2))
-    (uuseg (>= 15.1.0)))
+    (uuseg (>= 15.1.0))
+    (imagelib (>= 20221222)))
   (depopts
     (inotify (>= 2.1))
     (tsdl (>= 1.0.0))
