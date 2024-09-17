@@ -11,7 +11,7 @@ depends: [
   "dune" {>= "3.15"}
   "ocaml" {>= "4.0.8"}
   "js_of_ocaml" {>= "5.6.0"}
-  "brr" {>= "0.0.6"}
+  "brr" {= "0.0.6"}
   "gg" {>= "1.0.0"}
   "color" {>= "0.2.0"}
   "ctypes" {>= "0.21.1"}
@@ -19,6 +19,7 @@ depends: [
   "crunch" {>= "3.3.1"}
   "ppx_blob" {>= "0.7.2"}
   "uuseg" {>= "15.1.0"}
+  "imagelib" {>= "20221222"}
   "odoc" {with-doc}
 ]
 depopts: [
