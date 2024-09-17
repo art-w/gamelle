@@ -7,7 +7,11 @@ let extension_loader ~sysname ~ext =
   | ".ttf" -> Some (Raw "Gamelle.Font.load")
   | ".png" | ".jpeg" | ".jpg" ->
       let chunk_reader = ImageUtil_unix.chunk_reader_of_path sysname in
-      let w, h = ImageLib.size ~extension:(String.sub ext 1 (String.length ext - 1)) chunk_reader in
+      let w, h =
+        ImageLib.size
+          ~extension:(String.sub ext 1 (String.length ext - 1))
+          chunk_reader
+      in
       let raw = Printf.sprintf "Gamelle.Bitmap.load ~w:%i ~h:%i" w h in
       let parts = sysname ^ ".parts" in
       if Sys.file_exists parts then

@@ -68,4 +68,5 @@ end
 
 module Window : sig
   val show_cursor : io:io -> bool -> unit
+  val size : io:io -> Size.t
 end

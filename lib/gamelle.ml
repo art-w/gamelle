@@ -18,6 +18,8 @@ module Window = Window_
 
 let run init f =
   Gamelle_backend.run init (fun ~io ->
+      Box.fill ~io ~color:Color.black (Window.box ~io);
+      Format.printf "%a@." Box.pp (Window.box ~io);
       let r = f ~io in
       Gamelle_common.finalize_frame ~io;
       r)

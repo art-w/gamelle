@@ -2,9 +2,7 @@ open Gamelle_common
 open Geometry
 module W = Gamelle_backend.Window
 
-let size ~io =
-  let w, h = !(io.window_size) in
-  Size.v (float w) (float h)
+let size ~io = W.size ~io
 
 let set_size ~io s =
   let w = s |> Size.width |> int_of_float

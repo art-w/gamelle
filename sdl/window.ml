@@ -28,3 +28,7 @@ let finalize_frame ~io =
 let has_focus window =
   let flags = Sdl.get_window_flags window in
   Sdl.Window.(test input_focus) flags
+
+let size ~io =
+  let w, h = Sdl.get_window_size io.backend.window in
+  Size.v (float w) (float h)

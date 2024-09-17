@@ -28,6 +28,10 @@ module Window = struct
       Canvas.set_h canvas h;
       current_size := s)
 
+  let size ~io =
+    let canvas = io.backend.canvas in
+    Size.v (float (Canvas.w canvas)) (float (Canvas.h canvas))
+
   let show_cursor ~io status =
     let canvas = io.backend.canvas in
     let el = Canvas.to_el canvas in
