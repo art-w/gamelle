@@ -6,6 +6,7 @@
   gamelle_template
   unix
   str
+  threads
   cmdliner
   dynlink
   imagelib
