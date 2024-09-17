@@ -737,7 +737,7 @@ module Window : sig
       Example:
 
       {[
-      Window.set_size (Size.v 800. 800.) ;
+      Window.set_size ~io (Size.v 800. 800.) ;
       ]}
 
   *)
