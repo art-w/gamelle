@@ -9,7 +9,7 @@ homepage: "https://github.com/art-w/gamelle"
 bug-reports: "https://github.com/art-w/gamelle/issues"
 depends: [
   "dune" {>= "3.15"}
-  "ocaml" {>= "4.0.8"}
+  "ocaml" {>= "5.0.1"}
   "js_of_ocaml" {>= "5.6.0"}
   "brr" {= "0.0.6"}
   "gg" {>= "1.0.0"}
@@ -20,6 +20,7 @@ depends: [
   "ppx_blob" {>= "0.7.2"}
   "uuseg" {>= "15.1.0"}
   "imagelib" {>= "20221222"}
+  "webdriver_cohttp-lwt-unix" {with-test}
   "odoc" {with-doc}
 ]
 depopts: [
@@ -45,3 +46,7 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/art-w/gamelle.git"
+pin-depends: [
+    [ "webdriver.dev"                 "git+https://github.com/art-w/ocaml-webdriver.git#master" ]
+    [ "webdriver_cohttp-lwt-unix.dev" "git+https://github.com/art-w/ocaml-webdriver.git#master" ]
+]

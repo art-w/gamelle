@@ -1,0 +1,4 @@
+pin-depends: [
+    [ "webdriver.dev"                 "git+https://github.com/art-w/ocaml-webdriver.git#master" ]
+    [ "webdriver_cohttp-lwt-unix.dev" "git+https://github.com/art-w/ocaml-webdriver.git#master" ]
+]

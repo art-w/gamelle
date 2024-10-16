@@ -13,7 +13,7 @@
   (name gamelle)
   (synopsis "Gamelle")
   (depends
-    (ocaml (>= 4.0.8))
+    (ocaml (>= 5.0.1))
     (js_of_ocaml (>= 5.6.0))
     (brr (= 0.0.6))
     (gg (>= 1.0.0))
@@ -23,7 +23,8 @@
     (crunch (>= 3.3.1))
     (ppx_blob (>= 0.7.2))
     (uuseg (>= 15.1.0))
-    (imagelib (>= 20221222)))
+    (imagelib (>= 20221222))
+    (webdriver_cohttp-lwt-unix :with-test))
   (depopts
     (inotify (>= 2.1))
     (tsdl (>= 1.0.0))
