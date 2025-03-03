@@ -4,4 +4,4 @@
  (package gamelle)
  (modules tsdl_gfx)
  (libraries ctypes tsdl result)
- (c_library_flags -lSDL2_gfx))
+ (c_library_flags -Wl,--no-as-needed -lSDL2_gfx))
