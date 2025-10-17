@@ -4,7 +4,7 @@ type 'a abstract_io = {
   clip : Geometry.Box.t option;
   clip_events : bool;
   z_index : int;
-  color : Color.t;
+  color : Color_.t;
   window_size : (int * int) ref;
   clean : (unit -> unit) list ref;
   draws : (int * (unit -> unit)) list ref;
