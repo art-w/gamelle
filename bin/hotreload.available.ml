@@ -16,6 +16,7 @@ let to_string = function
   | Q_overflow -> "Q_overflow"
   | Unmount -> "Unmount"
 
+let () = ignore to_string
 let wait () = Unix.sleepf 0.01
 
 let[@inline never] mutex_protect m f =

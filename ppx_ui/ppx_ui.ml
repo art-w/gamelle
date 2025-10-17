@@ -14,19 +14,6 @@ let ui =
            Ui.update_loc [%e expr_ui ~loc]
              [%e Ast_builder.Default.(estring ~loc loc_string)]])
 
-let rec extract_args = function
-  | [%expr fun [%p? arg] -> [%e? e]] ->
-      let args, expr = extract_args e in
-      (arg :: args, expr)
-  | e -> ([], e)
-
-let rec build_func args expr =
-  match args with
-  | arg :: args ->
-      let loc = arg.ppat_loc in
-      [%expr fun [%p arg] -> [%e build_func args expr]]
-  | [] -> expr
-
 let traverse_ui =
   object
     inherit Ast_traverse.map as super
@@ -34,15 +21,61 @@ let traverse_ui =
     method! expression e =
       let e = super#expression e in
       match e with
-      | [%expr fun [%ui] -> [%e? subexpr]] ->
-          let args, body = extract_args subexpr in
-          let loc = subexpr.pexp_loc in
-          let body =
-            [%expr Ui.nest_loc [%e expr_ui ~loc] (fun () -> [%e body])]
+      | {
+       pexp_loc;
+       pexp_attributes;
+       pexp_loc_stack;
+       pexp_desc =
+         Pexp_function
+           ( {
+               pparam_loc;
+               pparam_desc = Pparam_val (Nolabel, None, [%pat? [%ui]]);
+             }
+             :: args,
+             typ_cons,
+             body );
+      } ->
+          let loc =
+            match body with
+            | Pfunction_body body -> body.pexp_loc
+            | Pfunction_cases (_, loc, _) -> loc
           in
-          let func = build_func args body in
+          let func =
+            [%expr
+              [%e
+                {
+                  pexp_attributes;
+                  pexp_loc_stack;
+                  pexp_loc;
+                  pexp_desc =
+                    Pexp_function
+                      ( args,
+                        typ_cons,
+                        Pfunction_body
+                          [%expr
+                            Ui.nest_loc [%e expr_ui ~loc]
+                              [%e
+                                {
+                                  pexp_attributes = [];
+                                  pexp_loc_stack;
+                                  pexp_loc;
+                                  pexp_desc =
+                                    Pexp_function
+                                      ( [
+                                          {
+                                            pparam_loc = loc;
+                                            pparam_desc =
+                                              Pparam_val
+                                                (Nolabel, None, [%pat? ()]);
+                                          };
+                                        ],
+                                        None,
+                                        body );
+                                }]] );
+                }]]
+          in
           let loc = e.pexp_loc in
-          [%expr fun [%p pat_ui ~loc] -> [%e func]]
+          [%expr fun [%p pat_ui ~loc:pparam_loc] -> [%e func]]
       | _ -> e
   end
 

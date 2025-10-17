@@ -24,7 +24,10 @@ let await_or_error fut =
 
 let blob_url binstring =
   let img = Bitmap.tarray_of_string binstring in
-  let b64 = Base64.data_of_binary_jstr @@ Tarray.to_binary_jstr img in
+  let b64 =
+    Base64.data_of_binary_jstr @@ Tarray.to_binary_jstr
+    @@ Tarray.of_bigarray1 img
+  in
   let b64 =
     match Base64.encode b64 with
     | Ok v -> v

@@ -31,7 +31,8 @@ let load binstring =
      let arr = Bitmap.tarray_of_string binstring in
      let fontface_class = Jv.get Jv.global "FontFace" in
      let ttf =
-       Jv.new' fontface_class [| Jv.of_string name; Tarray.to_jv arr |]
+       Jv.new' fontface_class
+         [| Jv.of_string name; Tarray.(to_jv (of_bigarray1 arr)) |]
      in
      let loading = Jv.call ttf "load" [||] in
      let _ =
