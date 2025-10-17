@@ -1,55 +1,58 @@
 (** Gamelle is a tiny 2D game engine. It provides:
 
-- Hot code reload on every file change for a quick feedback loop
-- Export to a single HTML file to share your game online
-- Automatic assets loading for images, sounds and fonts: see {!section:Assets}
-- Immediate mode GUI to quickly put together menus and widgets: see {!Ui}
-- Collisions detection and rigid physics: see {!Physics}
+    - Hot code reload on every file change for a quick feedback loop
+    - Export to a single HTML file to share your game online
+    - Automatic assets loading for images, sounds and fonts: see
+      {!section:Assets}
+    - Immediate mode GUI to quickly put together menus and widgets: see {!Ui}
+    - Collisions detection and rigid physics: see {!Physics}
 
-{1 Getting started}
+    {1 Getting started}
 
-You can create a new game project with:
+    You can create a new game project with:
 
-{@shell[
-$ gamelle init mygame
-$ cd mygame
-$ make
-]}
+    {@shell[
+      $ gamelle init mygame
+      $ cd mygame
+      $ make
+    ]}
 
-The [make] command starts the game in development mode: Editing [src/mygame.ml] will automatically reload your game on every change. Game assets added to the folder [assets/] are automatically available through the dynamic [Assets] module.
+    The [make] command starts the game in development mode: Editing
+    [src/mygame.ml] will automatically reload your game on every change. Game
+    assets added to the folder [assets/] are automatically available through the
+    dynamic [Assets] module.
 
-To export your game as a single HTML file, compiled with [js_of_ocaml] and including all game assets:
+    To export your game as a single HTML file, compiled with [js_of_ocaml] and
+    including all game assets:
 
-{@shell[
-$ make html
-]}
-
-*)
+    {@shell[
+      $ make html
+    ]} *)
 
 (** {1 Main loop} *)
 
 type io
-(** The type allowing input/output operations. Every side-effecting function requires a named argument [~io] of this type. *)
+(** The type allowing input/output operations. Every side-effecting function
+    requires a named argument [~io] of this type. *)
 
 val run : 'state -> (io:io -> 'state -> 'state) -> unit
-(** [run initial_state fn] is the game main loop. The function [fn] will
-    be called at every frame to react to player inputs and draw the game state on the screen.
+(** [run initial_state fn] is the game main loop. The function [fn] will be
+    called at every frame to react to player inputs and draw the game state on
+    the screen.
 
     {[
-open Gamelle
+      open Gamelle
 
-type state = ...
+      type state = ...
 
-let initial_state = ...
+      let initial_state = ...
 
-let () =
-  Gamelle.run initial_state @@ fun ~io current_state ->
-    let new_state = (* TODO: react to player inputs and update the current state *) in
-    (* TODO: draw the new game state *)
-    new_state
-]}
-
-*)
+      let () =
+        Gamelle.run initial_state @@ fun ~io current_state ->
+          let new_state = (* TODO: react to player inputs and update the current state *) in
+          (* TODO: draw the new game state *)
+          new_state
+    ]} *)
 
 (** {1 Maths} *)
 
@@ -62,18 +65,22 @@ module Color : sig
   (** The type of colors. *)
 
   val v : float -> float -> float -> float -> t
-  (** [v r g b a] is the color with alpha transparency [a] and RGB components between [0.0] and [1.0] *)
+  (** [v r g b a] is the color with alpha transparency [a] and RGB components
+      between [0.0] and [1.0] *)
 
   val rgb : ?alpha:float -> int -> int -> int -> t
-  (** [rgb r g b] is the RGB color with components red [r], green [g] and blue [b] between [0] and [255]. *)
+  (** [rgb r g b] is the RGB color with components red [r], green [g] and blue
+      [b] between [0] and [255]. *)
 
   val hsl : ?alpha:float -> float -> float -> float -> t
-  (** [hsl h s l] returns a color from the hue [h] (between [0.0] and [360.0]), the saturation [s] and lightness [l] (between [0.0] and [1.0]). *)
+  (** [hsl h s l] returns a color from the hue [h] (between [0.0] and [360.0]),
+      the saturation [s] and lightness [l] (between [0.0] and [1.0]). *)
 
   (** {1 Transformations} *)
 
   val with_alpha : float -> t -> t
-  (** [with_alpha a c] returns the color [c] with its alpha transparency set to [a]. *)
+  (** [with_alpha a c] returns the color [c] with its alpha transparency set to
+      [a]. *)
 
   (** {1 Basic colors} *)
 
@@ -121,12 +128,12 @@ module Point : sig
   (** [y pt] returns the [y] coordinate of the point [pt]. *)
 
   val lerp : float -> t -> t -> t
-  (** [lerp t a b] is the linear interpolation between the two points [a] and [b] controlled by the time parameter [t].
+  (** [lerp t a b] is the linear interpolation between the two points [a] and
+      [b] controlled by the time parameter [t].
 
       - [lerp 0.0 a b = a]
       - [lerp 1.0 a b = b]
-      - [lerp 0.5 a b =] mid point of [a] and [b]
-  *)
+      - [lerp 0.5 a b =] mid point of [a] and [b] *)
 end
 
 module Vec : sig
@@ -240,23 +247,27 @@ module Segment : sig
   (** [vector s] is the direction vector of the segment [s]. *)
 
   val intersect : t -> t -> bool
-  (** [intersect a b] returns [true] if segment [a] intersects segment [b], [false] otherwise. *)
+  (** [intersect a b] returns [true] if segment [a] intersects segment [b],
+      [false] otherwise. *)
 end
 
 module Box : sig
   (** Axis-aligned bounding boxes. *)
 
   type t
-  (** The type of axis-aligned bounding boxes (rectangles without a rotation). *)
+  (** The type of axis-aligned bounding boxes (rectangles without a rotation).
+  *)
 
   val v : Point.t -> Size.t -> t
-  (** [v topleft size] is a box with origin point [topleft] and dimension [size]. *)
+  (** [v topleft size] is a box with origin point [topleft] and dimension
+      [size]. *)
 
   val v_center : Point.t -> Size.t -> t
   (** [v_center p size] is a box with center point [p] and dimension [size]. *)
 
   val v_corners : Point.t -> Size.t -> t
-  (** [v_corner topleft bottomright] is a box with origin point [topleft] and bottom right point [bottomright]. *)
+  (** [v_corner topleft bottomright] is a box with origin point [topleft] and
+      bottom right point [bottomright]. *)
 
   val zero : t
   (** [zero] is the empty box located at the origin. *)
@@ -322,7 +333,8 @@ module Box : sig
   (** {2 Collisions} *)
 
   val mem : Point.t -> t -> bool
-  (** [mem pt b] returns [true] if the point [pt] lies inside the box [b], [false] otherwise. *)
+  (** [mem pt b] returns [true] if the point [pt] lies inside the box [b],
+      [false] otherwise. *)
 
   val random_mem : t -> Point.t
   (** [random_mem b] returns a random point inside the box [b]. *)
@@ -367,13 +379,16 @@ module Circle : sig
   (** {2 Collisions} *)
 
   val mem : Point.t -> t -> bool
-  (** [mem pt c] returns [true] if point [pt] lies inside the circle [c], [false] otherwise. *)
+  (** [mem pt c] returns [true] if point [pt] lies inside the circle [c],
+      [false] otherwise. *)
 
   val intersect : t -> t -> bool
-  (** [intersect a b] returns [true] if circle [a] intersects circle [b], [false] otherwise. *)
+  (** [intersect a b] returns [true] if circle [a] intersects circle [b],
+      [false] otherwise. *)
 
   val intersections : t -> t -> Point.t list
-  (** [intersections a b] returns the list of intersections points between the circles [a] and [b]. *)
+  (** [intersections a b] returns the list of intersections points between the
+      circles [a] and [b]. *)
 end
 
 module Polygon : sig
@@ -459,21 +474,28 @@ module Shape : sig
   (** {2 Collisions} *)
 
   val mem : Point.t -> t -> bool
-  (** [mem pt s] returns [true] if point [pt] lies inside the shape [s], [false] otherwise. *)
+  (** [mem pt s] returns [true] if point [pt] lies inside the shape [s], [false]
+      otherwise. *)
 
   val distance2 : Point.t -> t -> float
-  (** [distance2 pt s] returns the squared distance of the point [pt] with the shape [s]. *)
+  (** [distance2 pt s] returns the squared distance of the point [pt] with the
+      shape [s]. *)
 
   val intersect : t -> t -> bool
-  (** [intersect a b] returns [true] if the shape [a] intersects the shape [b], [false] otherwise. *)
+  (** [intersect a b] returns [true] if the shape [a] intersects the shape [b],
+      [false] otherwise. *)
 
   val intersections : t -> t -> Point.t list
-  (** [intersections a b] returns the list of intersections points between the shapes [a] and [b]. *)
+  (** [intersections a b] returns the list of intersections points between the
+      shapes [a] and [b]. *)
 end
 
 (** {1:Assets Assets} *)
 
-(** Game assets like images, fonts and sounds which are added to the [assets/] folder are automatically loaded and available through the dynamic [Assets] module. For example, a bitmap file [assets/foo.png] is accessible as [Assets.foo : Bitmap.t]. *)
+(** Game assets like images, fonts and sounds which are added to the [assets/]
+    folder are automatically loaded and available through the dynamic [Assets]
+    module. For example, a bitmap file [assets/foo.png] is accessible as
+    [Assets.foo : Bitmap.t]. *)
 
 (** {3 Images} *)
 
@@ -484,7 +506,8 @@ module Bitmap : sig
   (** The type of bitmap images (png, jpeg). *)
 
   val draw : io:io -> at:Point.t -> t -> unit
-  (** [draw ~io ~at img] draws the image [img] at position [at] on the screen. *)
+  (** [draw ~io ~at img] draws the image [img] at position [at] on the screen.
+  *)
 
   (** {2 Accessors} *)
 
@@ -498,12 +521,14 @@ module Bitmap : sig
   (** [dimensions img] is the width and height dimensions of the image [img]. *)
 
   val size : t -> Size.t
-  (** [size img] is the width and height size of the image [img]. Same as {!dimensions}. *)
+  (** [size img] is the width and height size of the image [img]. Same as
+      {!dimensions}. *)
 
   (** {2 Transforms} *)
 
   val sub : x:int -> y:int -> w:int -> h:int -> t -> t
-  (** [sub ~x ~y ~w ~h img] returns the sub-image at position [x,y] and size [w,h]. *)
+  (** [sub ~x ~y ~w ~h img] returns the sub-image at position [x,y] and size
+      [w,h]. *)
 
   (**/**)
 
@@ -511,16 +536,15 @@ module Bitmap : sig
 end
 
 val draw : io:io -> at:Point.t -> Bitmap.t -> unit
-(** [draw ~io ~at bitmap] draws the image [bitmap] at position [at] on the screen. Same as {!Bitmap.draw}.
+(** [draw ~io ~at bitmap] draws the image [bitmap] at position [at] on the
+    screen. Same as {!Bitmap.draw}.
 
-Example:
+    Example:
 
-{[
-(* draw the assets/player.png bitmap at position x=100, y=200 *)
-draw ~io Assets.player ~at:(Point.v 100. 200.) ;
-]}
-
-*)
+    {[
+      (* draw the assets/player.png bitmap at position x=100, y=200 *)
+      draw ~io Assets.player ~at:(Point.v 100. 200.)
+    ]} *)
 
 (** {3 Text} *)
 
@@ -552,7 +576,8 @@ module Text : sig
     at:Point.t ->
     string ->
     unit
-  (** [draw ~io ~at txt] prints the string [txt] at position [at] on the screen. *)
+  (** [draw ~io ~at txt] prints the string [txt] at position [at] on the screen.
+  *)
 
   val draw_multiline :
     io:io ->
@@ -564,12 +589,15 @@ module Text : sig
     at:Point.t ->
     string ->
     unit
-  (** [draw_multiline ~io ~at txt] prints the string [txt] at position [at] on the screen, possibly wrapping it on multiple lines if the text overflows [?width]. *)
+  (** [draw_multiline ~io ~at txt] prints the string [txt] at position [at] on
+      the screen, possibly wrapping it on multiple lines if the text overflows
+      [?width]. *)
 
   (** {2 Measure} *)
 
   val size : io:io -> ?font:Font.t -> ?size:int -> string -> Size.t
-  (** [size ~io str] returns the size that would be used by {!draw} to render the text [str]. *)
+  (** [size ~io str] returns the size that would be used by {!draw} to render
+      the text [str]. *)
 
   val size_multiline :
     io:io ->
@@ -579,7 +607,8 @@ module Text : sig
     ?size:int ->
     string ->
     Size.t
-  (** [size_multiline ~io str] returns the size that would be used by {!draw_multiline} to render the text [str] on multiple lines. *)
+  (** [size_multiline ~io str] returns the size that would be used by
+      {!draw_multiline} to render the text [str] on multiple lines. *)
 end
 
 val draw_string :
@@ -590,21 +619,21 @@ val draw_string :
   at:Point.t ->
   string ->
   unit
-(** [draw_string ~io ~at txt] prints the string [txt] at position [at] on the screen. Same as {!Text.draw}.
+(** [draw_string ~io ~at txt] prints the string [txt] at position [at] on the
+    screen. Same as {!Text.draw}.
 
-- [?color] is the text color, see {!View.color}
-- [?font] is the typeface used to render the text, see {!val:View.font}
-- [?size] is the font size, see {!View.font_size}
+    - [?color] is the text color, see {!View.color}
+    - [?font] is the typeface used to render the text, see {!val:View.font}
+    - [?size] is the font size, see {!View.font_size}
 
-Examples:
+    Examples:
 
-{[
-draw_string ~io "Hello World" ~at:(Input.mouse_pos ~io) ;
-draw_string ~io ~color:Color.red ~at:(Point.v 200. 100.) "Bloody!" ;
-draw_string ~io ~at:Point.zero "Why so serious?" ~font:Assets.comic_sans ~size:50 ;
-]}
-
- *)
+    {[
+      draw_string ~io "Hello World" ~at:(Input.mouse_pos ~io);
+      draw_string ~io ~color:Color.red ~at:(Point.v 200. 100.) "Bloody!";
+      draw_string ~io ~at:Point.zero "Why so serious?" ~font:Assets.comic_sans
+        ~size:50
+    ]} *)
 
 (** {3 Audio} *)
 
@@ -618,7 +647,9 @@ module Sound : sig
   (** [play ~io t] plays the sound [t] once. *)
 
   val play_music : io:io -> t -> unit
-  (** [play_music ~io t] plays the music [t] on a loop. If the music [t] was already playing, this function does nothing. Otherwise there can only be one music playing at a time, so the previous one is stopped. *)
+  (** [play_music ~io t] plays the music [t] on a loop. If the music [t] was
+      already playing, this function does nothing. Otherwise there can only be
+      one music playing at a time, so the previous one is stopped. *)
 
   val stop_music : io:io -> unit
   (** [stop_music ~io] stops the currently playing music. *)
@@ -659,13 +690,16 @@ module Input : sig
   (** The type of player inputs. *)
 
   val is_pressed : io:io -> key -> bool
-  (** [is_pressed ~io key] returns [true] if the player is currently holding [key]. *)
+  (** [is_pressed ~io key] returns [true] if the player is currently holding
+      [key]. *)
 
   val is_down : io:io -> key -> bool
-  (** [is_down ~io key] returns [true] if the player just started pressing the [key]. *)
+  (** [is_down ~io key] returns [true] if the player just started pressing the
+      [key]. *)
 
   val is_up : io:io -> key -> bool
-  (** [is_up ~io key] returns [true] if the player was holding [key] and just released it. *)
+  (** [is_up ~io key] returns [true] if the player was holding [key] and just
+      released it. *)
 
   (** {2 Mouse} *)
 
@@ -705,7 +739,8 @@ module View : sig
   (** [rotate a io] rotates everything by angle [a]. *)
 
   val drawing_box : ?scale:bool -> ?set_window_size:bool -> Box.t -> io -> io
-  (** [drawing_box b io] ensures the box [b] matches the dimensions of the window. See {!Window.size}. *)
+  (** [drawing_box b io] ensures the box [b] matches the dimensions of the
+      window. See {!Window.size}. *)
 
   val clip : Box.t -> io -> io
   (** [clip b io] ensures no drawing can happen outside of the box [b]. *)
@@ -729,7 +764,8 @@ module Window : sig
   (** Configure the game window. *)
 
   val show_cursor : io:io -> bool -> unit
-  (** [show_cursor ~io visible] toggles the visibility of the operating system mouse cursor. *)
+  (** [show_cursor ~io visible] toggles the visibility of the operating system
+      mouse cursor. *)
 
   val set_size : io:io -> Size.t -> unit
   (** [set_size ~io wh] resizes the operating system window.
@@ -737,10 +773,8 @@ module Window : sig
       Example:
 
       {[
-      Window.set_size ~io (Size.v 800. 800.) ;
-      ]}
-
-  *)
+        Window.set_size ~io (Size.v 800. 800.)
+      ]} *)
 
   val size : io:io -> Size.t
   (** [size ~io] returns the current size of the game window. *)
@@ -751,64 +785,67 @@ module Window : sig
       Example:
 
       {[
-      (* clear the screen *)
-      Box.fill ~io ~color:Color.white (Window.box ~io) ;
-      ]}
-  *)
+        (* clear the screen *)
+        Box.fill ~io ~color:Color.white (Window.box ~io)
+      ]} *)
 end
 
 (** {1 Animations} *)
 
 val clock : io:io -> float
-(** [clock ~io] returns the number of elapsed seconds since the game started until the current frame. The clock is defined at the beginning of a frame, calling [clock] multiple times will always produce the same result.
+(** [clock ~io] returns the number of elapsed seconds since the game started
+    until the current frame. The clock is defined at the beginning of a frame,
+    calling [clock] multiple times will always produce the same result.
 
-Examples:
+    Examples:
 
-{[
-(* circle moving around a circle *)
-let center = Vec.(100.0 * v (1. +. cos (clock ~io)) (1. +. sin (clock ~io))) in
-Circle.fill ~io (Circle.v center 10.0);
-]}
+    {[
+      (* circle moving around a circle *)
+      let center =
+        Vec.(100.0 * v (1. +. cos (clock ~io)) (1. +. sin (clock ~io)))
+      in
+      Circle.fill ~io (Circle.v center 10.0)
+    ]}
 
-{[
-(* show elapsed time since the last click *)
-Gamelle.run 0. @@ fun ~io last_click ->
-let now = clock ~io in
-let last_click = if Input.is_up ~io `click_left then now else last_click in
-let elapsed = now -. last_click in
-draw_string ~io ~at:Point.zero (Printf.sprintf "Time since clicked: %fs" elapsed);
-last_click
-]}
-
-*)
+    {[
+      (* show elapsed time since the last click *)
+      Gamelle.run 0. @@ fun ~io last_click ->
+      let now = clock ~io in
+      let last_click =
+        if Input.is_up ~io `click_left then now else last_click
+      in
+      let elapsed = now -. last_click in
+      draw_string ~io ~at:Point.zero
+        (Printf.sprintf "Time since clicked: %fs" elapsed);
+      last_click
+    ]} *)
 
 val dt : io:io -> float
 (** [dt ~io] is the duration of a frame, which is fixed to a 60fps framerate.
 
-Example:
+    Example:
 
-{[
-Gamelle.run (Point.v 200. 200., Vec.zero) @@ fun ~io (position, velocity) ->
-let acceleration = Vec.v 0. 9.81 in (* gravity *)
-let velocity = Vec.(velocity + dt ~io * acceleration) in
-let position = Vec.(position + dt ~io * velocity) in
-Circle.draw ~io (Circle.v position 20.0);
-(position, velocity)
-]}
-
-*)
+    {[
+      Gamelle.run (Point.v 200. 200., Vec.zero)
+      @@ fun ~io (position, velocity) ->
+      let acceleration = Vec.v 0. 9.81 in
+      (* gravity *)
+      let velocity = Vec.(velocity + (dt ~io * acceleration)) in
+      let position = Vec.(position + (dt ~io * velocity)) in
+      Circle.draw ~io (Circle.v position 20.0);
+      (position, velocity)
+    ]} *)
 
 module Ease : sig
   (** Easing functions, to smooth changes over time.
 
-   - [in_] functions are smooth near zero.
-   - [out_] functions are smooth near one.
-   - [in_out_] functions are smooth on both ends.
-
-  *)
+      - [in_] functions are smooth near zero.
+      - [out_] functions are smooth near one.
+      - [in_out_] functions are smooth on both ends. *)
 
   type t = float -> float
-  (** The type of easing functions, with input and output varying from [0.0] to [1.0]. *)
+  (** The type of easing functions, with input and output varying from [0.0] to
+      [1.0]. *)
 
   val linear : t
   (** The [linear] identity, providing no easing at all. *)
@@ -857,16 +894,21 @@ module Anim : sig
   (** The type of animations describing an ['a] value varying over time. *)
 
   val v : float -> (float -> 'a) -> 'a t
-  (** [v duration fn] is an animation, lasting [duration] in seconds. The function [fn] will be called on demand to compute the current ['a] value. *)
+  (** [v duration fn] is an animation, lasting [duration] in seconds. The
+      function [fn] will be called on demand to compute the current ['a] value.
+  *)
 
   val const : float -> 'a -> 'a t
-  (** [const duration x] is a constant animation always producing [x], lasting [duration] seconds. *)
+  (** [const duration x] is a constant animation always producing [x], lasting
+      [duration] seconds. *)
 
   val frames : float -> 'a array -> 'a t
-  (** [frames duration arr] is an animation, lasting [duration] seconds, which steps over the values of the array [arr]. *)
+  (** [frames duration arr] is an animation, lasting [duration] seconds, which
+      steps over the values of the array [arr]. *)
 
   val update : dt:float -> 'a t -> 'a t
-  (** [update ~dt t] moves the animation [t] forward in time by [dt] seconds. See {!dt}. *)
+  (** [update ~dt t] moves the animation [t] forward in time by [dt] seconds.
+      See {!dt}. *)
 
   (** {2 Accessors} *)
 
@@ -877,7 +919,8 @@ module Anim : sig
   (** [last t] returns the last ['a] value, at the end of the animation. *)
 
   val duration : 'a t -> float
-  (** [duration t] is the length of the animation [t]. Returns [0.0] if the animation has completed. *)
+  (** [duration t] is the length of the animation [t]. Returns [0.0] if the
+      animation has completed. *)
 
   (** {2 Composition} *)
 
@@ -888,7 +931,9 @@ module Anim : sig
   (** [a >> b] is the same as [seq a b]. *)
 
   val continue : 'a t -> ('a -> 'a t) -> 'a t
-  (** [continue t fn] is the same as [seq a (fn (last t))]. It continues the animation [t] with a follow-up animation depending on the last value of [t]. *)
+  (** [continue t fn] is the same as [seq a (fn (last t))]. It continues the
+      animation [t] with a follow-up animation depending on the last value of
+      [t]. *)
 
   val ( >>- ) : 'a t -> ('a -> 'a t) -> 'a t
   (** [t >>- fn] is the same as [continue t fn]. *)
@@ -905,7 +950,8 @@ module Anim : sig
   (** [scale f t] stretches the animation [t] duration by a factor [f]. *)
 
   val cut : float -> 'a t -> 'a t * 'a t
-  (** [cut duration t] returns the animation [t] truncated to [duration], and the rest. *)
+  (** [cut duration t] returns the animation [t] truncated to [duration], and
+      the rest. *)
 
   val map : ('a -> 'b) -> 'a t -> 'b t
   (** [map fn t] applies [fn] to each output value of the animation [t]. *)
@@ -931,12 +977,10 @@ module Physics : sig
     t
   (** [v s] returns a new rigid body with shape [s].
 
-    - [?mass] is the weight of the rigid body.
-    - [?inertia] controls the reactivity of the rigid body.
-    - [?restitution] defines the bouncyness of the rigid body.
-    - [?kind] controls if the rigid body can move.
-
-  *)
+      - [?mass] is the weight of the rigid body.
+      - [?inertia] controls the reactivity of the rigid body.
+      - [?restitution] defines the bouncyness of the rigid body.
+      - [?kind] controls if the rigid body can move. *)
 
   (** {2 Accessors} *)
 
@@ -953,7 +997,8 @@ module Physics : sig
   (** [center t] returns the rotation of the rigid body [t]. *)
 
   val rot_velocity : t -> float
-  (** [rot_velocity t] returns the current rotational velocity of the rigid body [t]. *)
+  (** [rot_velocity t] returns the current rotational velocity of the rigid body
+      [t]. *)
 
   (** {2 Simulation} *)
 
@@ -961,27 +1006,33 @@ module Physics : sig
   (** [add_velocity v t] adds [v] to the rigid body [t] current {!velocity}. *)
 
   val add_rot_velocity : float -> t -> t
-  (** [add_rot_velocity r t] adds [r] to the rigid body [t] current rotational velocity. *)
+  (** [add_rot_velocity r t] adds [r] to the rigid body [t] current rotational
+      velocity. *)
 
   val update : dt:float -> t -> t
-  (** [update ~dt t] updates the rigid body [t] position and rotation according to its current velocities and delta time [dt]. *)
+  (** [update ~dt t] updates the rigid body [t] position and rotation according
+      to its current velocities and delta time [dt]. *)
 
   val fix_collisions : t list -> t list
-  (** [fix_collisions lst] detects and repairs any collisions between the rigid bodies in the list [lst]. *)
+  (** [fix_collisions lst] detects and repairs any collisions between the rigid
+      bodies in the list [lst]. *)
 
   (** {2 Teleportation} *)
 
   val set_center : Point.t -> t -> t
-  (** [set_center pt t] teleports the rigid body [t] to have a center at point [pt]. *)
+  (** [set_center pt t] teleports the rigid body [t] to have a center at point
+      [pt]. *)
 
   val set_rotation : float -> t -> t
   (** [set_rotation r t] rotates the rigid body [t] to have a rotation [r]. *)
 
   val set_velocity : Vec.t -> t -> t
-  (** [set_velocity speed t] sets the velocity of the rigid body [t] to the vector [speed]. *)
+  (** [set_velocity speed t] sets the velocity of the rigid body [t] to the
+      vector [speed]. *)
 
   val set_rot_velocity : float -> t -> t
-  (** [set_rot_velocity dr t] sets the rotational velocity of the rigid body [t] to [dr]. *)
+  (** [set_rot_velocity dr t] sets the rotational velocity of the rigid body [t]
+      to [dr]. *)
 
   (** {2 Draw} *)
 
