@@ -285,8 +285,18 @@ module Box : sig
 
   (** {2 Accessors} *)
 
+  (** {3 Size} *)
+
   val size : t -> Size.t
   (** [size b] returns the dimension of the box [b]. *)
+
+  val width : t -> float
+  (** [width b] returns the width of the box [b]. *)
+
+  val height : t -> float
+  (** [height b] returns the height of the box [b]. *)
+
+  (** {3 Vertices} *)
 
   val top_left : t -> Point.t
   (** [top_left b] returns the top-left point of the box [b]. *)
@@ -299,6 +309,8 @@ module Box : sig
 
   val bottom_right : t -> Point.t
   (** [bottom_right b] returns the bottom-right point of the box [b]. *)
+
+  (** {3 Coordinates} *)
 
   val x_left : t -> float
   (** [x_left b] is the left-most [x] coordinate of the box [b]. *)
@@ -317,6 +329,8 @@ module Box : sig
 
   val y_bottom : t -> float
   (** [y_bottom b] is the lower [y] coordinate of the box [b]. *)
+
+  (** {3 Edges} *)
 
   val left : t -> Segment.t
   (** [left b] returns the left segment of the box [b]. *)
@@ -713,6 +727,56 @@ end
 module Ui : sig
   (** Graphical user interface: buttons, checkboxes, text inputs. *)
 
+  type ui
+
+  val window :
+    io:io ->
+    ?width:(float -> float) ->
+    ?height:(float -> float) ->
+    (ui -> 'a) ->
+    'a
+
+  val button : ui -> string -> bool
+  val checkbox : ui -> string -> bool -> bool
+  val radios : ui -> ?equal:('a -> 'a -> bool) -> 'a -> ('a * string) list -> 'a
+  val slider : ui -> min:float -> max:float -> float -> float
+  val int_slider : ui -> min:int -> max:int -> int -> int
+  val text_input : ui -> string -> string
+  val label : ui -> string -> unit
+  val text_area : ui -> string -> unit
+  val vscroll : ui -> (unit -> 'a) -> 'a
+  val horizontal : ui -> ?gap:float -> (unit -> 'a) -> 'a
+  val vertical : ui -> ?gap:float -> (unit -> 'a) -> 'a
+  val over : ui -> (unit -> 'a) -> 'a
+
+  (* *)
+
+  type constrain = { min : float; flex : float; max : float }
+
+  val reshape :
+    ui ->
+    ?width:(constrain -> constrain) ->
+    ?height:(constrain -> constrain) ->
+    (unit -> 'a) ->
+    'a
+
+  val draw :
+    ui ->
+    ?min_width:float ->
+    ?max_width:float ->
+    ?min_height:float ->
+    ?max_height:float ->
+    ?flex_width:float ->
+    ?flex_height:float ->
+    (io:io -> Box.t -> unit) ->
+    unit
+
+  (**/**)
+
+  val update_loc : ui -> string -> ui
+  val nest_loc : ui -> (unit -> 'a) -> 'a
+
+  (*
   (** @inline *)
   include
     Ui.S
@@ -720,6 +784,7 @@ module Ui : sig
        and type point := Point.t
        and type size := Size.t
        and type box := Box.t
+*)
 end
 
 (** {1 Camera} *)

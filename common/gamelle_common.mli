@@ -5,9 +5,10 @@ module Events_backend : module type of Events_backend
 module Font : module type of Font
 module Delayed : module type of Delayed
 module Geometry : module type of Geometry
+module View : module type of View
 open Geometry
 
-type 'a abstract_io = {
+type 'a abstract_io = 'a View.abstract_io = {
   view : Transform.t;
   event : Events_backend.t;
   clip : box option;
@@ -20,7 +21,7 @@ type 'a abstract_io = {
   backend : 'a;
 }
 
-val make_io : 'a -> 'a abstract_io
+val make_io : ?previous:'a abstract_io -> 'a -> 'a abstract_io
 val clean_io : io:'a abstract_io -> (unit -> unit) -> unit
 val clock : io:'a abstract_io -> float
 val dt : io:'a abstract_io -> float
@@ -28,3 +29,4 @@ val z : io:'a abstract_io -> (io:'a abstract_io -> unit) -> unit
 val get_color : io:'a abstract_io -> Color.t option -> Color.t
 val finalize_frame : io:'a abstract_io -> unit
 val max_sounds : int
+val ui_replay_height : float ref
