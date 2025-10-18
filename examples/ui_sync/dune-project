@@ -1,0 +1,9 @@
+(lang dune 3.7)
+
+(name ui_sync)
+
+(package
+  (name ui_sync)
+  (synopsis "ui_sync")
+  (depends
+    gamelle))

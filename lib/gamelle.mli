@@ -1042,3 +1042,20 @@ module Physics : sig
   val fill : io:io -> ?color:Color.t -> t -> unit
   (** [fill ~io t] fills the inside of the rigid body [t]. *)
 end
+
+module Sync : sig
+  type ('i, 'o, 'a) continuation
+
+  type ('i, 'o, 'r) routine =
+    | Finished of 'r
+    | To_be_continued of 'o * ('i, 'o, 'r) continuation
+    | Start
+
+  val run :
+    ('i, 'o, 'r) routine ->
+    'i ->
+    (yield:('o -> 'i) -> 'i -> 'r) ->
+    ('i, 'o, 'r) routine
+end
+
+val run_sync : (io:io -> yield:(unit -> unit) -> unit) -> unit

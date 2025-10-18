@@ -4,6 +4,7 @@ module Ui = Ui
 module Ease = Ease
 module Anim = Anim
 module Physics = Physics
+module Sync = Sync
 module View = View
 module Transform = Gamelle_common.Transform
 module Input = Event
@@ -22,6 +23,14 @@ let run init f =
       let r = f ~io in
       Gamelle_common.finalize_frame ~io;
       r)
+
+let run_sync (f : io:Gamelle_backend.io -> yield:(unit -> unit) -> unit) : unit
+    =
+  run Sync.Start (fun ~io routine ->
+      let open Sync in
+      match Sync.run routine () (fun ~yield () -> f ~io ~yield) with
+      | Finished () -> raise Exit
+      | s -> s)
 
 module Font = Gamelle_backend.Font
 

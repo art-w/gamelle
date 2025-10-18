@@ -56,7 +56,7 @@ let run () =
   let open Gamelle_common in
   let events = ref Events_backend.default in
 
-  let latest_io = ref (make_io backend) in
+  let io = make_io backend in
 
   let rec loop () : unit =
     let t0 = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
@@ -65,23 +65,22 @@ let run () =
     now := t0;
 
     let was_replayed =
-      mutex_protect State.lock @@ fun () ->
-      Replay.replay ~backend ~events ~latest_io
+      mutex_protect State.lock @@ fun () -> Replay.replay ~events ~io
     in
 
     Sdl.pump_events ();
-    let event = Events_sdl.update ~clock:!Replay.clock !latest_io.event in
+    let event = Events_sdl.update ~clock:!Replay.clock !(io.event) in
     let has_focus = Window.has_focus window in
 
     if (not was_replayed) && (not (State.crashed ())) && has_focus then (
-      let io = { (make_io backend) with event } in
-      latest_io := io;
+      io_reset_mutable_fields io;
+      io.event := event;
       Replay.add event;
       State.update_frame ~io);
 
     if Events_backend.is_pressed event `quit then raise Exit;
 
-    Window.finalize_frame ~io:!latest_io;
+    Window.finalize_frame ~io;
     Sdl.render_present renderer;
 
     if State.crashed () || ((not has_focus) && not was_replayed) then
