@@ -9,7 +9,7 @@ open Geometry
 
 type 'a abstract_io = {
   view : Transform.t;
-  event : Events_backend.t;
+  event : Events_backend.t ref;
   clip : box option;
   clip_events : bool;
   z_index : int;
@@ -21,6 +21,7 @@ type 'a abstract_io = {
 }
 
 val make_io : 'a -> 'a abstract_io
+val io_reset_mutable_fields: 'a abstract_io -> unit
 val clean_io : io:'a abstract_io -> (unit -> unit) -> unit
 val clock : io:'a abstract_io -> float
 val dt : io:'a abstract_io -> float

@@ -35,7 +35,7 @@ let draw_progress ~io () =
   Draw.fill_rect ~io ~color:Color.red
     (Box.v (Point.v 10.0 10.0) (Size.v (percent *. (width -. 20.0)) 30.0))
 
-let replay ~backend ~events ~latest_io =
+let replay ~events ~io =
   let lst = !must_replay in
   if lst = [] then false
   else
@@ -49,8 +49,8 @@ let replay ~backend ~events ~latest_io =
           let e = { e with clock = !clock } in
           events := e;
           add e;
-          let io = { (Gamelle_common.make_io backend) with event = e } in
-          latest_io := io;
+          Gamelle_common.io_reset_mutable_fields io;
+          io.event := e;
           State.unsafe_update ~io;
           go ((e, count - 1) :: es)
     in

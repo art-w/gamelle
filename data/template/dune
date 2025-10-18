@@ -20,6 +20,7 @@
  (name mygame_js)
  (modules mygame_js)
  (modes js)
+ (flags )
  (libraries mygame gamelle.jsoo))
 
 (rule
