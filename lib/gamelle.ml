@@ -4,7 +4,7 @@ module Ui = Ui
 module Ease = Ease
 module Anim = Anim
 module Physics = Physics
-module Sync = Sync
+module Routine = Routine
 module View = View
 module Transform = Gamelle_common.Transform
 module Input = Event
@@ -24,11 +24,19 @@ let run init f =
       Gamelle_common.finalize_frame ~io;
       r)
 
-let run_sync (f : io:Gamelle_backend.io -> yield:(unit -> unit) -> unit) : unit
+let ref_next_frame = ref (fun () -> ())
+
+let next_frame ~(io:Gamelle_backend.io) = ignore io ;
+!ref_next_frame ()
+
+let run (f : io:Gamelle_backend.io -> unit) : unit
     =
-  run Sync.Start (fun ~io routine ->
-      let open Sync in
-      match Sync.run routine () (fun ~yield () -> f ~io ~yield) with
+  run Routine.Start (fun ~io routine ->
+      let open Routine in
+      match Routine.run routine () (fun ~next_frame () ->
+        if !ref_next_frame != next_frame then
+          ref_next_frame := next_frame;
+        f ~io) with
       | Finished () -> raise Exit
       | s -> s)
 

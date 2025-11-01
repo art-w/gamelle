@@ -35,7 +35,7 @@ type io
 (** The type allowing input/output operations. Every side-effecting function
     requires a named argument [~io] of this type. *)
 
-val run : 'state -> (io:io -> 'state -> 'state) -> unit
+val run : (io:io -> unit) -> unit
 (** [run initial_state fn] is the game main loop. The function [fn] will be
     called at every frame to react to player inputs and draw the game state on
     the screen.
@@ -53,6 +53,9 @@ val run : 'state -> (io:io -> 'state -> 'state) -> unit
           (* TODO: draw the new game state *)
           new_state
     ]} *)
+
+(** wait for the next frame *)
+val next_frame: io:io -> unit
 
 (** {1 Maths} *)
 
@@ -1043,7 +1046,7 @@ module Physics : sig
   (** [fill ~io t] fills the inside of the rigid body [t]. *)
 end
 
-module Sync : sig
+module Routine : sig
   type ('i, 'o, 'a) continuation
 
   type ('i, 'o, 'r) routine =
@@ -1054,8 +1057,6 @@ module Sync : sig
   val run :
     ('i, 'o, 'r) routine ->
     'i ->
-    (yield:('o -> 'i) -> 'i -> 'r) ->
+    (next_frame:('o -> 'i) -> 'i -> 'r) ->
     ('i, 'o, 'r) routine
 end
-
-val run_sync : (io:io -> yield:(unit -> unit) -> unit) -> unit

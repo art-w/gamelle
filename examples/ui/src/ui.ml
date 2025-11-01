@@ -6,9 +6,8 @@ type k' = k
 
 let two_checkboxes [%ui] l1 l2 = Ui.(checkbox [%ui] l1, checkbox [%ui] l2)
 
-let () =
-  Gamelle.run Box.zero @@ fun ~io box ->
-  if Input.is_pressed ~io `escape then raise Exit;
+let rec loop ~io box =
+   if Input.is_pressed ~io `escape then raise Exit;
   Window.show_cursor ~io true;
   let io = View.drawing_box box io in
   let _, box =
@@ -66,4 +65,7 @@ let () =
   in
   Segment.draw ~io ~color:Color.red (Segment.v Vec.zero (Vec.v 200. 0.));
   (* draw_text ~io ~color:Color.red ~size:20 "aaaa\nbbb" Vec.zero; *)
-  box
+  next_frame ~io;
+  loop ~io box
+
+let () = Gamelle.run (loop Box.zero)

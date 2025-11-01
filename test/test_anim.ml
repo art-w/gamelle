@@ -67,9 +67,7 @@ let update_particles ~dt ps : particles =
   let ps = List.map (Anim.update ~dt) ps in
   List.filter (fun a -> Anim.duration a > 0.0) ps
 
-let () =
-  Gamelle.run ([], initial_state)
-  @@ fun ~io (particles, { pos; color; radius }) ->
+let rec loop ~io (particles, { pos; color; radius }) =
   if Input.is_pressed ~io `escape then raise Exit;
   Window.show_cursor ~io true;
 
@@ -107,5 +105,7 @@ let () =
   let particles = new_particle (Input.mouse_pos ~io) :: particles in
   List.iter (fun draw -> Anim.get draw ~io) particles;
   let particles = update_particles ~dt:(dt ~io) particles in
+  next_frame ~io;
+  loop ~io (particles, { pos; color; radius })
 
-  (particles, { pos; color; radius })
+let () = Gamelle.run (loop ( [], initial_state))

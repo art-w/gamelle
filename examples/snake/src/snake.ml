@@ -47,51 +47,55 @@ let init =
   { apple = random_apple init_snake; snake = init_snake; last_frame = 0. }
 
 let () =
-  Gamelle.run init @@ fun ~io state ->
-  if Input.is_pressed ~io `escape then raise Exit;
+  Gamelle.run @@ fun ~io ->
+  let rec loop state =
+    if Input.is_pressed ~io `escape then raise Exit;
 
-  let state = if Input.is_pressed ~io `click_left then init else state in
+    let state = if Input.is_pressed ~io `click_left then init else state in
 
-  let state =
-    let snake = state.snake in
-    let dir =
-      if Input.is_pressed ~io `arrow_left then (-1, 0)
-      else if Input.is_pressed ~io `arrow_right then (1, 0)
-      else if Input.is_pressed ~io `arrow_down then (0, 1)
-      else if Input.is_pressed ~io `arrow_up then (0, -1)
-      else snake.dir
-    in
-    let snake = { snake with dir } in
-    { state with snake }
-  in
-
-  let state =
-    if state.last_frame +. frame_duration state > clock ~io then state
-    else
-      let snake = update state.snake in
-      let snake, apple =
-        if head snake = state.apple then
-          ({ snake with growth = snake.growth + 5 }, random_apple snake)
-        else (snake, state.apple)
+    let state =
+      let snake = state.snake in
+      let dir =
+        if Input.is_pressed ~io `arrow_left then (-1, 0)
+        else if Input.is_pressed ~io `arrow_right then (1, 0)
+        else if Input.is_pressed ~io `arrow_down then (0, 1)
+        else if Input.is_pressed ~io `arrow_up then (0, -1)
+        else snake.dir
       in
-      { snake; apple; last_frame = clock ~io }
+      let snake = { snake with dir } in
+      { state with snake }
+    in
+
+    let state =
+      if state.last_frame +. frame_duration state > clock ~io then state
+      else
+        let snake = update state.snake in
+        let snake, apple =
+          if head snake = state.apple then
+            ({ snake with growth = snake.growth + 5 }, random_apple snake)
+          else (snake, state.apple)
+        in
+        { snake; apple; last_frame = clock ~io }
+    in
+
+    let width = cell_size *. float size in
+    Window.set_size ~io (Size.v (width +. 20.0) (60.0 +. width));
+    Box.fill ~io ~color:Color.black (Window.box ~io);
+    let io = View.translate (Vec.v 10.0 10.0) io in
+    draw_string ~io ~at:Point.zero
+      (Printf.sprintf "Score: %i" (List.length state.snake.cells));
+    let io = View.translate (Vec.v 0.0 40.0) io in
+    Box.draw ~io (Box.v Point.zero (Size.v width width));
+    Box.fill ~io:(View.color Color.red io) (cell state.apple);
+    List.iter (fun at -> Box.fill ~io (cell at)) state.snake.cells;
+    let grey = Color.v 0.1 0.1 0.0 0.4 in
+    for x = 0 to size do
+      let x = cell_size *. float x in
+      Segment.draw ~io ~color:grey (Segment.v (Point.v x 0.0) (Point.v x width));
+      Segment.draw ~io ~color:grey (Segment.v (Point.v 0.0 x) (Point.v width x))
+    done;
+
+    next_frame ~io;
+    loop state
   in
-
-  let width = cell_size *. float size in
-  Window.set_size ~io (Size.v (width +. 20.0) (60.0 +. width));
-  Box.fill ~io ~color:Color.black (Window.box ~io);
-  let io = View.translate (Vec.v 10.0 10.0) io in
-  draw_string ~io ~at:Point.zero
-    (Printf.sprintf "Score: %i" (List.length state.snake.cells));
-  let io = View.translate (Vec.v 0.0 40.0) io in
-  Box.draw ~io (Box.v Point.zero (Size.v width width));
-  Box.fill ~io:(View.color Color.red io) (cell state.apple);
-  List.iter (fun at -> Box.fill ~io (cell at)) state.snake.cells;
-  let grey = Color.v 0.1 0.1 0.0 0.4 in
-  for x = 0 to size do
-    let x = cell_size *. float x in
-    Segment.draw ~io ~color:grey (Segment.v (Point.v x 0.0) (Point.v x width));
-    Segment.draw ~io ~color:grey (Segment.v (Point.v 0.0 x) (Point.v width x))
-  done;
-
-  state
+  loop init

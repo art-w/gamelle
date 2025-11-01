@@ -116,4 +116,9 @@ let update ~io { x; y; vx; vy; _ } =
 
   { x; y; vx; vy; mx; my }
 
-let () = run { mx = 0.0; my = 0.0; x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 } update
+let rec loop ~io state =
+  let state = update ~io state in
+  next_frame ~io;
+  loop ~io state
+
+let () = run (loop { mx = 0.0; my = 0.0; x = 0.0; y = 0.0; vx = 0.0; vy = 0.0 })
