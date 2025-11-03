@@ -35,6 +35,8 @@ type io
 (** The type allowing input/output operations. Every side-effecting function
     requires a named argument [~io] of this type. *)
 
+val run_loop : 'state -> (io:io -> 'state -> 'state) -> unit
+
 val run : (io:io -> unit) -> unit
 (** [run initial_state fn] is the game main loop. The function [fn] will be
     called at every frame to react to player inputs and draw the game state on

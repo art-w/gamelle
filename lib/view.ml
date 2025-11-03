@@ -4,6 +4,12 @@ open Draw_geometry
 let translate dxy io = { io with view = Transform.translate dxy io.view }
 let scale factor io = { io with view = Transform.scale factor io.view }
 let rotate angle io = { io with view = Transform.rotate angle io.view }
+
+let translation io = io.view.translate
+let scaling io = io.view.scale
+let rotation io = io.view.rotate
+
+
 let clip clip io = { io with clip = Some clip }
 let unclip io = { io with clip = None }
 let clip_events b io = { io with clip_events = b }
@@ -38,7 +44,10 @@ let drawing_box ?scale:must_scale ?(set_window_size = true) box io =
   if set_window_size && not must_scale then Window_.set_size ~io size;
   let window_mid = Box.center (Window_.box ~io) in
   let box_mid = Box.center box in
+
   let inv_scale = 1. /. io_scale in
-  let tr = Vec.((inv_scale * window_mid) - box_mid) in
+  let tr = Vec.((inv_scale * window_mid) - box_mid - translation io) in
+  (* Format.printf "%f %a %a %a@." inv_scale Box.pp (Window_.box ~io) Vec.pp (translation io) Vec.pp tr; *)
+
   let io = translate tr io in
   io

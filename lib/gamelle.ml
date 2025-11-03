@@ -17,7 +17,7 @@ let clock = Gamelle_backend.clock
 module Sound = Gamelle_backend.Sound
 module Window = Window_
 
-let run init f =
+let run_loop init f =
   Gamelle_backend.run init (fun ~io ->
       Box.fill ~io ~color:Color.black (Window.box ~io);
       let r = f ~io in
@@ -31,11 +31,10 @@ let next_frame ~(io:Gamelle_backend.io) = ignore io ;
 
 let run (f : io:Gamelle_backend.io -> unit) : unit
     =
-  run Routine.Start (fun ~io routine ->
+  run_loop Routine.Start (fun ~io routine ->
       let open Routine in
       match Routine.run routine () (fun ~next_frame () ->
-        if !ref_next_frame != next_frame then
-          ref_next_frame := next_frame;
+        ref_next_frame := next_frame;
         f ~io) with
       | Finished () -> raise Exit
       | s -> s)

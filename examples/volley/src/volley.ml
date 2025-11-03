@@ -101,10 +101,9 @@ let update_player ~io ~player:{ shape = player; jumps; grounded } ~gravity left
   { shape = player; jumps; grounded }
 
 let rec loop ~io ({ player1; player2; ball; _ } as state) =
-  let io = View.translate (Vec.v 0.0 500.0) io in
-  Window.set_size ~io (Size.v 1010. 1020.);
-  Box.fill ~io ~color:Color.black (Window.box ~io);
   let state =
+    let io = View.translate (Vec.v 0.0 500.0) io in
+    Box.fill ~io ~color:Color.black (Window.box ~io);
     if Input.is_pressed ~io `escape then raise Exit
     else if Input.is_down ~io (`input_char "r") then initial_state
     else if Vec.y (Physics.center ball) > 440.0 then
@@ -155,4 +154,17 @@ let rec loop ~io ({ player1; player2; ball; _ } as state) =
   next_frame ~io;
   loop ~io state
 
-let () = Gamelle.run (loop initial_state)
+let rec splash_screen ~io frame_number =
+  if frame_number / 8 mod 4 <> 0 then
+    Text.draw ~io ~size:30 ~at:Vec.zero "press space to play volley";
+  if Input.is_down ~io `space then ()
+  else (
+    next_frame ~io;
+    splash_screen ~io (frame_number + 1))
+
+let main ~io =
+  Window.set_size ~io (Size.v 1010. 1020.);
+  splash_screen ~io 0;
+  loop ~io initial_state
+
+let () = Gamelle.run main
