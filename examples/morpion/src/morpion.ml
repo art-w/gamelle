@@ -157,7 +157,8 @@ let draw_board ~io
 
 let failsound = Assets.Audio.confirm1
 
-let rec loop ~io state =
+let () =
+  run state @@ fun ~io state ->
   let { board; player } = state in
   let state =
     match victory board with
@@ -189,7 +190,4 @@ let rec loop ~io state =
   draw_background ~io ();
   draw_board ~io state.board;
   draw_grid ~io ();
-  next_frame ~io;
-  loop ~io state
-
-let () = run (loop state)
+  state

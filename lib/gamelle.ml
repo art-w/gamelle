@@ -26,18 +26,28 @@ let run_loop init f =
 
 let ref_next_frame = ref (fun () -> ())
 
-let next_frame ~(io:Gamelle_backend.io) = ignore io ;
-!ref_next_frame ()
+let next_frame ~(io : Gamelle_backend.io) =
+  ignore io;
+  !ref_next_frame ()
 
-let run (f : io:Gamelle_backend.io -> unit) : unit
-    =
+let run_no_loop (f : io:Gamelle_backend.io -> unit) : unit =
   run_loop Routine.Start (fun ~io routine ->
       let open Routine in
-      match Routine.run routine () (fun ~next_frame () ->
-        ref_next_frame := next_frame;
-        f ~io) with
+      match
+        Routine.run routine () (fun ~next_frame () ->
+            ref_next_frame := next_frame;
+            f ~io)
+      with
       | Finished () -> raise Exit
       | s -> s)
+
+let run init f =
+  let rec loop ~io state =
+    let state = f ~io state in
+    next_frame ~io;
+    loop ~io state
+  in
+  run_no_loop (loop init)
 
 module Font = Gamelle_backend.Font
 

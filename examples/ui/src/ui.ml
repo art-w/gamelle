@@ -7,7 +7,7 @@ type k' = k
 let two_checkboxes [%ui] l1 l2 = Ui.(checkbox [%ui] l1, checkbox [%ui] l2)
 
 let rec loop ~io box =
-   if Input.is_pressed ~io `escape then raise Exit;
+  if Input.is_pressed ~io `escape then raise Exit;
   Window.show_cursor ~io true;
   let io = View.drawing_box box io in
   let _, box =
@@ -68,4 +68,4 @@ let rec loop ~io box =
   next_frame ~io;
   loop ~io box
 
-let () = Gamelle.run (loop Box.zero)
+let () = Gamelle.run_no_loop (loop Box.zero)

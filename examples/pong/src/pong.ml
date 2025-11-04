@@ -144,7 +144,7 @@ let draw_players ~io state =
   Segment.draw ~io ~color player_left;
   Segment.draw ~io ~color player_right
 
-let rec loop ~io state =
+let update ~io state =
   let io = View.drawing_box box_game io in
   let player_speed = player_speed state in
   if Input.is_pressed ~io `escape then raise Exit;
@@ -184,7 +184,6 @@ let rec loop ~io state =
   draw_ball ~io state;
   draw_players ~io state;
   draw_score ~io ~state;
-  next_frame ~io;
-  loop ~io state
+  state
 
-let () = run (loop init)
+let () = run init update

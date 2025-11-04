@@ -71,11 +71,6 @@ let print_rects ~file { rects; _ } =
 
 let do_the_thing out file =
   let st = fresh_state file in
-  run @@ fun ~io ->
-    let rec loop st =
-      if Input.is_pressed ~io `quit then print_rects ~file:out st;
-      let st = main ~io st in
-      next_frame ~io;
-      loop st
-    in
-    loop st
+  run st @@ fun ~io st ->
+  if Input.is_pressed ~io `quit then print_rects ~file:out st;
+  main ~io st

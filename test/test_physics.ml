@@ -18,7 +18,8 @@ let world =
 let random_size1 () = 5.0 +. Random.float 30.0
 let random_size2 () = Size.v (2.0 *. random_size1 ()) (2.0 *. random_size1 ())
 
-let rec loop ~io world =
+let () =
+  run world @@ fun ~io world ->
   Window.show_cursor ~io true;
   Window.set_size ~io (Size.v 510.0 810.0);
   if Input.is_up ~io `escape then raise Exit;
@@ -46,7 +47,4 @@ let rec loop ~io world =
   List.iter (Physics.fill ~io ~color) world;
   let color = Color.v 1.0 1.0 0.0 1.0 in
   List.iter (Physics.draw ~io ~color) world;
-  next_frame ~io;
-  loop ~io world
-
-let () = run (loop world)
+  world

@@ -4,12 +4,9 @@ open Draw_geometry
 let translate dxy io = { io with view = Transform.translate dxy io.view }
 let scale factor io = { io with view = Transform.scale factor io.view }
 let rotate angle io = { io with view = Transform.rotate angle io.view }
-
 let translation io = io.view.translate
 let scaling io = io.view.scale
 let rotation io = io.view.rotate
-
-
 let clip clip io = { io with clip = Some clip }
 let unclip io = { io with clip = None }
 let clip_events b io = { io with clip_events = b }

@@ -167,4 +167,4 @@ let main ~io =
   splash_screen ~io 0;
   loop ~io initial_state
 
-let () = Gamelle.run main
+let () = Gamelle.run_no_loop main

@@ -35,9 +35,7 @@ type io
 (** The type allowing input/output operations. Every side-effecting function
     requires a named argument [~io] of this type. *)
 
-val run_loop : 'state -> (io:io -> 'state -> 'state) -> unit
-
-val run : (io:io -> unit) -> unit
+val run : 'state -> (io:io -> 'state -> 'state) -> unit
 (** [run initial_state fn] is the game main loop. The function [fn] will be
     called at every frame to react to player inputs and draw the game state on
     the screen.
@@ -56,8 +54,12 @@ val run : (io:io -> unit) -> unit
           new_state
     ]} *)
 
+val run_no_loop : (io:io -> unit) -> unit
+(** [run_no_loop f] only calls [f] once. To display more than one frame,
+    {!next_frame} can be used. *)
+
+val next_frame : io:io -> unit
 (** wait for the next frame *)
-val next_frame: io:io -> unit
 
 (** {1 Maths} *)
 

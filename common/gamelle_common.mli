@@ -21,7 +21,7 @@ type 'a abstract_io = {
 }
 
 val make_io : 'a -> 'a abstract_io
-val io_reset_mutable_fields: 'a abstract_io -> unit
+val io_reset_mutable_fields : 'a abstract_io -> unit
 val clean_io : io:'a abstract_io -> (unit -> unit) -> unit
 val clock : io:'a abstract_io -> float
 val dt : io:'a abstract_io -> float
