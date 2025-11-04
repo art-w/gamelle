@@ -18,7 +18,10 @@ struct
   type 'i eff += Wait_for_next_frame : o -> i eff
 
   let run : type a.
-      (i, o, a) routine -> i -> (next_frame:(o -> i) -> i -> a) -> (i, o, a) routine =
+      (i, o, a) routine ->
+      i ->
+      (next_frame:(o -> i) -> i -> a) ->
+      (i, o, a) routine =
    fun sync_state input f ->
     let next_frame o = perform (Wait_for_next_frame o) in
     match sync_state with
