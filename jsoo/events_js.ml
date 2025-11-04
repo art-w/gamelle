@@ -45,7 +45,7 @@ let update ~status t e =
   let chars =
     keys
     |> List.filter_map (fun key ->
-           match key with `input_char c -> Some c | _ -> None)
+        match key with `input_char c -> Some c | _ -> None)
     |> Strings.of_list
   in
   let keys = Keys.of_list keys in
