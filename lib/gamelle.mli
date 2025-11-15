@@ -62,14 +62,14 @@ val run_no_loop : (io:io -> unit) -> unit
     Typically used in the following fashion:
 
     {[
-    let rec loop ~io state =
-      let state =
-        ...
-      in
-      next_frame ~io;
-      loop ~io state
+      let rec loop ~io state =
+        let state =
+          ...
+        in
+        next_frame ~io;
+        loop ~io state
 
-    let () = run_no_loop (loop initial_state)
+      let () = run_no_loop (loop initial_state)
     ]} *)
 
 val next_frame : io:io -> unit
