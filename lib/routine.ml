@@ -27,7 +27,7 @@ struct
     match sync_state with
     | Start -> begin
         try Finished (f ~next_frame input)
-        with effect (Wait_for_next_frame output), k ->
+        with effect Wait_for_next_frame output, k ->
           To_be_continued (output, k)
       end
     | To_be_continued (_o, k) -> continue k input
