@@ -55,8 +55,22 @@ val run : 'state -> (io:io -> 'state -> 'state) -> unit
     ]} *)
 
 val run_no_loop : (io:io -> unit) -> unit
-(** [run_no_loop f] only calls [f] once. To display more than one frame,
-    {!next_frame} can be used. *)
+(** [run_no_loop f] only calls [f] once.
+
+    To display more than one frame, {!next_frame} can be used.
+
+    Typically used in the following fashion:
+
+    {[
+    let rec loop ~io state =
+      let state =
+        ...
+      in
+      next_frame ~io;
+      loop ~io state
+
+    let () = run_no_loop (loop initial_state)
+    ]} *)
 
 val next_frame : io:io -> unit
 (** wait for the next frame *)
