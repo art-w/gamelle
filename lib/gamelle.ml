@@ -17,29 +17,36 @@ let clock = Gamelle_backend.clock
 module Sound = Gamelle_backend.Sound
 module Window = Window_
 
-let run_loop init f =
+
+(** raw run function, without the handler for {!next_frame}. *)
+let run_no_handler init f =
   Gamelle_backend.run init (fun ~io ->
       Box.fill ~io ~color:Color.black (Window.box ~io);
       let r = f ~io in
       Gamelle_common.finalize_frame ~io;
       r)
 
-let ref_next_frame = ref (fun () -> ())
+(* code from routine.ml, modified to have only type unit and for the next_frame
+function to be top-level (which is possible because of the monomorphic type)*)
+
+type 'i eff += Wait_for_next_frame : unit -> unit eff
 
 let next_frame ~(io : Gamelle_backend.io) =
-  ignore io;
-  !ref_next_frame ()
+  let _ = io in
+  Effect.perform (Wait_for_next_frame ())
 
 let run_no_loop (f : io:Gamelle_backend.io -> unit) : unit =
-  run_loop Routine.Start (fun ~io routine ->
-      let open Routine in
-      match
-        Routine.run routine () (fun ~next_frame () ->
-            ref_next_frame := next_frame;
-            f ~io)
-      with
-      | Finished () -> raise Exit
-      | s -> s)
+  let routine : (unit, unit, unit) Routine.routine = Start in
+  run_no_handler (routine : (unit, unit, unit) Routine.routine) begin fun ~io state ->
+    match state with
+    | Start -> begin
+        try Finished (f ~io)
+        with effect Wait_for_next_frame (), k ->
+          To_be_continued ((), (k : (unit, _) continuation))
+      end
+    | To_be_continued (_o, k) -> Effect.Deep.continue k ()
+    | Finished v -> Finished v
+    end
 
 let run init f =
   let rec loop ~io state =
