@@ -1051,16 +1051,46 @@ module Physics : sig
 end
 
 module Routine : sig
+  (** This module allows to run a sub-routine, that is a part of code with its
+      own control flow.
+
+      Type {!t} describes such subroutines, and {!tick} allows you to advance
+      them by one frame.*)
+
   type ('i, 'o, 'a) continuation
+  (** The continuation of routines. You never need to use this. *)
 
-  type ('i, 'o, 'r) routine =
-    | Finished of 'r
-    | To_be_continued of 'o * ('i, 'o, 'r) continuation
-    | Start
+  (** The type of a routine. Use {!start} to construct of value of this type.
 
-  val run :
-    ('i, 'o, 'r) routine ->
-    'i ->
-    (next_frame:('o -> 'i) -> 'i -> 'r) ->
-    ('i, 'o, 'r) routine
+      ['i] is the type of the input given at each tick. ['o] is the type of the
+      output returned at the end of each tick. ['r] is the type of the result
+      returned when the routine finishes.
+
+      In a lot of cases, ['i] and/or ['o] and/or ['r] can be [unit]. For
+      example, all would be unit if your routine was just an animation loop that
+      had no need to communicate with the rest of the program.
+
+      This type is private; use [start f] for constructed a new routine.*)
+  type ('i, 'o, 'r) t = private
+    | Finished of 'r  (** A finished routine. *)
+    | Running of 'o * ('i, 'o, 'r) continuation
+        (** The routine is started but not finished.
+
+            The first element of the payload is the output of the tick that just
+            ended, the second one is for internal use. *)
+    | Start of (next_frame:('o -> 'i) -> 'i -> 'r)
+        (** This initial state of the routine. See {!start} *)
+
+  val start : (next_frame:('o -> 'i) -> 'i -> 'r) -> ('i, 'o, 'r) t
+  (** [start f] constructs a new routine with function [f]
+
+      [f] has access to a special version of [next_frame] that waits for the
+      next {!tick} but also communicates with the rest of the program by sending
+      an output of type ['o] and receiving an input of type ['i]. *)
+
+  val tick : ('i, 'o, 'r) t -> 'i -> ('i, 'o, 'r) t
+  (** [tick r i f] ticks the routine [r] by one frame, giving input [i]. The
+      returned value is the next state of the routine.
+
+      Never returns [Start _]. *)
 end

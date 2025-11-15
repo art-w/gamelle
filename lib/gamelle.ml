@@ -17,6 +17,7 @@ let clock = Gamelle_backend.clock
 module Sound = Gamelle_backend.Sound
 module Window = Window_
 
+type io = Gamelle_backend.io
 
 (** raw run function, without the handler for {!next_frame}. *)
 let run_no_handler init f =
@@ -31,20 +32,28 @@ function to be top-level (which is possible because of the monomorphic type)*)
 
 type 'i eff += Wait_for_next_frame : unit -> unit eff
 
-let next_frame ~(io : Gamelle_backend.io) =
+let next_frame ~(io : io) =
   let _ = io in
   Effect.perform (Wait_for_next_frame ())
 
-let run_no_loop (f : io:Gamelle_backend.io -> unit) : unit =
-  let routine : (unit, unit, unit) Routine.routine = Start in
-  run_no_handler (routine : (unit, unit, unit) Routine.routine) begin fun ~io state ->
+type ('i, 'o, 'a) state =
+  | Finished of 'a
+  | Running of 'o * ('i, 'o, 'a) continuation
+  | Start
+
+and ('i, 'o, 'a) continuation =
+  ('i, ('i, 'o, 'a) state) Effect.Deep.continuation
+
+let run_no_loop (f : io:io -> unit) : unit =
+  let routine : (unit, unit, unit) state = Start in
+  run_no_handler (routine : (unit, unit, unit) state) begin fun ~io state ->
     match state with
     | Start -> begin
         try Finished (f ~io)
         with effect Wait_for_next_frame (), k ->
-          To_be_continued ((), (k : (unit, _) continuation))
+          Running ((), (k : (unit, _) Effect.Deep.continuation))
       end
-    | To_be_continued (_o, k) -> Effect.Deep.continue k ()
+    | Running (_o, k) -> Effect.Deep.continue k ()
     | Finished v -> Finished v
     end
 
@@ -57,8 +66,6 @@ let run init f =
   run_no_loop (loop init)
 
 module Font = Gamelle_backend.Font
-
-type io = Gamelle_backend.io
 
 let draw_string ~io ?color ?font ?size ~at txt =
   Text.draw ~io ?color ?font ?size ~at txt
