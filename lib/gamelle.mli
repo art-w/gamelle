@@ -1101,8 +1101,6 @@ module Routine : sig
       an output of type ['o] and receiving an input of type ['i]. *)
 
   val tick : ('i, 'o, 'r) t -> 'i -> ('i, 'o, 'r) t
-  (** [tick r i f] ticks the routine [r] by one frame, giving input [i]. The
-      returned value is the next state of the routine.
-
-      Never returns [Start _]. *)
+  (** [tick r i f] ticks the routine [r] by one frame, sending input [i] to it.
+      The returned value is the next state of the routine. *)
 end
