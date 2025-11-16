@@ -1065,8 +1065,8 @@ module Physics : sig
 end
 
 module Routine : sig
-  (** This module allows to run a sub-routine, that is a part of code with its
-      own control flow.
+  (** This module allows to run a sub-routine, that is a part of the program
+      with its own control flow.
 
       Type {!t} describes such subroutines, and {!tick} allows you to advance
       them by one frame.*)
