@@ -1094,11 +1094,13 @@ module Routine : sig
             ended, the second one is for internal use. *)
 
   val start : (next_frame:('o -> 'i) -> 'r) -> ('i, 'o, 'r) t
-  (** [start f] constructs a new routine with function [f]
+  (** [start f] constructs a new routine with function [f].
 
       [f] has access to a special version of [next_frame] that waits for the
       next {!tick} but also communicates with the rest of the program by sending
-      an output of type ['o] and receiving an input of type ['i]. *)
+      an output of type ['o] and receiving an input of type ['i].
+
+      When [start] is called, [f] runs until the first call to [next_frame]. *)
 
   val tick : ('i, 'o, 'r) t -> 'i -> ('i, 'o, 'r) t
   (** [tick r i f] ticks the routine [r] by one frame, sending input [i] to it.
