@@ -1,11 +1,15 @@
 open Gamelle
 
-let bubble_size = 5.
-let random_vec () = Vec.v (Random.float 2. -. 1.) (Random.float 2. -. 1.)
+let bubble_size = 15.
+let bubble_speed = 5.
 
-let bubble ~io pos ~next_frame _is_colliding =
+let random_vec () =
+  Vec.v
+    (Random.float (bubble_speed *. 2.) -. bubble_speed)
+    (Random.float (bubble_speed *. 2.) -. bubble_speed)
+
+let bubble ~io pos ~next_frame =
   let rec loop pos =
-    Format.printf "%a@." Vec.pp pos;
     let is_colliding = next_frame pos in
     let color = if is_colliding then Color.red else Color.green in
     let circle = Circle.v pos bubble_size in
@@ -30,7 +34,6 @@ let rec loop ~io bubbles =
     |> List.filter_map begin fun (was_colliding, bubble) ->
         let bubble = Routine.tick bubble was_colliding in
         match bubble with
-        | Start _ -> assert false
         | Finished () -> None
         | Running (pos, _) -> Some (pos, bubble)
       end

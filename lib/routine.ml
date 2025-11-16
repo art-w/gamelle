@@ -4,11 +4,8 @@ open Effect.Deep
 type ('i, 'o, 'a) t =
   | Finished of 'a
   | Running of 'o * ('i, 'o, 'a) continuation
-  | Start of (next_frame:('o -> 'i) -> 'i -> 'a)
 
 and ('i, 'o, 'a) continuation = ('i, ('i, 'o, 'a) t) Deep.continuation
-
-let start f = Start f
 
 module Make (S : sig
   type i
@@ -17,18 +14,20 @@ end) =
 struct
   type i = S.i
   type o = S.o
-  type 'i eff += Wait_for_next_frame : o -> i eff
+  type 'i eff += Wait_for_next_tick : o -> i eff
+
+  let next_frame o = perform (Wait_for_next_tick o)
 
   let tick : type a. (i, o, a) t -> i -> (i, o, a) t =
    fun sync_state input ->
-    let next_frame o = perform (Wait_for_next_frame o) in
     match sync_state with
-    | Start f -> begin
-        try Finished (f ~next_frame input)
-        with effect Wait_for_next_frame output, k -> Running (output, k)
-      end
     | Running (_o, k) -> continue k input
     | Finished v -> Finished v
+
+  let start : type a. (next_frame:(o -> i) -> a) -> (i, o, a) t =
+   fun f ->
+    try Finished (f ~next_frame)
+    with effect Wait_for_next_tick output, k -> Running (output, k)
 end
 
 let tick (type i o) sync_state state =
@@ -37,3 +36,10 @@ let tick (type i o) sync_state state =
     type nonrec o = o
   end) in
   S.tick sync_state state
+
+let start (type i o) f =
+  let module S = Make (struct
+    type nonrec i = i
+    type nonrec o = o
+  end) in
+  S.start f
