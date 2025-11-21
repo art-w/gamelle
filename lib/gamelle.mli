@@ -54,6 +54,27 @@ val run : 'state -> (io:io -> 'state -> 'state) -> unit
           new_state
     ]} *)
 
+val run_no_loop : (io:io -> unit) -> unit
+(** [run_no_loop f] only calls [f] once.
+
+    To display more than one frame, {!next_frame} can be used.
+
+    Typically used in the following fashion:
+
+    {[
+      let rec loop ~io state =
+        let state =
+          ...
+        in
+        next_frame ~io;
+        loop ~io state
+
+      let () = run_no_loop (loop initial_state)
+    ]} *)
+
+val next_frame : io:io -> unit
+(** wait for the next frame *)
+
 (** {1 Maths} *)
 
 (** {2 Linear Algebra} *)
@@ -1041,4 +1062,47 @@ module Physics : sig
 
   val fill : io:io -> ?color:Color.t -> t -> unit
   (** [fill ~io t] fills the inside of the rigid body [t]. *)
+end
+
+module Routine : sig
+  (** This module allows to run a sub-routine, that is a part of the program
+      with its own control flow.
+
+      Type {!t} describes such subroutines, and {!tick} allows you to advance
+      them by one frame.*)
+
+  type ('i, 'o, 'a) continuation
+  (** The continuation of routines. You never need to use this. *)
+
+  (** The type of a routine. Use {!start} to construct of value of this type.
+
+      ['i] is the type of the input given at each tick. ['o] is the type of the
+      output returned at the end of each tick. ['r] is the type of the result
+      returned when the routine finishes.
+
+      In a lot of cases, ['i] and/or ['o] and/or ['r] can be [unit]. For
+      example, all would be unit if your routine was just an animation loop that
+      had no need to communicate with the rest of the program.
+
+      This type is private; use [start f] to construct a new routine.*)
+  type ('i, 'o, 'r) t = private
+    | Finished of 'r  (** A finished routine. *)
+    | Running of 'o * ('i, 'o, 'r) continuation
+        (** The routine is started but not finished.
+
+            The first element of the payload is the output of the tick that just
+            ended, the second one is for internal use. *)
+
+  val start : (next_frame:('o -> 'i) -> 'r) -> ('i, 'o, 'r) t
+  (** [start f] constructs a new routine with function [f].
+
+      [f] has access to a special version of [next_frame] that waits for the
+      next {!tick} but also communicates with the rest of the program by sending
+      an output of type ['o] and receiving an input of type ['i].
+
+      When [start] is called, [f] runs until the first call to [next_frame]. *)
+
+  val tick : ('i, 'o, 'r) t -> 'i -> ('i, 'o, 'r) t
+  (** [tick r i f] ticks the routine [r] by one frame, sending input [i] to it.
+      The returned value is the next state of the routine. *)
 end

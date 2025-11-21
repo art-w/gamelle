@@ -1,2 +1,4 @@
 version = 0.28.1
 profile = default
+exp-grouping=preserve
+ocaml-version=5.4.0

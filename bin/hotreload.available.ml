@@ -106,7 +106,8 @@ let run cmxs_file =
   Mutex.lock lock;
   let init = ref true in
   watch ~lock cmxs_file;
-  Gamelle.run () (fun ~io:_ () ->
+  Gamelle.run () (fun ~io () ->
       if !init then (
         init := false;
-        Mutex.unlock lock))
+        Mutex.unlock lock);
+      Gamelle.next_frame ~io)

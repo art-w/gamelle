@@ -61,6 +61,7 @@ let run ~canvas state update =
   let backend =
     { canvas; ctx; audio; font = Font.default; font_size = Font.default_size }
   in
+  let io = make_io backend in
   let clock_ref = ref 0 in
 
   let rec animate state =
@@ -71,12 +72,8 @@ let run ~canvas state update =
     prev_now := !now;
     now := elapsed /. 1000.0;
     Events_js.new_frame ();
-    let io =
-      {
-        (make_io backend) with
-        event = { !Events_js.current with clock = !clock_ref };
-      }
-    in
+    io_reset_mutable_fields io;
+    io.event := { !Events_js.current with clock = !clock_ref };
     incr clock_ref;
     let state = update ~io state in
     finalize_frame ~io;
