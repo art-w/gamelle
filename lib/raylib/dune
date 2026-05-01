@@ -1,0 +1,9 @@
+(include_subdirs no)
+
+(library
+ (public_name gamelle.raylib)
+ (name gamelle_raylib)
+ (optional)
+ (private_modules bitmap common draw events_raylib font_ sound text window)
+ (libraries gamelle_common uuseg raylib ctypes)
+ (implements gamelle))

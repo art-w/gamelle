@@ -17,6 +17,19 @@
    (run echo "include Pong"))))
 
 (executable
+ (name pong_raylib)
+ (modules pong_raylib)
+ (optional)
+ (libraries pong gamelle.raylib))
+
+(rule
+ (target pong_raylib.ml)
+ (action
+  (with-stdout-to
+   pong_raylib.ml
+   (run echo "include Pong"))))
+
+(executable
  (name pong_js)
  (modules pong_js)
  (modes js)

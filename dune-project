@@ -53,7 +53,9 @@
    (>= 0.6))
   (tsdl-ttf
    (>= 0.6))
-  conf-sdl2-gfx))
+  conf-sdl2-gfx
+  (raylib
+   (>= 1.0.0))))
 
 (package
  (name conf-sdl2-gfx)
