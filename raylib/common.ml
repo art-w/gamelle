@@ -3,7 +3,12 @@ module Transform = Gamelle_common.Transform
 open Gamelle_common
 open Geometry
 
-type font_s = { data : string; sizes : (int, Raylib.Font.t) Hashtbl.t }
+type sized_font = {
+  mutable raylib_font : Raylib.Font.t;
+  codepoint_set : (int, unit) Hashtbl.t;
+}
+
+type font_s = { data : string; sizes : (int, sized_font) Hashtbl.t }
 
 type io_backend = { font : font; font_size : int }
 and io = io_backend abstract_io
