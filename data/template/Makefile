@@ -1,4 +1,7 @@
-.PHONY: run html
+.PHONY: run run-sdl html
+
+run-bin:
+	dune exec --root=. ./mygame_raylib.exe
 
 run:
 	dune build --root=. --watch _build/default/src/mygame.cmxs & \
