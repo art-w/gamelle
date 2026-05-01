@@ -11,6 +11,7 @@ let set_size ~io =
   end
 
 let size ~io:_ =
+  (* probably wrong *)
   let w = Raylib.get_screen_width () in
   let h = Raylib.get_screen_height () in
   Size.v (float w) (float h)
