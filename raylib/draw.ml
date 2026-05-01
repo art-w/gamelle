@@ -9,18 +9,7 @@ let get_color ~io c =
 
 let v2 x y = Raylib.Vector2.create x y
 
-let with_scissor ~io f =
-  match io.clip with
-  | None -> f ()
-  | Some clip ->
-      let clip = Transform.project_box io.view clip in
-      let x = int_of_float (Box.x_left clip) in
-      let y = int_of_float (Box.y_top clip) in
-      let w = int_of_float (Box.width clip) in
-      let h = int_of_float (Box.height clip) in
-      Raylib.begin_scissor_mode x y w h;
-      f ();
-      Raylib.end_scissor_mode ()
+
 
 let tau = 8.0 *. atan 1.0
 
@@ -96,14 +85,13 @@ let draw_rect ~io ?color rect =
        ])
 
 let fill_rect ~io ?color rect =
-  fill_poly ~io ?color
-    (Polygon.v
-       [
-         Box.top_left rect;
-         Box.top_right rect;
-         Box.bottom_right rect;
-         Box.bottom_left rect;
-       ])
+  with_scissor ~io @@ fun () ->
+   Raylib.draw_rectangle
+    (int_of_float (Box.x_left rect))
+    (int_of_float (Box.y_top rect))
+    (int_of_float (Box.width rect))
+    (int_of_float (Box.height rect))
+    (get_color ~io color)
 
 let draw_circle ~io ?color circle =
   let center = Circle.center circle in
