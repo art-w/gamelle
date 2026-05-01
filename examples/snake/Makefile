@@ -1,9 +1,13 @@
-.PHONY: run html
+.PHONY: run run-sdl html
+
+run-bin:
+	dune exec --root=. ./snake_bin.exe
 
 run:
-	dune build --root=.
-	gamelle hotreload _build/default/src/snake.cmxs &
-	dune build --root=. --watch
+	dune build --root=. --watch _build/default/src/snake.cmxs & \
+		export DUNE_PID=$$! ; \
+		gamelle hotreload _build/default/src/snake.cmxs ; \
+		kill $${DUNE_PID}
 
 html:
 	dune build --root=. --profile=release snake.html

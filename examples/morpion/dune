@@ -7,7 +7,7 @@
  (public_name morpion)
  (name morpion_bin)
  (modules morpion_bin)
- (libraries morpion gamelle.sdl))
+ (libraries morpion gamelle.raylib))
 
 (rule
  (target morpion_bin.ml)
@@ -17,9 +17,23 @@
    (run echo "include Morpion"))))
 
 (executable
+ (name morpion_sdl)
+ (modules morpion_sdl)
+ (optional)
+ (libraries morpion gamelle.sdl))
+
+(rule
+ (target morpion_sdl.ml)
+ (action
+  (with-stdout-to
+   morpion_sdl.ml
+   (run echo "include Morpion"))))
+
+(executable
  (name morpion_js)
  (modules morpion_js)
  (modes js)
+ (flags)
  (libraries morpion gamelle.jsoo))
 
 (rule

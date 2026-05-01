@@ -7,7 +7,7 @@
  (public_name pong)
  (name pong_bin)
  (modules pong_bin)
- (libraries pong gamelle.sdl))
+ (libraries pong gamelle.raylib))
 
 (rule
  (target pong_bin.ml)
@@ -17,22 +17,23 @@
    (run echo "include Pong"))))
 
 (executable
- (name pong_raylib)
- (modules pong_raylib)
+ (name pong_sdl)
+ (modules pong_sdl)
  (optional)
- (libraries pong gamelle.raylib))
+ (libraries pong gamelle.sdl))
 
 (rule
- (target pong_raylib.ml)
+ (target pong_sdl.ml)
  (action
   (with-stdout-to
-   pong_raylib.ml
+   pong_sdl.ml
    (run echo "include Pong"))))
 
 (executable
  (name pong_js)
  (modules pong_js)
  (modes js)
+ (flags)
  (libraries pong gamelle.jsoo))
 
 (rule

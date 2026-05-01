@@ -7,7 +7,7 @@
  (public_name snake)
  (name snake_bin)
  (modules snake_bin)
- (libraries snake gamelle.sdl))
+ (libraries snake gamelle.raylib))
 
 (rule
  (target snake_bin.ml)
@@ -17,9 +17,23 @@
    (run echo "include Snake"))))
 
 (executable
+ (name snake_sdl)
+ (modules snake_sdl)
+ (optional)
+ (libraries snake gamelle.sdl))
+
+(rule
+ (target snake_sdl.ml)
+ (action
+  (with-stdout-to
+   snake_sdl.ml
+   (run echo "include Snake"))))
+
+(executable
  (name snake_js)
  (modules snake_js)
  (modes js)
+ (flags)
  (libraries snake gamelle.jsoo))
 
 (rule

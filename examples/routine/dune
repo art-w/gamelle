@@ -7,13 +7,26 @@
  (public_name routine)
  (name routine_bin)
  (modules routine_bin)
- (libraries routine gamelle.sdl))
+ (libraries routine gamelle.raylib))
 
 (rule
  (target routine_bin.ml)
  (action
   (with-stdout-to
    routine_bin.ml
+   (run echo "include Routine"))))
+
+(executable
+ (name routine_sdl)
+ (modules routine_sdl)
+ (optional)
+ (libraries routine gamelle.sdl))
+
+(rule
+ (target routine_sdl.ml)
+ (action
+  (with-stdout-to
+   routine_sdl.ml
    (run echo "include Routine"))))
 
 (executable
