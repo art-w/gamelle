@@ -45,21 +45,21 @@ let get_sized_font ~io font size =
 
 let get ~io font_opt size_opt =
   let font, size = get_font ~io font_opt size_opt in
-  get_sized_font ~io font size
+  (* multiply by a magic constant to get close to the same size as the JS backend. *)
+  let size = int_of_float (float_of_int size *. 26. /. 18.) in
+  (get_sized_font ~io font size, float_of_int size)
 
 let text_size ~io ?font ?size text =
-  let raylib_font = get ~io font size in
-  let font_size = float (get_font_size_opt ~io size) in
+  let raylib_font, font_size = get ~io font size in
+
   let v = Raylib.measure_text_ex raylib_font text font_size 0. in
   Size.v (Raylib.Vector2.x v) (Raylib.Vector2.y v)
 
 let tau = 8.0 *. atan 1.0
 
 let draw_text ~io ?color ?font ?size ~at:p text =
-  let raylib_font = get ~io font size in
-  let font_size =
-    float (get_font_size_opt ~io size) *. io.view.Transform.scale
-  in
+  let raylib_font, font_size = get ~io font size in
+
   let color = get_color ~io color in
   let x, y = project ~io p in
   let angle = io.view.Transform.rotate *. 360.0 /. tau in
