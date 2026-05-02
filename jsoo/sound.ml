@@ -26,9 +26,11 @@ let mime_type_of binstring =
   else if starts_with "fLaC" then "audio/flac"
   else if starts_with "OggS" then "audio/ogg"
   else if starts_with "ID3" then "audio/mpeg"
-  else if String.length binstring >= 2
-          && Char.code binstring.[0] = 0xFF
-          && Char.code binstring.[1] land 0xE0 = 0xE0 then "audio/mpeg"
+  else if
+    String.length binstring >= 2
+    && Char.code binstring.[0] = 0xFF
+    && Char.code binstring.[1] land 0xE0 = 0xE0
+  then "audio/mpeg"
   else "audio/wav"
 
 let blob_url binstring =
@@ -104,7 +106,6 @@ let init ~io data =
 let duration t = data_duration t.data
 let current_time t = t.elapsed
 let time_left t = Float.max 0.0 (duration t -. t.elapsed)
-
 let node_ctx_of ~io = Context.as_base io.backend.audio
 
 let make_and_start_source ~io ~offset buffer =
@@ -118,7 +119,7 @@ let make_and_start_source ~io ~offset buffer =
   let start_audio_time = Context.Base.current_time node_ctx in
   { src; start_audio_time; start_offset = offset }
 
-let stop_node n = (try Node.Buffer_source.stop n.src with _ -> ())
+let stop_node n = try Node.Buffer_source.stop n.src with _ -> ()
 
 module Playing_set = Weak.Make (struct
   type nonrec t = t
@@ -138,28 +139,29 @@ let pause_node ~io t node =
   t.status <- Idle
 
 let end_frame ~io =
-  let current_frame = (!(io.event)).clock in
-  Playing_set.iter
-    (fun t ->
+  let current_frame = !(io.event).clock in
+  playing_sounds
+  |> Playing_set.iter begin fun t ->
       match t.status with
       | Playing node when t.last_frame < current_frame -> pause_node ~io t node
-      | _ -> ())
-    playing_sounds
+      | _ -> ()
+    end
 
 let play ~io t =
-  let current_frame = (!(io.event)).clock in
+  let current_frame = !(io.event).clock in
   let node_ctx = node_ctx_of ~io in
   let audio_now = Context.Base.current_time node_ctx in
-  (match t.status with
+  begin match t.status with
   | Playing node ->
       let elapsed = node.start_offset +. (audio_now -. node.start_audio_time) in
       if elapsed >= duration t then (
         t.elapsed <- duration t;
         t.status <- Done)
       else t.elapsed <- elapsed
-  | _ -> ());
+  | _ -> ()
+  end;
   t.last_frame <- current_frame;
-  (match t.status with
+  begin match t.status with
   | Idle -> (
       match t.data.buffer with
       | Some buffer ->
@@ -167,7 +169,8 @@ let play ~io t =
           t.status <- Playing node;
           Playing_set.add playing_sounds t
       | None -> ensure_loaded ~io t.data)
-  | Playing _ | Done -> ());
+  | Playing _ | Done -> ()
+  end;
   match t.status with Done -> false | _ -> true
 
 let play_loop ~io t =
@@ -209,9 +212,9 @@ let start_music ~io data =
 
 let stop_music ~io:_ =
   match !current_music with
-  | Some (_, src) ->
+  | Some (_, src) -> (
       current_music := None;
-      (try Node.Buffer_source.stop src with _ -> ())
+      try Node.Buffer_source.stop src with _ -> ())
   | None -> ()
 
 let play_music ~io data =
