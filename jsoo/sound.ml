@@ -162,13 +162,14 @@ let play ~io t =
   end;
   t.last_frame <- current_frame;
   begin match t.status with
-  | Idle -> (
+  | Idle -> begin
       match t.data.buffer with
       | Some buffer ->
           let node = make_and_start_source ~io ~offset:t.elapsed buffer in
           t.status <- Playing node;
           Playing_set.add playing_sounds t
-      | None -> ensure_loaded ~io t.data)
+      | None -> ensure_loaded ~io t.data
+    end
   | Playing _ | Done -> ()
   end;
   match t.status with Done -> false | _ -> true
@@ -212,9 +213,10 @@ let start_music ~io data =
 
 let stop_music ~io:_ =
   match !current_music with
-  | Some (_, src) -> (
+  | Some (_, src) -> begin
       current_music := None;
-      try Node.Buffer_source.stop src with _ -> ())
+      try Node.Buffer_source.stop src with _ -> ()
+    end
   | None -> ()
 
 let play_music ~io data =
