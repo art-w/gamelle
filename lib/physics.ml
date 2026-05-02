@@ -275,7 +275,8 @@ let precompute_collisions lst =
         | Some lst -> TMap.replace tbl before ((before, after) :: lst)
       end
       lst after
-  end
+  end;
+  tbl
 
 let fix_collisions_with_data (data : collision_data) t =
   let lst = TMap.find data t in
