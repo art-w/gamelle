@@ -47,7 +47,7 @@ let update ~io { x; y; vx; vy; _ } =
   if Input.is_down ~io `click_left then (
     cursor := not !cursor;
     Window.show_cursor ~io !cursor;
-    Sound.play ~io Assets.stick);
+    Sound.play_until_end ~io Assets.stick);
 
   let origin = Point.v 100.0 300.0 in
   Vec.draw ~io:(View.z_index 999 io) ~color:red ~at:origin

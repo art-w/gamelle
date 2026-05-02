@@ -24,12 +24,22 @@ module Font : sig
 end
 
 module Sound : sig
+  type data
+
+  val play_until_end : io:io -> data -> unit
+  val play_music : io:io -> data -> unit
+  val stop_music : io:io -> unit
+  val data_duration : data -> float
+
   type t
 
-  val load : string -> t
-  val play : io:io -> t -> unit
-  val play_music : io:io -> t -> unit
-  val stop_music : io:io -> unit
+  val init : io:io -> data -> t
+  val play : io:io -> t -> bool
+  val play_loop : io:io -> t -> unit
+  val time_left : t -> float
+  val current_time : t -> float
+  val duration : t -> float
+  val load : string -> data
 end
 
 val clock : io:io -> float
