@@ -225,9 +225,9 @@ module World = Map.Make (Int)
 let fix_collisions shapes =
   let had_collision = ref false in
   World.iter
-    (fun i _ ->
+    begin fun i _ ->
       World.iter
-        (fun j _ ->
+        begin fun j _ ->
           if i >= j then ()
           else
             let a = World.find i !shapes in
@@ -240,8 +240,10 @@ let fix_collisions shapes =
                   had_collision := true;
                   let a, b = collision_react ~normal a b in
                   shapes := World.add i a !shapes;
-                  shapes := World.add j b !shapes)
-        !shapes)
+                  shapes := World.add j b !shapes
+        end
+        !shapes
+    end
     !shapes;
   !had_collision
 
@@ -251,3 +253,31 @@ let fix_collisions t =
   let rec go n = if n > 0 && fix_collisions shapes then go (n - 1) in
   go 10;
   List.map snd (World.bindings !shapes)
+
+module TMap = Hashtbl.Make (struct
+  type nonrec t = t
+
+  let hash = Hashtbl.hash
+  let equal = ( == )
+  let compare = compare
+end)
+
+type collision_data = (t * t) list TMap.t
+
+let precompute_collisions lst =
+  let after = fix_collisions lst in
+
+  let tbl = TMap.create 64 in
+  begin
+    List.iter2
+      begin fun before after ->
+        match TMap.find_opt tbl before with
+        | None -> TMap.replace tbl before [ (before, after) ]
+        | Some lst -> TMap.replace tbl before ((before, after) :: lst)
+      end
+      lst after
+  end
+
+let fix_collisions_with_data (data : collision_data) t =
+  let lst = TMap.find data t in
+  List.find (fun (before, _after) -> before == t) lst |> snd

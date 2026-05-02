@@ -1038,6 +1038,18 @@ module Physics : sig
   (** [fix_collisions lst] detects and repairs any collisions between the rigid
       bodies in the list [lst]. *)
 
+  type collision_data
+
+  val precompute_collisions : t list -> collision_data
+  (** [precompute_collisions lst] precomputes the collision data for the rigid
+        bodies in the list [lst]. Then you can query the collision data to get
+        the new values of a given rigid body. *)
+
+  val fix_collisions_with_data : collision_data -> t -> t
+  (** [fix_collisions_with_data data t] detects and repairs any collisions between
+      the rigid body [t] and the other rigid bodies in the precomputed collision
+      data [data]. *)
+
   (** {2 Teleportation} *)
 
   val set_center : Point.t -> t -> t
