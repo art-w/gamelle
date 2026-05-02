@@ -251,3 +251,12 @@ let fix_collisions t =
   let rec go n = if n > 0 && fix_collisions shapes then go (n - 1) in
   go 10;
   List.map snd (World.bindings !shapes)
+
+type collision_data = (t * t) list
+
+let precompute_collisions lst =
+  let after = fix_collisions lst in
+  List.combine lst after
+
+let fix_collisions_with_data data t =
+  List.find (fun (before, _after) -> before == t) data |> snd
