@@ -259,7 +259,6 @@ module TMap = Hashtbl.Make (struct
 
   let hash = Hashtbl.hash
   let equal = ( == )
-  let compare = compare
 end)
 
 type collision_data = (t * t) list TMap.t
