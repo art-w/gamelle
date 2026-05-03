@@ -6,7 +6,7 @@ let current_size = ref (0, 0)
 
 let set_size ~io =
   let s = !(io.window_size) in
-  if s <> !current_size then (
+  if s <> (0, 0) && s <> !current_size then (
     let w, h = s in
     Sdl.set_window_size io.backend.window ~w ~h;
     current_size := s)

@@ -21,7 +21,7 @@ module Window = struct
 
   let set_size ~io =
     let s = !(io.window_size) in
-    if s <> !current_size then (
+    if s <> (0, 0) && s <> !current_size then (
       let w, h = s in
       let canvas = io.backend.canvas in
       Canvas.set_w canvas w;
