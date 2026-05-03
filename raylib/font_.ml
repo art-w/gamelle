@@ -19,8 +19,7 @@ let default : t = load Gamelle_common.Font.default
 let default_size = Gamelle_common.Font.default_size
 
 (* Initial codepoint range loaded eagerly: ASCII + Latin extended + Greek + Cyrillic. *)
-let initial_codepoints =
-  Array.init (1103 - 32 + 1) (fun i -> 32 + i)
+let initial_codepoints = Array.init (1103 - 32 + 1) (fun i -> 32 + i)
 
 let load_font_with_codepoints data size codepoints =
   let n = Array.length codepoints in
@@ -96,7 +95,9 @@ let draw_text ~io ?color ?font ?size ~at:p text =
   let angle = io.view.Transform.rotate *. 360.0 /. tau in
   with_scissor ~io begin fun () ->
       Raylib.draw_text_pro raylib_font text
-        (Raylib.Vector2.create x y)
+        (Raylib.Vector2.create
+           (float_of_int @@ int_of_float x)
+           (float_of_int @@ int_of_float y))
         (Raylib.Vector2.create 0. 0.)
         angle font_size 0. color
     end
