@@ -20,7 +20,7 @@
  (name trigonometry_sprint_js)
  (modules trigonometry_sprint_js)
  (modes js)
- (flags )
+ (flags)
  (libraries trigonometry_sprint gamelle.jsoo))
 
 (rule
