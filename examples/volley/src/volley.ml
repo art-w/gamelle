@@ -104,6 +104,8 @@ let rec loop ~io ({ player1; player2; ball; _ } as state) =
   let state =
     let io = View.translate (Vec.v 0.0 500.0) io in
     Box.fill ~io ~color:Color.black (Window.box ~io);
+    if Input.is_down ~io (`input_char "f") then
+      Window.set_fullscreen ~io (not (Window.get_fullscreen ~io));
     if Input.is_pressed ~io `escape then raise Exit
     else if Input.is_down ~io (`input_char "r") then initial_state
     else if Vec.y (Physics.center ball) > 440.0 then
@@ -157,6 +159,8 @@ let rec loop ~io ({ player1; player2; ball; _ } as state) =
 let rec splash_screen ~io frame_number =
   if frame_number / 8 mod 4 <> 0 then
     Text.draw ~io ~size:30 ~at:Vec.zero "press space to play volley";
+  if Input.is_down ~io (`input_char "f") then
+    Window.set_fullscreen ~io (not (Window.get_fullscreen ~io));
   if Input.is_down ~io `space then ()
   else (
     next_frame ~io;

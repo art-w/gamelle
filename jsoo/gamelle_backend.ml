@@ -47,6 +47,9 @@ module Window = struct
       else Document.exit_fullscreen G.document
     in
     ()
+
+  let get_fullscreen ~io:_ =
+    Option.is_some (Document.fullscreen_element G.document)
 end
 
 let finalize_frame ~io =

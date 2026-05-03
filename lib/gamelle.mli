@@ -788,6 +788,13 @@ module Window : sig
   (** [show_cursor ~io visible] toggles the visibility of the operating system
       mouse cursor. *)
 
+  val set_fullscreen : io:io -> bool -> unit
+  (** [set_fullscreen ~io fullscreen] toggles fullscreen mode. *)
+
+  val get_fullscreen : io:io -> bool
+  (** [get_fullscreen ~io] returns [true] if the window is currently in
+      fullscreen mode. *)
+
   val set_size : io:io -> Size.t -> unit
   (** [set_size ~io wh] resizes the operating system window.
 
@@ -1042,13 +1049,13 @@ module Physics : sig
 
   val precompute_collisions : t list -> collision_data
   (** [precompute_collisions lst] precomputes the collision data for the rigid
-        bodies in the list [lst]. Then you can query the collision data to get
-        the new values of a given rigid body. *)
+      bodies in the list [lst]. Then you can query the collision data to get the
+      new values of a given rigid body. *)
 
   val fix_collisions_with_data : collision_data -> t -> t
-  (** [fix_collisions_with_data data t] detects and repairs any collisions between
-      the rigid body [t] and the other rigid bodies in the precomputed collision
-      data [data]. *)
+  (** [fix_collisions_with_data data t] detects and repairs any collisions
+      between the rigid body [t] and the other rigid bodies in the precomputed
+      collision data [data]. *)
 
   (** {2 Teleportation} *)
 

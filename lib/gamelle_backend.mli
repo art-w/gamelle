@@ -68,5 +68,7 @@ end
 
 module Window : sig
   val show_cursor : io:io -> bool -> unit
+  val set_fullscreen : io:io -> bool -> unit
+  val get_fullscreen : io:io -> bool
   val size : io:io -> Size.t
 end
