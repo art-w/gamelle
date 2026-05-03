@@ -21,12 +21,13 @@ module Window = struct
 
   let set_size ~io =
     let s = !(io.window_size) in
-    if s <> (0, 0) && s <> !current_size then (
+    if s <> (0, 0) && s <> !current_size then begin
       let w, h = s in
       let canvas = io.backend.canvas in
       Canvas.set_w canvas w;
       Canvas.set_h canvas h;
-      current_size := s)
+      current_size := s
+    end
 
   let size ~io =
     let canvas = io.backend.canvas in
@@ -37,6 +38,15 @@ module Window = struct
     let el = Canvas.to_el canvas in
     if status then Brr.El.remove_inline_style Brr.El.Style.cursor el
     else Brr.El.set_inline_style Brr.El.Style.cursor (Jstr.of_string "none") el
+
+  let set_fullscreen ~io fullscreen =
+    let canvas = io.backend.canvas in
+    let el = Canvas.to_el canvas in
+    let _fut =
+      if fullscreen then El.request_fullscreen el
+      else Document.exit_fullscreen G.document
+    in
+    ()
 end
 
 let finalize_frame ~io =
@@ -92,11 +102,13 @@ let run state update =
   let _ =
     Ev.listen
       (Ev.Type.create (Jstr.of_string "focus"))
-      (fun _ ->
+      begin fun _ ->
         if !started then ()
-        else (
+        else begin
           started := true;
-          run ~canvas state update))
+          run ~canvas state update
+        end
+      end
       (El.as_target canvas)
   in
   El.set_has_focus true canvas;
