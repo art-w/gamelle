@@ -17,9 +17,11 @@ let make_triangle cx =
   Physics.v ~kind:Immovable ~restitution:0.0
     (Shape.polygon
        (Polygon.v
-          [ Point.v (cx -. half_w) ground_y
-          ; Point.v (cx +. half_w) ground_y
-          ; Point.v cx (ground_y -. 60.0) ]))
+          [
+            Point.v (cx -. half_w) ground_y;
+            Point.v (cx +. half_w) ground_y;
+            Point.v cx (ground_y -. 60.0);
+          ]))
 
 let make_player () =
   Physics.v ~kind:Movable ~restitution:0.0 ~mass:50.0
@@ -29,8 +31,20 @@ let make_player () =
           (Vec.v player_size player_size)))
 
 let triangle_xs =
-  [ 350.0; 500.0; 660.0; 670.0; 900.0; 1050.0; 1200.0; 1210.0; 1220.0
-  ; 1500.0; 1650.0; 1800.0 ]
+  [
+    350.0;
+    500.0;
+    660.0;
+    670.0;
+    900.0;
+    1050.0;
+    1200.0;
+    1210.0;
+    1220.0;
+    1500.0;
+    1650.0;
+    1800.0;
+  ]
 
 let level_end_x = 2100.0
 
@@ -41,9 +55,11 @@ type state = {
 }
 
 let init () =
-  { player = make_player ()
-  ; ground = make_ground ()
-  ; triangles = List.map make_triangle triangle_xs }
+  {
+    player = make_player ();
+    ground = make_ground ();
+    triangles = List.map make_triangle triangle_xs;
+  }
 
 let is_on_ground player ground =
   Shape.intersect (Physics.shape player) (Physics.shape ground)
@@ -54,29 +70,29 @@ let draw_flag ~io =
     (Segment.v (Point.v level_end_x pole_top) (Point.v level_end_x ground_y));
   Polygon.fill ~io ~color:Color.yellow
     (Polygon.v
-       [ Point.v level_end_x pole_top
-       ; Point.v (level_end_x +. 40.0) (pole_top +. 20.0)
-       ; Point.v level_end_x (pole_top +. 40.0) ])
+       [
+         Point.v level_end_x pole_top;
+         Point.v (level_end_x +. 40.0) (pole_top +. 20.0);
+         Point.v level_end_x (pole_top +. 40.0);
+       ])
 
 let rec victory_screen ~io =
   if Input.is_pressed ~io `escape then raise Exit;
   Box.fill ~io ~color:Color.black (Window.box ~io);
   Text.draw ~io ~color:Color.yellow ~size:40 "You win!"
-    ~at:(Point.v (screen_w /. 2.0 -. 70.0) (screen_h /. 2.0 -. 40.0));
+    ~at:(Point.v ((screen_w /. 2.0) -. 70.0) ((screen_h /. 2.0) -. 40.0));
   Text.draw ~io ~color:Color.white ~size:25 "Press R to play again"
-    ~at:(Point.v (screen_w /. 2.0 -. 135.0) (screen_h /. 2.0 +. 20.0));
+    ~at:(Point.v ((screen_w /. 2.0) -. 135.0) ((screen_h /. 2.0) +. 20.0));
   next_frame ~io;
-  if Input.is_down ~io (`input_char "r") then ()
-  else victory_screen ~io
+  if Input.is_down ~io (`input_char "r") then () else victory_screen ~io
 
 let rec dead_screen ~io =
   if Input.is_pressed ~io `escape then raise Exit;
   Box.fill ~io ~color:Color.black (Window.box ~io);
   Text.draw ~io ~color:Color.white ~size:30 "You died! Press R to restart"
-    ~at:(Point.v (screen_w /. 2.0 -. 200.0) (screen_h /. 2.0 -. 15.0));
+    ~at:(Point.v ((screen_w /. 2.0) -. 200.0) ((screen_h /. 2.0) -. 15.0));
   next_frame ~io;
-  if Input.is_down ~io (`input_char "r") then ()
-  else dead_screen ~io
+  if Input.is_down ~io (`input_char "r") then () else dead_screen ~io
 
 let rec loop ~io state =
   if Input.is_pressed ~io `escape then raise Exit;
@@ -116,10 +132,9 @@ let rec loop ~io state =
     if won then (
       victory_screen ~io;
       loop ~io (init ()))
-    else
-      loop ~io { state with player }
+    else loop ~io { state with player }
 
 let () =
   run_no_loop (fun ~io ->
-    Window.set_size ~io (Size.v screen_w screen_h);
-    loop ~io (init ()))
+      Window.set_size ~io (Size.v screen_w screen_h);
+      loop ~io (init ()))
