@@ -1,0 +1,43 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))
+
+(executable
+ (public_name trigonometry_sprint)
+ (name trigonometry_sprint_bin)
+ (modules trigonometry_sprint_bin)
+ (libraries trigonometry_sprint gamelle.sdl))
+
+(rule
+ (target trigonometry_sprint_bin.ml)
+ (action
+  (with-stdout-to
+   trigonometry_sprint_bin.ml
+   (run echo "include Trigonometry_sprint"))))
+
+(executable
+ (name trigonometry_sprint_js)
+ (modules trigonometry_sprint_js)
+ (modes js)
+ (flags)
+ (libraries trigonometry_sprint gamelle.jsoo))
+
+(rule
+ (target trigonometry_sprint_js.ml)
+ (action
+  (with-stdout-to
+   trigonometry_sprint_js.ml
+   (run echo "include Trigonometry_sprint"))))
+
+(rule
+ (target trigonometry_sprint.html)
+ (deps trigonometry_sprint.template.html trigonometry_sprint_js.bc.js)
+ (action
+  (with-stdout-to
+   trigonometry_sprint.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=trigonometry_sprint.template.html
+    --script=trigonometry_sprint_js.bc.js))))

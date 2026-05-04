@@ -30,7 +30,10 @@ let drawing_box ?scale:must_scale ?(set_window_size = true) box io =
   if set_window_size && not must_scale then Window_.set_size ~io size;
   let window_mid = Box.center (Window_.box ~io) in
   let box_mid = Box.center box in
+
   let inv_scale = 1. /. io_scale in
-  let tr = Vec.((inv_scale * window_mid) - box_mid) in
+  let tr = Vec.((inv_scale * window_mid) - box_mid - translation io) in
+  (* Format.printf "%f %a %a %a@." inv_scale Box.pp (Window_.box ~io) Vec.pp (translation io) Vec.pp tr; *)
+
   let io = translate tr io in
   io

@@ -8,6 +8,7 @@
   assets
   dune
   dune-project
+  dune-workspace
   funny_game.template.html
   src
   $ dune build

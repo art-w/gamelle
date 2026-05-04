@@ -1,6 +1,6 @@
 type 'a abstract_io = {
   view : Transform.t;
-  event : Events_backend.t;
+  event : Events_backend.t ref;
   clip : Geometry.Box.t option;
   clip_events : bool;
   z_index : int;
@@ -11,6 +11,7 @@ type 'a abstract_io = {
   backend : 'a;
 }
 
+let translation io = io.view.translate
 let translate dxy io = { io with view = Transform.translate dxy io.view }
 let scale factor io = { io with view = Transform.scale factor io.view }
 let rotate angle io = { io with view = Transform.rotate angle io.view }

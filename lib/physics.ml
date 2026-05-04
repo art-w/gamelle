@@ -222,12 +222,12 @@ let collision_react ~normal a b =
 
 module World = Map.Make (Int)
 
-let fix_collisions shapes =
+let detect_collisions shapes =
   let had_collision = ref false in
-  World.iter
-    (fun i _ ->
-      World.iter
-        (fun j _ ->
+  !shapes
+  |> World.iter begin fun i _ ->
+      !shapes
+      |> World.iter begin fun j _ ->
           if i >= j then ()
           else
             let a = World.find i !shapes in
@@ -240,14 +240,71 @@ let fix_collisions shapes =
                   had_collision := true;
                   let a, b = collision_react ~normal a b in
                   shapes := World.add i a !shapes;
-                  shapes := World.add j b !shapes)
-        !shapes)
-    !shapes;
+                  shapes := World.add j b !shapes
+        end
+    end;
   !had_collision
+
+let fix_collisions_map t =
+  let shapes = ref t in
+  let rec go n = if n > 0 && detect_collisions shapes then go (n - 1) in
+  go 10;
+  !shapes
 
 let fix_collisions t =
   let shapes = ref World.empty in
   List.iteri (fun i shape -> shapes := World.add i shape !shapes) t;
-  let rec go n = if n > 0 && fix_collisions shapes then go (n - 1) in
+  let rec go n = if n > 0 && detect_collisions shapes then go (n - 1) in
   go 10;
   List.map snd (World.bindings !shapes)
+
+type _ world_tree =
+  | Leaf : t -> [ `leaf ] world_tree
+  | LeafLi : t list -> [ `leaf_li ] world_tree
+  | Node : 'a world_tree * 'b world_tree -> [ `node of 'a * 'b ] world_tree
+
+let fix_collisions_world (type s) (world : s world_tree) : s world_tree =
+  let map = ref World.empty in
+  let rec fill : type s. int -> s world_tree -> int =
+   fun i w ->
+    match w with
+    | Leaf t ->
+        map := World.add i t !map;
+        i + 1
+    | LeafLi ts ->
+        List.iteri (fun j t -> map := World.add (i + j) t !map) ts;
+        i + List.length ts
+    | Node (a, b) ->
+        let i = fill i a in
+        fill i b
+  in
+  fill 0 world |> ignore;
+  let fixed_map = fix_collisions_map !map in
+  let rec rebuild : type s. int -> s world_tree -> int * s world_tree =
+   fun i w ->
+    match w with
+    | Leaf _ -> (i + 1, Leaf (World.find i fixed_map))
+    | LeafLi ts ->
+        let n = List.length ts in
+        let fixed_ts = List.init n (fun j -> World.find (i + j) fixed_map) in
+        (i + n, LeafLi fixed_ts)
+    | Node (a, b) ->
+        let i, a = rebuild i a in
+        let i, b = rebuild i b in
+        (i, Node (a, b))
+  in
+  rebuild 0 world |> snd
+
+module CollisionOp = struct
+  type 'a t = T : 's world_tree * ('s world_tree -> 'a) -> 'a t
+  type 'a app = 'a t
+
+  let ( let+ ) (T (w, f') : 'a t) (f : 'a -> 'b) : 'b =
+    f (f' (fix_collisions_world w))
+
+  let ( and+ ) (T (wa, fa) : 'a t) (T (wb, fb) : 'b t) : ('a * 'b) t =
+    T (Node (wa, wb), fun (Node (wa', wb')) -> (fa wa', fb wb'))
+
+  let obj a = T (Leaf a, fun (Leaf a) -> a)
+  let obj_list a = T (LeafLi a, fun (LeafLi a) -> a)
+end

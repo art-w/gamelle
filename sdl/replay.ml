@@ -45,7 +45,7 @@ let draw_progress ~io () =
       force_reload ();
       State.force_reload ()))
 
-let replay ~backend ~events ~latest_io =
+let replay ~events ~io =
   let lst = !must_replay in
   if lst = [] then `not_replayed
   else if !clock = !target_clock then `paused
@@ -62,13 +62,8 @@ let replay ~backend ~events ~latest_io =
           let e = { e with clock = !clock } in
           events := e;
           add e;
-          let io =
-            {
-              (Gamelle_common.make_io ~previous:!latest_io backend) with
-              event = e;
-            }
-          in
-          latest_io := io;
+          Gamelle_common.io_reset_mutable_fields io;
+          io.event := e;
           State.unsafe_update ~io;
           go ((e, count - 1) :: es)
     in

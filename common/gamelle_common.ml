@@ -11,7 +11,7 @@ open Geometry
 
 type 'a abstract_io = 'a View.abstract_io = {
   view : Transform.t;
-  event : Events_backend.t;
+  event : Events_backend.t ref;
   clip : box option;
   clip_events : bool;
   z_index : int;
@@ -25,7 +25,7 @@ type 'a abstract_io = 'a View.abstract_io = {
 let make_io backend =
   {
     view = Transform.default;
-    event = Events_backend.default;
+    event = ref Events_backend.default;
     clip = None;
     clip_events = false;
     z_index = 0;
@@ -42,10 +42,16 @@ let make_io ?previous backend =
   | None -> io
   | Some previous -> { io with window_size = previous.window_size }
 
+let io_reset_mutable_fields io =
+  io.event := Events_backend.default;
+  io.window_size := (0, 0);
+  io.clean := [];
+  io.draws := []
+
 let clean_io ~io fn = io.clean := fn :: !(io.clean)
 let get_color ~io = function None -> io.color | Some c -> c
-let clock ~io = Events_backend.clock io.event
-let dt ~io = Events_backend.dt io.event
+let clock ~io = Events_backend.clock !(io.event)
+let dt ~io = Events_backend.dt !(io.event)
 let z ~io f = io.draws := (io.z_index, fun () -> f ~io) :: !(io.draws)
 
 let finalize_frame ~io =

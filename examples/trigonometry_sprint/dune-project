@@ -1,0 +1,9 @@
+(lang dune 3.7)
+
+(name trigonometry_sprint)
+
+(package
+  (name trigonometry_sprint)
+  (synopsis "trigonometry_sprint")
+  (depends
+    gamelle))

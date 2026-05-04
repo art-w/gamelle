@@ -1,0 +1,43 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))
+
+(executable
+ (public_name routine)
+ (name routine_bin)
+ (modules routine_bin)
+ (libraries routine gamelle.sdl))
+
+(rule
+ (target routine_bin.ml)
+ (action
+  (with-stdout-to
+   routine_bin.ml
+   (run echo "include Routine"))))
+
+(executable
+ (name routine_js)
+ (modules routine_js)
+ (modes js)
+ (flags)
+ (libraries routine gamelle.jsoo))
+
+(rule
+ (target routine_js.ml)
+ (action
+  (with-stdout-to
+   routine_js.ml
+   (run echo "include Routine"))))
+
+(rule
+ (target routine.html)
+ (deps routine.template.html routine_js.bc.js)
+ (action
+  (with-stdout-to
+   routine.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=routine.template.html
+    --script=routine_js.bc.js))))

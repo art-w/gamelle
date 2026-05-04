@@ -8,7 +8,7 @@ let get_size ~io = !(io.window_size)
 let set_size ~io =
   let w, h = get_size ~io in
   let s = (w, h + int_of_float !Gamelle_common.ui_replay_height) in
-  if s <> !current_size then (
+  if (w, h) <> (0, 0) && s <> !current_size then (
     let w, h = s in
     Sdl.set_window_size io.backend.window ~w ~h;
     current_size := s)
@@ -20,6 +20,17 @@ let box ~io =
 let show_cursor ~io:_ b =
   let& _ = Sdl.show_cursor b in
   ()
+
+let set_fullscreen ~io fullscreen =
+  let flags =
+    if fullscreen then Sdl.Window.fullscreen_desktop else Sdl.Window.windowed
+  in
+  let& _ = Sdl.set_window_fullscreen io.backend.window flags in
+  ()
+
+let get_fullscreen ~io =
+  let flags = Sdl.get_window_flags io.backend.window in
+  Sdl.Window.(test fullscreen_desktop) flags
 
 let finalize_frame ~io =
   set_size ~io;

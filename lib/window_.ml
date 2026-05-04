@@ -11,3 +11,5 @@ let set_size ~io s =
 
 let box ~io = Box.v Vec.zero (size ~io)
 let show_cursor = W.show_cursor
+let set_fullscreen = W.set_fullscreen
+let get_fullscreen = W.get_fullscreen

@@ -23,9 +23,7 @@ let initial_state =
     rad = A;
   }
 
-let () =
-  Gamelle.run initial_state
-  @@ fun ~io { text; check1; check2; slider1; slider2; rad } ->
+let rec loop { text; check1; check2; slider1; slider2; rad } ~io =
   if Input.is_pressed ~io `escape then raise Exit;
   Window.show_cursor ~io true;
   let wr = ref 0.0 and hr = ref 0.0 in
@@ -94,4 +92,7 @@ let () =
     { text; check1; check2; slider1; slider2; rad }
   in
   Window.set_size ~io (Size.v !wr !hr);
-  state
+  next_frame ~io;
+  loop state ~io
+
+let () = Gamelle.run_no_loop (loop initial_state)

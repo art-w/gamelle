@@ -54,6 +54,27 @@ val run : 'state -> (io:io -> 'state -> 'state) -> unit
           new_state
     ]} *)
 
+val run_no_loop : (io:io -> unit) -> unit
+(** [run_no_loop f] only calls [f] once.
+
+    To display more than one frame, {!next_frame} can be used.
+
+    Typically used in the following fashion:
+
+    {[
+      let rec loop ~io state =
+        let state =
+          ...
+        in
+        next_frame ~io;
+        loop ~io state
+
+      let () = run_no_loop (loop initial_state)
+    ]} *)
+
+val next_frame : io:io -> unit
+(** wait for the next frame *)
+
 (** {1 Maths} *)
 
 (** {2 Linear Algebra} *)
@@ -832,6 +853,13 @@ module Window : sig
   (** [show_cursor ~io visible] toggles the visibility of the operating system
       mouse cursor. *)
 
+  val set_fullscreen : io:io -> bool -> unit
+  (** [set_fullscreen ~io fullscreen] toggles fullscreen mode. *)
+
+  val get_fullscreen : io:io -> bool
+  (** [get_fullscreen ~io] returns [true] if the window is currently in
+      fullscreen mode. *)
+
   val set_size : io:io -> Size.t -> unit
   (** [set_size ~io wh] resizes the operating system window.
 
@@ -1082,6 +1110,52 @@ module Physics : sig
   (** [fix_collisions lst] detects and repairs any collisions between the rigid
       bodies in the list [lst]. *)
 
+  (** {2 Collision applicative}
+
+      [CollisionOp] lets you group a set of rigid bodies, run collision
+      resolution across all of them at once, and retrieve each body's
+      post-collision values in a type safe-way.
+
+      {[
+        let open Physics.CollisionOp in
+        let+ ball   = obj ball
+        and+ paddle = obj paddle
+        and+ walls  = obj_list walls in
+        (* ball, paddle, walls are now post-collision values *)
+        ...
+      ]}
+
+      Each [let+] is one collision-resolution pass over the bodies registered
+      with [and+]. Nesting two [let+] expressions runs two independent passes,
+      which is useful to model groups that should not interact with each other:
+
+      {[
+        let open Physics.CollisionOp in
+        let+ ball   = obj ball   and+ _ = obj wall  in
+        let+ paddle = obj paddle and+ _ = obj floor in
+        ...
+      ]} *)
+  module CollisionOp : sig
+    type 'a app
+    (** An applicative computation that produces a value of type ['a] after
+        collision resolution. *)
+
+    val ( let+ ) : 'a app -> ('a -> 'b) -> 'b
+    (** [let+ x = op in f x] resolves all collisions registered in [op] and
+        passes the post-collision results to [f]. *)
+
+    val ( and+ ) : 'a app -> 'b app -> ('a * 'b) app
+    (** [op_a and+ op_b] merges two computations so their bodies are resolved
+        together in the same collision pass. *)
+
+    val obj : t -> t app
+    (** [obj body] registers a single rigid body for collision resolution. *)
+
+    val obj_list : t list -> t list app
+    (** [obj_list bodies] registers a list of rigid bodies for collision
+        resolution. *)
+  end
+
   (** {2 Teleportation} *)
 
   val set_center : Point.t -> t -> t
@@ -1106,4 +1180,47 @@ module Physics : sig
 
   val fill : io:io -> ?color:Color.t -> t -> unit
   (** [fill ~io t] fills the inside of the rigid body [t]. *)
+end
+
+module Routine : sig
+  (** This module allows to run a sub-routine, that is a part of the program
+      with its own control flow.
+
+      Type {!t} describes such subroutines, and {!tick} allows you to advance
+      them by one frame.*)
+
+  type ('i, 'o, 'a) continuation
+  (** The continuation of routines. You never need to use this. *)
+
+  (** The type of a routine. Use {!start} to construct of value of this type.
+
+      ['i] is the type of the input given at each tick. ['o] is the type of the
+      output returned at the end of each tick. ['r] is the type of the result
+      returned when the routine finishes.
+
+      In a lot of cases, ['i] and/or ['o] and/or ['r] can be [unit]. For
+      example, all would be unit if your routine was just an animation loop that
+      had no need to communicate with the rest of the program.
+
+      This type is private; use [start f] to construct a new routine.*)
+  type ('i, 'o, 'r) t = private
+    | Finished of 'r  (** A finished routine. *)
+    | Running of 'o * ('i, 'o, 'r) continuation
+        (** The routine is started but not finished.
+
+            The first element of the payload is the output of the tick that just
+            ended, the second one is for internal use. *)
+
+  val start : (next_frame:('o -> 'i) -> 'r) -> ('i, 'o, 'r) t
+  (** [start f] constructs a new routine with function [f].
+
+      [f] has access to a special version of [next_frame] that waits for the
+      next {!tick} but also communicates with the rest of the program by sending
+      an output of type ['o] and receiving an input of type ['i].
+
+      When [start] is called, [f] runs until the first call to [next_frame]. *)
+
+  val tick : ('i, 'o, 'r) t -> 'i -> ('i, 'o, 'r) t
+  (** [tick r i f] ticks the routine [r] by one frame, sending input [i] to it.
+      The returned value is the next state of the routine. *)
 end

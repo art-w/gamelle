@@ -1,0 +1,9 @@
+(lang dune 3.7)
+
+(name routine)
+
+(package
+  (name routine)
+  (synopsis "routine")
+  (depends
+    gamelle))
