@@ -1059,15 +1059,53 @@ module Physics : sig
 
       Uses physical equality to differentiate shapes. *)
 
+  (** {2 Collision applicative}
+
+      [CollisionOp] lets you group a set of rigid bodies, run collision
+      resolution across all of them at once, and retrieve each body's
+      post-collision values. The interface uses standard applicative-let syntax.
+
+      {[
+        let open Physics.CollisionOp in
+        let+ ball   = obj ball
+        and+ paddle = obj paddle
+        and+ walls  = obj_list walls in
+        (* ball, paddle, walls are now post-collision values *)
+        ...
+      ]}
+
+      Each [let+] is one collision-resolution pass over the bodies registered
+      with [and+]. Nesting two [let+] expressions runs two independent passes,
+      which is useful to model groups that should not interact with each other:
+
+      {[
+        let open Physics.CollisionOp in
+        let+ ball   = obj ball   and+ _ = obj wall  in
+        let+ paddle = obj paddle and+ _ = obj floor in
+        ...
+      ]} *)
+
   module CollisionOp : sig
     type 'a app
+    (** An applicative computation that produces a value of type ['a] after
+        collision resolution. *)
 
     val ( let+ ) : 'a app -> ('a -> 'b) -> 'b
-    val ( and+ ) : 'a app -> 'b app -> ('a * 'b) app
-    val obj : t -> t app
-    val obj_list : t list -> t list app
-  end
+    (** [let+ x = op in f x] resolves all collisions registered in [op] and
+        passes the post-collision results to [f]. *)
 
+    val ( and+ ) : 'a app -> 'b app -> ('a * 'b) app
+    (** [op_a and+ op_b] merges two computations so their bodies are resolved
+        together in the same collision pass. *)
+
+    val obj : t -> t app
+    (** [obj body] registers a single rigid body for collision resolution. *)
+
+    val obj_list : t list -> t list app
+    (** [obj_list bodies] registers a list of rigid bodies for collision
+        resolution. *)
+
+  end
 
   (** {2 Teleportation} *)
 
