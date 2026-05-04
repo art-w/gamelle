@@ -1052,10 +1052,12 @@ module Physics : sig
       bodies in the list [lst]. Then you can query the collision data to get the
       new values of a given rigid body. *)
 
-  val fix_collisions_with_data : collision_data -> t -> t
-  (** [fix_collisions_with_data data t] detects and repairs any collisions
-      between the rigid body [t] and the other rigid bodies in the precomputed
-      collision data [data]. *)
+  val apply_collisions : collision_data -> t -> t
+  (** [apply_collisions data t] detects and repairs any collisions between the
+      rigid body [t] and the other rigid bodies in the precomputed collision
+      data [data].
+
+      Uses physical equality to differentiate shapes. *)
 
   (** {2 Teleportation} *)
 

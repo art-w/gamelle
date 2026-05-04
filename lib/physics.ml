@@ -278,6 +278,6 @@ let precompute_collisions lst =
   end;
   tbl
 
-let fix_collisions_with_data (data : collision_data) t =
+let apply_collisions (data : collision_data) t =
   let lst = TMap.find data t in
   List.find (fun (before, _after) -> before == t) lst |> snd

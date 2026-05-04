@@ -119,7 +119,7 @@ let rec loop ~io state =
   else
     let all = player :: ground :: triangles in
     let data = Physics.precompute_collisions all in
-    let player = Physics.fix_collisions_with_data data player in
+    let player = Physics.apply_collisions data player in
     let player_x = Vec.x (Physics.center player) in
     let won = player_x >= level_end_x in
     let draw_io = View.translate (Vec.v (200.0 -. player_x) 0.0) io in
