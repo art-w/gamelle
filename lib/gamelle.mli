@@ -1059,6 +1059,13 @@ module Physics : sig
 
       Uses physical equality to differentiate shapes. *)
 
+  type 'a app
+
+  val (let+) : ('a app) -> ( 'a -> 'b) -> 'b
+  val (and+) : ('a app) -> ('b app) -> ('a * 'b) app
+  val const : t -> t app
+  val constli: t list -> t list app
+
   (** {2 Teleportation} *)
 
   val set_center : Point.t -> t -> t
