@@ -258,34 +258,6 @@ let fix_collisions t =
   go 10;
   List.map snd (World.bindings !shapes)
 
-module TMap = Hashtbl.Make (struct
-  type nonrec t = t
-
-  let hash = Hashtbl.hash
-  let equal = ( == )
-end)
-
-type collision_data = (t * t) list TMap.t
-
-let precompute_collisions lst =
-  let after = fix_collisions lst in
-
-  let tbl = TMap.create 64 in
-  begin
-    List.iter2
-      begin fun before after ->
-        match TMap.find_opt tbl before with
-        | None -> TMap.replace tbl before [ (before, after) ]
-        | Some lst -> TMap.replace tbl before ((before, after) :: lst)
-      end
-      lst after
-  end;
-  tbl
-
-let apply_collisions (data : collision_data) t =
-  let lst = TMap.find data t in
-  List.find (fun (before, _after) -> before == t) lst |> snd
-
 type _ world_tree =
   | Leaf : t -> [ `leaf ] world_tree
   | LeafLi : t list -> [ `leaf_li ] world_tree

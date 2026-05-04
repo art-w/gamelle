@@ -1045,20 +1045,6 @@ module Physics : sig
   (** [fix_collisions lst] detects and repairs any collisions between the rigid
       bodies in the list [lst]. *)
 
-  type collision_data
-
-  val precompute_collisions : t list -> collision_data
-  (** [precompute_collisions lst] precomputes the collision data for the rigid
-      bodies in the list [lst]. Then you can query the collision data to get the
-      new values of a given rigid body. *)
-
-  val apply_collisions : collision_data -> t -> t
-  (** [apply_collisions data t] detects and repairs any collisions between the
-      rigid body [t] and the other rigid bodies in the precomputed collision
-      data [data].
-
-      Uses physical equality to differentiate shapes. *)
-
   (** {2 Collision applicative}
 
       [CollisionOp] lets you group a set of rigid bodies, run collision
