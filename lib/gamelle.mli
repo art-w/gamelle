@@ -1063,7 +1063,7 @@ module Physics : sig
 
       [CollisionOp] lets you group a set of rigid bodies, run collision
       resolution across all of them at once, and retrieve each body's
-      post-collision values. The interface uses standard applicative-let syntax.
+      post-collision values in a type safe-way.
 
       {[
         let open Physics.CollisionOp in
