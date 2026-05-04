@@ -117,9 +117,10 @@ let rec loop ~io state =
     dead_screen ~io;
     loop ~io (init ()))
   else
-    let all = player :: ground :: triangles in
-    let data = Physics.precompute_collisions all in
-    let player = Physics.apply_collisions data player in
+    let open Physics.CollisionOp in
+    let+ player = obj player
+    and+ _ground = obj ground
+    and+ _triangles = obj_list triangles in
     let player_x = Vec.x (Physics.center player) in
     let won = player_x >= level_end_x in
     let draw_io = View.translate (Vec.v (200.0 -. player_x) 0.0) io in

@@ -1059,12 +1059,15 @@ module Physics : sig
 
       Uses physical equality to differentiate shapes. *)
 
-  type 'a app
+  module CollisionOp : sig
+    type 'a app
 
-  val (let+) : ('a app) -> ( 'a -> 'b) -> 'b
-  val (and+) : ('a app) -> ('b app) -> ('a * 'b) app
-  val const : t -> t app
-  val constli: t list -> t list app
+    val ( let+ ) : 'a app -> ('a -> 'b) -> 'b
+    val ( and+ ) : 'a app -> 'b app -> ('a * 'b) app
+    val obj : t -> t app
+    val obj_list : t list -> t list app
+  end
+
 
   (** {2 Teleportation} *)
 

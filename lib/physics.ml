@@ -286,97 +286,54 @@ let apply_collisions (data : collision_data) t =
   let lst = TMap.find data t in
   List.find (fun (before, _after) -> before == t) lst |> snd
 
-module
-  H
-  (* :  sig
-  type world
-  type closed_world
-  type id
-  type fixed_world = Leaf of t | Node of world * world
+type _ world_tree =
+  | Leaf : t -> [ `leaf ] world_tree
+  | LeafLi : t list -> [ `leaf_li ] world_tree
+  | Node : 'a world_tree * 'b world_tree -> [ `node of 'a * 'b ] world_tree
 
-  val register_in_world : world -> t -> world * id
-  val close_world : world -> closed_world
-  val fix_collisions_world : closed_world -> fixed_world
-end  *) =
-struct
-  type world = Leaf of t | LeafLi of t list | Node of world * world
-  type closed_world = world
-  type fixed_world = world
+let fix_collisions_world (type s) (world : s world_tree) : s world_tree =
+  let map = ref World.empty in
+  let rec fill : type s. int -> s world_tree -> int =
+   fun i w ->
+    match w with
+    | Leaf t ->
+        map := World.add i t !map;
+        i + 1
+    | LeafLi ts ->
+        List.iteri (fun j t -> map := World.add (i + j) t !map) ts;
+        i + List.length ts
+    | Node (a, b) ->
+        let i = fill i a in
+        fill i b
+  in
+  fill 0 world |> ignore;
+  let fixed_map = fix_collisions_map !map in
+  let rec rebuild : type s. int -> s world_tree -> int * s world_tree =
+   fun i w ->
+    match w with
+    | Leaf _ -> (i + 1, Leaf (World.find i fixed_map))
+    | LeafLi ts ->
+        let n = List.length ts in
+        let fixed_ts = List.init n (fun j -> World.find (i + j) fixed_map) in
+        (i + n, LeafLi fixed_ts)
+    | Node (a, b) ->
+        let i, a = rebuild i a in
+        let i, b = rebuild i b in
+        (i, Node (a, b))
+  in
+  rebuild 0 world |> snd
 
-  let close_world world = world
-  let register_in_world world t = (t :: world, List.length world)
+module CollisionOp = struct
+  type 'a t = T : 's world_tree * ('s world_tree -> 'a) -> 'a t
+  type 'a app = 'a t
 
-  let fix_collisions_world (world : world) : fixed_world =
-    let map = ref World.empty in
-    let rec loop i w =
-      match w with
-      | Leaf t ->
-          map := World.add i t !map;
-          i + 1
-      | LeafLi ts ->
-          List.iteri (fun j t -> map := World.add (i + j) t !map) ts;
-          i + List.length ts
-      | Node (a, b) ->
-          let i = loop i a in
-          let i = loop i b in
-          i
-    in
-    loop 0 world |> ignore;
-    let fixed_map = fix_collisions_map !map in
-    let rec loop i w =
-      match w with
-      | Leaf _t -> (i + 1, Leaf (World.find i fixed_map))
-      | LeafLi ts ->
-          let n = List.length ts in
-          let fixed_ts = List.init n (fun j -> World.find (i + j) fixed_map) in
-          (i + n, LeafLi fixed_ts)
-      | Node (a, b) ->
-          let i, a = loop i a in
-          let i, b = loop i b in
-          (i, Node (a, b))
-    in
-    loop 0 world |> snd
+  let ( let+ ) (T (w, f') : 'a t) (f : 'a -> 'b) : 'b =
+    f (f' (fix_collisions_world w))
+
+  let ( and+ ) (T (wa, fa) : 'a t) (T (wb, fb) : 'b t) : ('a * 'b) t =
+    T (Node (wa, wb), fun (Node (wa', wb')) -> (fa wa', fb wb'))
+
+  let obj a = T (Leaf a, fun (Leaf a) -> a)
+  let obj_list a = T (LeafLi a, fun (LeafLi a) -> a)
 end
 
-type 'a app = H.world * (H.fixed_world -> 'a)
-
-let ( let+ ) ((w, f') : 'a app) (f : 'a -> 'b) : 'b =
-  let open H in
-  let closed_world = close_world w in
-  let fixed_world = fix_collisions_world closed_world in
-  let a = f' fixed_world in
-  f a
-
-let ( and+ ) ((wa, fa) : 'a app) ((wb, fb) : 'b app) =
-  let open H in
-  let w = H.Node (wa, wb) in
-  let f =
-   fun fixed_world ->
-    match fixed_world with
-    | Leaf _ | LeafLi _ ->
-        failwith
-          "Impossible: fixed world should have the same structure as the world"
-    | Node (wa, wb) ->
-        let a = fa wa in
-        let b = fb wb in
-        (a, b)
-  in
-  (w, f)
-
-let const a =
-  ( H.Leaf a,
-    function
-    | H.Leaf a -> a
-    | H.Node _ | H.LeafLi _ ->
-        failwith
-          "Impossible: fixed world should have the same structure as the world"
-  )
-
-let constli a =
-  ( H.LeafLi a,
-    function
-    | H.LeafLi a -> a
-    | H.Node _ | H.Leaf _ ->
-        failwith
-          "Impossible: fixed world should have the same structure as the world"
-  )
