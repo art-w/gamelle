@@ -125,16 +125,21 @@ let rec loop ~io ({ player1; player2; ball; _ } as state) =
         update_player ~io ~gravity (`physical_char 'a') (`physical_char 'd')
           (`physical_char 'w') (`physical_char 's') ~player:player1
       in
-      let[@warning "-partial-match"] (player1_shape :: player2_shape :: ball
-                                    :: _) =
-        Physics.fix_collisions (player1.shape :: player2.shape :: ball :: world)
+      let collisions =
+        Physics.precompute_collisions
+          (player1.shape :: player2.shape :: ball :: world)
       in
-      let[@warning "-partial-match"] (player1_shape :: _) =
-        Physics.fix_collisions [ player1_shape; block_player1 ]
+      let player1_shape = Physics.apply_collisions collisions player1.shape in
+      let player2_shape = Physics.apply_collisions collisions player2.shape in
+      let ball = Physics.apply_collisions collisions ball in
+      let collisions =
+        Physics.precompute_collisions [ player1_shape; block_player1 ]
       in
-      let[@warning "-partial-match"] (player2_shape :: _) =
-        Physics.fix_collisions [ player2_shape; block_player2 ]
+      let player1_shape = Physics.apply_collisions collisions player1_shape in
+      let collisions =
+        Physics.precompute_collisions [ player2_shape; block_player2 ]
       in
+      let player2_shape = Physics.apply_collisions collisions player2_shape in
       let player1 = { player1 with shape = player1_shape } in
       let player2 = { player2 with shape = player2_shape } in
       List.iter (Physics.fill ~io ~color:Color.white) world;
