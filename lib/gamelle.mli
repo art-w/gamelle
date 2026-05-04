@@ -1045,19 +1045,51 @@ module Physics : sig
   (** [fix_collisions lst] detects and repairs any collisions between the rigid
       bodies in the list [lst]. *)
 
-  type collision_data
+  (** {2 Collision applicative}
 
-  val precompute_collisions : t list -> collision_data
-  (** [precompute_collisions lst] precomputes the collision data for the rigid
-      bodies in the list [lst]. Then you can query the collision data to get the
-      new values of a given rigid body. *)
+      [CollisionOp] lets you group a set of rigid bodies, run collision
+      resolution across all of them at once, and retrieve each body's
+      post-collision values in a type safe-way.
 
-  val apply_collisions : collision_data -> t -> t
-  (** [apply_collisions data t] detects and repairs any collisions between the
-      rigid body [t] and the other rigid bodies in the precomputed collision
-      data [data].
+      {[
+        let open Physics.CollisionOp in
+        let+ ball   = obj ball
+        and+ paddle = obj paddle
+        and+ walls  = obj_list walls in
+        (* ball, paddle, walls are now post-collision values *)
+        ...
+      ]}
 
-      Uses physical equality to differentiate shapes. *)
+      Each [let+] is one collision-resolution pass over the bodies registered
+      with [and+]. Nesting two [let+] expressions runs two independent passes,
+      which is useful to model groups that should not interact with each other:
+
+      {[
+        let open Physics.CollisionOp in
+        let+ ball   = obj ball   and+ _ = obj wall  in
+        let+ paddle = obj paddle and+ _ = obj floor in
+        ...
+      ]} *)
+  module CollisionOp : sig
+    type 'a app
+    (** An applicative computation that produces a value of type ['a] after
+        collision resolution. *)
+
+    val ( let+ ) : 'a app -> ('a -> 'b) -> 'b
+    (** [let+ x = op in f x] resolves all collisions registered in [op] and
+        passes the post-collision results to [f]. *)
+
+    val ( and+ ) : 'a app -> 'b app -> ('a * 'b) app
+    (** [op_a and+ op_b] merges two computations so their bodies are resolved
+        together in the same collision pass. *)
+
+    val obj : t -> t app
+    (** [obj body] registers a single rigid body for collision resolution. *)
+
+    val obj_list : t list -> t list app
+    (** [obj_list bodies] registers a list of rigid bodies for collision
+        resolution. *)
+  end
 
   (** {2 Teleportation} *)
 
