@@ -125,13 +125,13 @@ let rec loop ~io ({ player1; player2; ball; _ } as state) =
         update_player ~io ~gravity (`physical_char 'a') (`physical_char 'd')
           (`physical_char 'w') (`physical_char 's') ~player:player1
       in
-      let open Physics in
-      let+ player1_shape = const player1.shape
-      and+ player2_shape = const player2.shape
-      and+ ball = const ball
-      and+ _world = constli world in
-      let+ player1_shape = const player1_shape and+ _ = const block_player1 in
-      let+ player2_shape = const player2_shape and+ _ = const block_player2 in
+      let open Physics.CollisionOp in
+      let+ player1_shape = obj player1.shape
+      and+ player2_shape = obj player2.shape
+      and+ ball = obj ball
+      and+ _world = obj_list world in
+      let+ player1_shape = obj player1_shape and+ _ = obj block_player1 in
+      let+ player2_shape = obj player2_shape and+ _ = obj block_player2 in
       let player1 = { player1 with shape = player1_shape } in
       let player2 = { player2 with shape = player2_shape } in
       List.iter (Physics.fill ~io ~color:Color.white) world;
