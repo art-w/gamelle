@@ -1084,7 +1084,6 @@ module Physics : sig
         let+ paddle = obj paddle and+ _ = obj floor in
         ...
       ]} *)
-
   module CollisionOp : sig
     type 'a app
     (** An applicative computation that produces a value of type ['a] after
@@ -1104,7 +1103,6 @@ module Physics : sig
     val obj_list : t list -> t list app
     (** [obj_list bodies] registers a list of rigid bodies for collision
         resolution. *)
-
   end
 
   (** {2 Teleportation} *)

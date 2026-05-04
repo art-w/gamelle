@@ -336,4 +336,3 @@ module CollisionOp = struct
   let obj a = T (Leaf a, fun (Leaf a) -> a)
   let obj_list a = T (LeafLi a, fun (LeafLi a) -> a)
 end
-
