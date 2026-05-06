@@ -30,8 +30,7 @@ let load_font_with_codepoints data size codepoints =
       (Ctypes.CArray.start arr) n
   in
   assert (Raylib.is_font_valid f);
-  Raylib.set_texture_filter
-    (Raylib.Font.texture f)
+  Raylib.set_texture_filter (Raylib.Font.texture f)
     Raylib.TextureFilter.Bilinear;
   f
 

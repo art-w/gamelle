@@ -35,5 +35,4 @@ let of_string = Fun.id
 let draw ~io ?color ?font ?size ~at:p text =
   if text <> "" then Font_.draw_text ~io ?color ?font ?size ~at:p text
 
-let size ~io ?font ?size text =
-  Font_.text_size ~io ?font ?size text
+let size ~io ?font ?size text = Font_.text_size ~io ?font ?size text

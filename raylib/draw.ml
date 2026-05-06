@@ -8,9 +8,6 @@ let get_color ~io c =
   to_raylib_color c
 
 let v2 x y = Raylib.Vector2.create x y
-
-
-
 let tau = 8.0 *. atan 1.0
 
 let draw ~io bmp p =
@@ -52,7 +49,7 @@ let project_points ~io pts =
 let draw_poly ~io ?color poly =
   let pts = Polygon.points poly in
   let n = List.length pts in
-  if n >= 2 then
+  if n >= 2 then (
     let color = get_color ~io color in
     let arr = Raylib.CArray.make Raylib.Vector2.t (n + 1) in
     List.iteri
@@ -63,7 +60,7 @@ let draw_poly ~io ?color poly =
     let x, y = project ~io (List.hd pts) in
     Raylib.CArray.set arr n (v2 x y);
     with_scissor ~io @@ fun () ->
-    Raylib.draw_line_strip (Raylib.CArray.start arr) (n + 1) color
+    Raylib.draw_line_strip (Raylib.CArray.start arr) (n + 1) color)
 
 let fill_poly ~io ?color poly =
   let pts = Polygon.points poly in
@@ -86,7 +83,7 @@ let draw_rect ~io ?color rect =
 
 let fill_rect ~io ?color rect =
   with_scissor ~io @@ fun () ->
-   Raylib.draw_rectangle
+  Raylib.draw_rectangle
     (int_of_float (Box.x_left rect))
     (int_of_float (Box.y_top rect))
     (int_of_float (Box.width rect))
@@ -99,8 +96,7 @@ let draw_circle ~io ?color circle =
   let x, y = project ~io center in
   let radius = io.view.Transform.scale *. radius in
   let color = get_color ~io color in
-  with_scissor ~io @@ fun () ->
-  Raylib.draw_circle_lines_v (v2 x y) radius color
+  with_scissor ~io @@ fun () -> Raylib.draw_circle_lines_v (v2 x y) radius color
 
 let fill_circle ~io ?color circle =
   let center = Circle.center circle in
@@ -108,5 +104,4 @@ let fill_circle ~io ?color circle =
   let x, y = project ~io center in
   let radius = io.view.Transform.scale *. radius in
   let color = get_color ~io color in
-  with_scissor ~io @@ fun () ->
-  Raylib.draw_circle_v (v2 x y) radius color
+  with_scissor ~io @@ fun () -> Raylib.draw_circle_v (v2 x y) radius color

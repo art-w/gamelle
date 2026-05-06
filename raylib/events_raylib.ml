@@ -58,12 +58,10 @@ let build_keypressed () =
   let keys = ref Keys.empty in
   List.iter
     (fun (rk, c) ->
-      if Raylib.is_key_down rk then
-        keys := Keys.add (`physical_char c) !keys)
+      if Raylib.is_key_down rk then keys := Keys.add (`physical_char c) !keys)
     physical_key_pairs;
   List.iter
-    (fun (rk, k) ->
-      if Raylib.is_key_down rk then keys := Keys.add k !keys)
+    (fun (rk, k) -> if Raylib.is_key_down rk then keys := Keys.add k !keys)
     special_key_pairs;
   if Raylib.is_mouse_button_down Raylib.MouseButton.Left then
     keys := Keys.add `click_left !keys;
@@ -91,6 +89,14 @@ let update clock previous =
       pressed_chars keypressed
   in
   let t =
-    { previous with clock; mouse_x; mouse_y; wheel_delta; pressed_chars; keypressed }
+    {
+      previous with
+      clock;
+      mouse_x;
+      mouse_y;
+      wheel_delta;
+      pressed_chars;
+      keypressed;
+    }
   in
   update_updown previous t
