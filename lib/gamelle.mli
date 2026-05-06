@@ -989,7 +989,8 @@ end
 val clock : io:io -> float
 (** [clock ~io] returns the number of elapsed seconds since the game started
     until the current frame. The clock is defined at the beginning of a frame,
-    calling [clock] multiple times will always produce the same result.
+    calling [clock] multiple times during a single frame will always produce the
+    same result.
 
     Examples:
 
