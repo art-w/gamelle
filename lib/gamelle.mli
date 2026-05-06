@@ -895,7 +895,11 @@ its [min] size; a positive value means it competes for extra space
 proportionally to that value.
 
 No clipping is applied: drawing outside [box] is not prevented. If you want
-clipping you can use {!View.clip}. *)
+clipping you can use {!View.clip}.
+
+You can combine this with {!over} to create "reskins" of other widgets.
+
+*)
 
   (**/**)
 
