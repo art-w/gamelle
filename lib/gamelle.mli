@@ -765,7 +765,7 @@ module Ui : sig
   val text_input : ui -> string -> string
   val label : ui -> string -> unit
   val text_area : ui -> string -> unit
-  val vscroll : ui -> (unit -> 'a) -> 'a
+  val vscroll : ui -> ?min_height:float -> (unit -> 'a) -> 'a
   val horizontal : ui -> ?gap:float -> (unit -> 'a) -> 'a
   val vertical : ui -> ?gap:float -> (unit -> 'a) -> 'a
   val over : ui -> (unit -> 'a) -> 'a

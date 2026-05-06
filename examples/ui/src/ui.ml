@@ -42,19 +42,34 @@ let rec loop { text; check1; check2; slider1; slider2; rad } ~io =
       "aaaa aaaa aaaa aaaa aaaa fffffffffffffffffffffffffffffff aaaa aaaa aaaa \
        bbb aaaa aaaa bbb aaaa aaaa bbb aaaa aaaa bbb";
     label [%ui] "This is a label ----";
-    horizontal [%ui] (fun () ->
-        vscroll [%ui] (fun () ->
+    horizontal [%ui] begin fun () ->
+        vscroll [%ui] begin fun () ->
             text_area [%ui]
               "Another long string that should wrap, and wrap, and wrap again \
                until everything is displayed. It must be longer otherwise \
-               there will be no need for the scrollbar.");
-        vscroll [%ui] (fun () ->
+               there will be no need for the scrollbar."
+          end;
+        vscroll [%ui] begin fun () ->
             if button [%ui] "button A" then print_endline "button pressed";
             if button [%ui] "button AB" then print_endline "button pressed";
             if button [%ui] "button ABA" then print_endline "button pressed";
             if button [%ui] "button ABAB" then print_endline "button pressed";
-            if button [%ui] "button ABAB---" then print_endline "button pressed"));
-    horizontal [%ui] (fun () ->
+            if button [%ui] "button ABAB---" then print_endline "button pressed"
+          end
+      end;
+    vscroll [%ui] begin fun () ->
+        if button [%ui] "button A" then print_endline "button pressed";
+        if button [%ui] "button AB" then print_endline "button pressed";
+        if button [%ui] "button ABA" then print_endline "button pressed";
+        if button [%ui] "button ABAB" then print_endline "button pressed";
+        if button [%ui] "button ABAB---" then print_endline "button pressed";
+        if button [%ui] "button A" then print_endline "button pressed";
+        if button [%ui] "button AB" then print_endline "button pressed";
+        if button [%ui] "button ABA" then print_endline "button pressed";
+        if button [%ui] "button ABAB" then print_endline "button pressed";
+        if button [%ui] "button ABAB---" then print_endline "button pressed"
+      end;
+    horizontal [%ui] begin fun () ->
         if button [%ui] "button 1" then print_endline "button 1 pressed";
         vertical [%ui] (fun () ->
             if button [%ui] "button 2" then print_endline "button 2 pressed";
@@ -63,15 +78,17 @@ let rec loop { text; check1; check2; slider1; slider2; rad } ~io =
                 if button [%ui] "button a" then print_endline "button a pressed";
                 if button [%ui] "button b" then print_endline "button b pressed"));
         if button [%ui] "button 4" then print_endline "button 4 pressed";
-        if button [%ui] "button 5" then print_endline "button 5 pressed");
+        if button [%ui] "button 5" then print_endline "button 5 pressed"
+      end;
 
     let check1 = checkbox [%ui] "This is a checkbox 🤓" check1 in
     let check2 =
-      if check1 then (
+      if check1 then begin
         let check2 = checkbox [%ui] "Checkbox 2 !" check2 in
         if button [%ui] "for checkboxers only" then
           print_endline "YOU ARE A CHECKBOXER";
-        check2)
+        check2
+      end
       else check2
     in
     let slider1 = slider [%ui] ~min:10. ~max:20. slider1 in
@@ -85,10 +102,11 @@ let rec loop { text; check1; check2; slider1; slider2; rad } ~io =
       horizontal [%ui] @@ fun () ->
       radios [%ui] rad [ (A, "Select A"); (B, "Select B") ]
     in
-    (match rad with
+    begin match rad with
     | A -> label [%ui] "A is selected"
     | B -> label [%ui] "B is selected"
-    | C -> label [%ui] "C is selected");
+    | C -> label [%ui] "C is selected"
+    end;
     { text; check1; check2; slider1; slider2; rad }
   in
   Window.set_size ~io (Size.v !wr !hr);

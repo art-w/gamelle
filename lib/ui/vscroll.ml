@@ -24,7 +24,7 @@ let with_vertical_drag ui box percent fn =
   let percent = max 0.0 (min 1.0 percent) in
   fn percent
 
-let vscrollbar ui container_height state =
+let vscrollbar ui ?(min_height = 100.0) container_height state =
   with_box ui @@ fun box ->
   let h = max 1.0 container_height in
   let child_height = state.child_height in
@@ -35,7 +35,7 @@ let vscrollbar ui container_height state =
   let max_height = child_height -. h in
   let percent = if max_height <= 0.0 then 0.0 else state.offset /. max_height in
   with_vertical_drag ui drag_box percent @@ fun percent ->
-  draw ui ~min_width:scroll_bar_width ~min_height:100.0 ~flex_height:1.0
+  draw ui ~min_width:scroll_bar_width ~min_height ~flex_height:1.0
     (fun ~io box ->
       let scrollbox =
         Box.v
@@ -47,7 +47,7 @@ let vscrollbar ui container_height state =
       Box.fill ~io ~color:highlight scrollbox);
   percent *. max_height
 
-let v ui fn =
+let v ui ?(min_height = 100.0) fn =
   boxed ~pad:0.0 ~border:Gruvbox.Light.fg2 ~bg:Gruvbox.Light.bg2 ui @@ fun () ->
   with_box ui @@ fun container_box ->
   horizontal ui ~gap:0.0 @@ fun () ->
@@ -60,7 +60,7 @@ let v ui fn =
     state := { !state with child_height = Box.height child_box };
     vertical ui fn
   in
-  let offset = vscrollbar ui (Box.height container_box) !state in
+  let offset = vscrollbar ui ~min_height (Box.height container_box) !state in
   let io = get_io ui in
   let offset =
     if
