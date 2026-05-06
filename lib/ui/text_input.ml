@@ -1,59 +1,16 @@
 open Draw_geometry
 open Ui_backend
-open Widget_builder
-
-type params = float
+open Widgets
 
 type state = {
-  text : Text.t;
   offset : float;
   cursor : int;
   focused : bool;
   pressed_key : (int * Event.key) option;
 }
 
-type return = string
-type Ui_backend.state += Text_input of state
-
-let default _ =
-  {
-    text = Text.of_string "";
-    offset = 0.;
-    cursor = 0;
-    focused = false;
-    pressed_key = None;
-  }
-
-(*
-
-let rec v1 = body1
-and v2 = body2
-
----
-body2
----
-( let rec v1 = body1 in
-  and v2 = body2 in
-  v2
-)
----
-let module M = struct
-  let rec v1 = body1
-  and v2 = body2
-end
-in
-M.v2
-
-  *)
-
-let construct_state s = Text_input s
-
-let destruct_state s =
-  match s with Text_input b -> b | _ -> raise IdTypeMismatch
-
-let size ~ts width =
-  let text_size = Size.v width (Size.height (ts "a")) in
-  Vec.(text_size + (2. * padding_xy))
+let default_state =
+  { offset = 0.; cursor = 0; focused = false; pressed_key = None }
 
 let text_length ~io text = Size.width (Text.size_t ~io text)
 let cursor_offset ~io text cursor = text_length ~io (Text.sub text 0 cursor)
@@ -61,23 +18,22 @@ let cursor_offset ~io text cursor = text_length ~io (Text.sub text 0 cursor)
 let delete_char i text =
   Text.(sub text 0 i ^ sub text (i + 1) (length text - (i + 1)))
 
-let render ~io _params { text; offset; cursor; focused; pressed_key = _ } box =
-  Box.fill ~io ~color:bg' box;
-  Box.draw ~io ~color:(if focused then highlight else fg) box;
-  let io = View.clip box io in
-  let nsize = Vec.(Box.size box - (2. * padding_xy)) in
-  let box = Box.(v_center (center box) nsize) in
-  Text.draw_t ~io ~color:fg ~at:Vec.(Box.top_left box + v offset 0.) text;
-  let cursor_offset = cursor_offset ~io text cursor in
-  let cursor_pos = cursor_offset +. offset in
-  let cursor_seg =
-    Segment.v
-      (Point.v (Box.x_left box +. cursor_pos) (Box.y_top box))
-      (Point.v
-         (Box.x_left box +. cursor_pos)
-         (Box.y_top box +. Size.height (Text.size ~io "a")))
-  in
-  if focused then Segment.draw ~io ~color:highlight cursor_seg
+let render ~io { offset; cursor; focused; pressed_key = _ } text box =
+  let p = -4.0 in
+  let box' = Box.shrink ~left:p ~right:p ~top:p ~bottom:p box in
+  let io = View.clip (Box.translate (Vec.v offset 0.0) box') io in
+  let io = View.translate (Vec.v (-.offset) 0.0) io in
+  Text.draw_t ~io ~color:fg ~at:(Box.top_left box) text;
+  if focused then
+    let cursor_pos = cursor_offset ~io text cursor in
+    let cursor_seg =
+      Segment.v
+        (Point.v (Box.x_left box +. cursor_pos) (Box.y_top box))
+        (Point.v
+           (Box.x_left box +. cursor_pos)
+           (Box.y_top box +. Size.height (Text.size ~io "a")))
+    in
+    Segment.draw ~io ~color:highlight cursor_seg
 
 let find_cursor_click ~io text x =
   let rec loop prev_w i =
@@ -93,9 +49,7 @@ let slow_frames = 60
 let slow_frequency = 20
 let fast_frequency = 3
 
-let update ~io _param { text; offset; cursor; focused; pressed_key } box =
-  let nsize = Vec.(Box.size box - (2. * padding_xy)) in
-  let box = Box.(v_center (center box) nsize) in
+let update ~io { offset; cursor; focused; pressed_key } text box =
   let width = max (Box.width box) 0. in
   let pressed_key =
     match pressed_key with
@@ -119,10 +73,11 @@ let update ~io _param { text; offset; cursor; focused; pressed_key } box =
     | None -> pressed_key
   in
   let cursor, focused =
-    if is_clicked ~io box then
-      let x = (Event.mouse_pos ~io).x -. Box.x_left box +. offset in
-      (find_cursor_click ~io text x, true)
-    else if clicked_outside ~io box then (cursor, false)
+    if Event.is_up ~io `click_left then
+      if Box.mem (Event.mouse_pos ~io) box then
+        let x = (Event.mouse_pos ~io).x -. Box.x_left box +. offset in
+        (find_cursor_click ~io text x, true)
+      else (cursor, false)
     else (cursor, focused)
   in
   let cursor =
@@ -178,20 +133,30 @@ let update ~io _param { text; offset; cursor; focused; pressed_key } box =
     | _ -> (cursor, text)
   in
 
-  let cursor_pos = cursor_offset ~io text cursor +. offset in
+  let cursor_pos = cursor_offset ~io text cursor in
+  let max_width = Size.width (Text.size_t ~io text) in
   let offset =
-    if cursor_pos < 0. then offset +. text_length ~io (Text.sub text cursor 1)
-    else if cursor_pos > width then
-      let char_text = Text.sub text (cursor - 1) 1 in
-      let char_len = text_length ~io char_text in
-      offset -. char_len
+    if cursor_pos -. 30.0 < offset then max 0.0 (cursor_pos -. 30.0)
+    else if cursor_pos +. 30.0 > offset +. width then
+      cursor_pos +. 30.0 -. width
     else offset
   in
-  { text; offset; cursor; focused; pressed_key }
+  let offset = max 0.0 (min (max_width -. width) offset) in
+  ({ offset; cursor; focused; pressed_key }, text)
 
-let result _ { text; _ } = Text.to_string text
-let destruct_result _ text = { (default ()) with text = Text.of_string text }
+module State = Ui_backend.State (struct
+  type t = state
+end)
 
-let v =
-  elt ~construct_state ~destruct_state ~default ~size ~render ~update
-    ~destruct_result ~result ()
+let v ui text =
+  boxed ui @@ fun () ->
+  with_box ui @@ fun box ->
+  let io = get_io ui in
+  let text = Text.of_string text in
+  let state = State.find ui default_state in
+  let st, text = update ~io !state text box in
+  state := st;
+  let text_size = Text.size_t ~io text in
+  Ui_backend.draw ui ~min_width:30.0 ~flex_width:1.0
+    ~min_height:(Size.height text_size) (render st text);
+  Text.to_string text

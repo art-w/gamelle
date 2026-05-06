@@ -40,4 +40,7 @@ let random_mem box =
   and y = Random.float (height box) +. y_top box in
   Point.v x y
 
+let shrink ?(left = 0.0) ?(right = 0.0) ?(top = 0.0) ?(bottom = 0.0) t =
+  v Point.(t.tl + v left top) Size.(t.size - v (left +. right) (top +. bottom))
+
 let pp h { tl; size } = Format.fprintf h "Box.v %a %a" Point.pp tl Size.pp size

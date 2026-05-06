@@ -42,7 +42,7 @@
  (modules test_physics)
  (libraries gamelle.sdl))
 
-(executable
+(library
  (name test_anim)
  (modules test_anim)
  (libraries gamelle.sdl))

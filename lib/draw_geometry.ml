@@ -113,6 +113,14 @@ module Text = struct
   let size_t = size
   let size ~io ?font ?size t = size_t ~io ?font ?size (of_string t)
 
+  let min_size ~io ?font ?size str =
+    let words = String.split_on_char ' ' str in
+    List.fold_left
+      (fun (min_width, min_height) word ->
+        let s = size_t ~io ?font ?size (of_string word) in
+        (max min_width (Size.width s), max min_height (Size.height s)))
+      (0.0, 0.0) words
+
   let size_multiline_t ~io ?(width = Float.infinity) ?(interline = -8.) ?font
       ?size (text : t) =
     let pos = Vec.zero in

@@ -1,4 +1,5 @@
 module Transform = Transform
+module View = View
 module Events_backend = Events_backend
 module Font = Font
 module Delayed = Delayed
@@ -8,7 +9,7 @@ let max_sounds = 256
 
 open Geometry
 
-type 'a abstract_io = {
+type 'a abstract_io = 'a View.abstract_io = {
   view : Transform.t;
   event : Events_backend.t ref;
   clip : box option;
@@ -35,6 +36,12 @@ let make_io backend =
     backend;
   }
 
+let make_io ?previous backend =
+  let io = make_io backend in
+  match previous with
+  | None -> io
+  | Some previous -> { io with window_size = previous.window_size }
+
 let io_reset_mutable_fields io =
   io.event := Events_backend.default;
   io.window_size := (0, 0);
@@ -52,3 +59,5 @@ let finalize_frame ~io =
   |> List.stable_sort (fun (z, _) (z', _) -> -Int.compare z z')
   |> List.rev
   |> List.iter (fun (_z, f) -> f ())
+
+let ui_replay_height = ref 0.0

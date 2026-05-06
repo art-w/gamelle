@@ -70,21 +70,28 @@ let run () =
 
     Sdl.pump_events ();
     let event = Events_sdl.update ~clock:!Replay.clock !(io.event) in
+    if Events_backend.is_pressed event `quit then raise Exit;
+
     let has_focus = Window.has_focus window in
 
-    if (not was_replayed) && (not (State.crashed ())) && has_focus then (
+    if
+      was_replayed = `not_replayed
+      && (not (State.crashed ()))
+      && ((has_focus && event.mouse_y > !Gamelle_common.ui_replay_height)
+         || !Replay.clock = 0)
+    then (
       io_reset_mutable_fields io;
       io.event := event;
       Replay.add event;
       State.update_frame ~io);
 
-    if Events_backend.is_pressed event `quit then raise Exit;
+    Replay.draw_progress ~io ();
 
     Window.finalize_frame ~io;
     Sdl.render_present renderer;
 
-    if State.crashed () || ((not has_focus) && not was_replayed) then
-      await_event ();
+    if State.crashed () || ((not has_focus) && was_replayed <> `replay_progress)
+    then await_event ();
 
     let now = Int32.to_float (Sdl.get_ticks ()) /. 1000.0 in
     let frame_elapsed = now -. t0 in

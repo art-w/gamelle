@@ -20,8 +20,14 @@ let unsafe_update ~io =
   if not !has_crashed then
     match !current_run with
     | No_run -> invalid_arg "No game currently running"
-    | Run { state; update; clean } ->
+    | Run ({ state; update; clean; _ } as run_state) ->
         let state =
+          let io =
+            Gamelle_common.View.translate
+              (Gamelle_common.Geometry.Vec.v 0.0
+                 !Gamelle_common.ui_replay_height)
+              io
+          in
           try update ~io state
           with exc when is_catchable exc ->
             Format.fprintf Format.err_formatter
@@ -33,20 +39,36 @@ let unsafe_update ~io =
             state
         in
         let clean = List.rev_append !(io.clean) clean in
-        current_run := Run { state; update; clean }
+        current_run := Run { run_state with state; update; clean }
 
 let update_frame ~io = mutex_protect lock (fun () -> unsafe_update ~io)
+
+let force_reload () =
+  mutex_protect lock @@ fun () ->
+  match !current_run with
+  | No_run -> ()
+  | Run ({ random_seed; init_state; _ } as run_state) ->
+      Random.set_state random_seed;
+      current_run := Run { run_state with state = init_state }
 
 let run state update ~start ~reload =
   Mutex.lock lock;
   has_crashed := false;
   let prev = !current_run in
-  current_run := Run { state; update; clean = [] };
+  current_run :=
+    Run
+      {
+        random_seed = Random.get_state ();
+        init_state = state;
+        state;
+        update;
+        clean = [];
+      };
   match prev with
   | No_run ->
       Mutex.unlock lock;
       start ()
-  | Run { clean; _ } ->
+  | Run { clean; update; _ } ->
       List.iter (fun fn -> fn ()) clean;
-      reload ();
+      reload (Obj.magic update);
       Mutex.unlock lock
