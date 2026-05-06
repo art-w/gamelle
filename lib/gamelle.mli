@@ -758,19 +758,89 @@ module Ui : sig
     'a
 
   val button : ui -> string -> bool
-  val checkbox : ui -> string -> bool -> bool
-  val radios : ui -> ?equal:('a -> 'a -> bool) -> 'a -> ('a * string) list -> 'a
-  val slider : ui -> min:float -> max:float -> float -> float
-  val int_slider : ui -> min:int -> max:int -> int -> int
-  val text_input : ui -> string -> string
-  val label : ui -> string -> unit
-  val text_area : ui -> string -> unit
-  val vscroll : ui -> ?min_height:float -> (unit -> 'a) -> 'a
-  val horizontal : ui -> ?gap:float -> (unit -> 'a) -> 'a
-  val vertical : ui -> ?gap:float -> (unit -> 'a) -> 'a
-  val over : ui -> (unit -> 'a) -> 'a
+  (** [button [%ui] "click me"] display a button saying "click me", and return
+      [true] if the button is clicked on the current frame. *)
 
-  (* *)
+  val checkbox : ui -> string -> bool -> bool
+  (** [checkbox [%ui] "label" b] display a checkbox saying ["label"]. It is
+      checked if [b] is true. It returns true if it is checked at the end of the
+      frame. *)
+
+  val radios : ui -> ?equal:('a -> 'a -> bool) -> 'a -> ('a * string) list -> 'a
+  (** [radios [%ui] ?equal current opts] display radio buttons. The options are
+      found in [opts], which has pairs of values and labels. Returns the
+      selected option.
+
+      [equal] is used to find which of the options [current] is. Defaults to
+      [(=)] *)
+
+  val slider : ui -> min:float -> max:float -> float -> float
+  (** [slider [%ui] ~min ~max c] display a slider allowing to pick a float
+      between [min] and [max] (included) with current value [c].
+
+      Returns the slider value at the end of the frame. *)
+
+  val int_slider : ui -> min:int -> max:int -> int -> int
+  (** [slider [%ui] ~min ~max c] display a slider allowing to pick an int
+      between [min] and [max] (included) with current value [c].
+
+      Returns the slider value at the end of the frame. *)
+
+  val text_input : ui -> string -> string
+  (** [text_input [%ui] c] A single line text input, holding text [c].
+
+      Returns the text held at the end of the frame. *)
+
+  val label : ui -> string -> unit
+  (** [label [%ui] txt] Just a single line label. *)
+
+  val text_area : ui -> string -> unit
+  (** [text_area [%ui] txt] Multiline text area. *)
+
+  val vscroll : ui -> ?min_height:float -> (unit -> 'a) -> 'a
+  (** {ocaml[
+vscroll [%ui] ?height begin fun () ->
+  ...
+end
+]}
+
+displays whatever is displayed by [...] with a vertical scroll bar.
+
+The height of the content inside can be anything, and the outside height will
+always be what was passed to the [?height] parameter (defaults to [100.0]). *)
+
+  val horizontal : ui -> ?gap:float -> (unit -> 'a) -> 'a
+  (** ocaml[
+horizontal [%ui] ?gap begin fun () ->
+  ...
+end
+]}
+
+displays whatever is displayed by [...] horizontally (not the default for {!window}).
+
+The gap between items of the content is [?gap] (default [8.0]). *)
+
+  val vertical : ui -> ?gap:float -> (unit -> 'a) -> 'a
+  (** ocaml[
+vertical [%ui] ?gap begin fun () ->
+  ...
+end
+]}
+
+displays whatever is displayed by [...] vertically (which the default for
+{!window}, so it only makes sense inside {!horizontal}).
+
+The gap between items of the content is [?gap] (default [8.0]). *)
+
+  val over : ui -> (unit -> 'a) -> 'a
+  (** ocaml[
+over [%ui] begin fun () ->
+  ...
+end
+]}
+
+displays whatever is displayed by [...] on top of each other. Can be used to
+draw a background and put text over it. *)
 
   type constrain = { min : float; flex : float; max : float }
 
@@ -780,6 +850,22 @@ module Ui : sig
     ?height:(constrain -> constrain) ->
     (unit -> 'a) ->
     'a
+  (** ocaml[
+reshape [%ui] ?width ?height begin fun () ->
+  ...
+end
+]}
+
+displays whatever is displayed by [...] with modified layout constraints.
+[?width] and [?height] are functions transforming the child's natural
+{!constrain}; both default to the identity.
+
+This is an escape hatch for adjusting constraints that the child does not
+expose directly — for example adding [flex] to a widget that has none, or
+capping its [max].
+
+Note: reporting a [min] smaller than the child actually needs will cause it
+to be rendered in a box that is too small, resulting in clipping or overflow. *)
 
   val draw :
     ui ->
@@ -791,21 +877,32 @@ module Ui : sig
     ?flex_height:float ->
     (io:io -> Box.t -> unit) ->
     unit
+  (** {ocaml[
+draw [%ui] ?min_width ?max_width ?min_height ?max_height
+  ?flex_width ?flex_height begin fun ~io box ->
+    ...
+  end
+]}
+
+The primitive leaf widget. Declares a box with the given layout constraints and
+calls the drawing function with the allocated [~io] and {!Box.t}.
+
+The code [...] should draw the desired inside the [box] its given by the layout.
+
+All size parameters default to [0.0] except [max_width] and [max_height] which
+default to [infinity]. A [flex] value of [0.0] means the widget takes exactly
+its [min] size; a positive value means it competes for extra space
+proportionally to that value.
+
+No clipping is applied: drawing outside [box] is not prevented. If you want
+clipping you can use {!View.clip}. *)
 
   (**/**)
 
+  (** Only intended for ppx generated code *)
+
   val update_loc : ui -> string -> ui
   val nest_loc : ui -> (unit -> 'a) -> 'a
-
-  (*
-  (** @inline *)
-  include
-    Ui.S
-      with type io := io
-       and type point := Point.t
-       and type size := Size.t
-       and type box := Box.t
-*)
 end
 
 (** {1 Camera} *)
