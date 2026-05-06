@@ -11,13 +11,19 @@ let set_size ~io =
   end
 
 let size ~io:_ =
-  (* probably wrong *)
   let w = Raylib.get_screen_width () in
   let h = Raylib.get_screen_height () in
-  Size.v (float w) (float h)
+  let dpi = Raylib.Vector2.x (Raylib.get_window_scale_dpi ()) in
+  Size.v (float w /. dpi) (float h /. dpi)
 
 let show_cursor ~io:_ show =
   if show then Raylib.show_cursor () else Raylib.hide_cursor ()
+
+let get_fullscreen ~io:_ = Raylib.is_window_fullscreen ()
+
+let set_fullscreen ~io:_ fullscreen =
+  if fullscreen <> Raylib.is_window_fullscreen () then
+    Raylib.toggle_fullscreen ()
 
 let finalize_frame ~io =
   set_size ~io;

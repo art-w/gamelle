@@ -9,7 +9,7 @@ include Draw
 module Window = Window
 
 let run state update =
-  Raylib.set_config_flags [ Raylib.ConfigFlags.Msaa_4x_hint ] ;
+  Raylib.set_config_flags [ Raylib.ConfigFlags.Msaa_4x_hint; Raylib.ConfigFlags.Window_highdpi ] ;
   Raylib.set_trace_log_level Raylib.TraceLogLevel.Warning;
   Raylib.init_window 640 640 "Gamelle";
   Raylib.set_target_fps 60;
@@ -17,6 +17,7 @@ let run state update =
 
   let backend = { font = Font_.default; font_size = Font_.default_size } in
   let io = Gamelle_common.make_io backend in
+  let dpi_scale = Raylib.Vector2.x (Raylib.get_window_scale_dpi ()) in
   let clock_ref = ref 0 in
   let state = ref state in
 
@@ -26,6 +27,7 @@ let run state update =
     Gamelle_common.io_reset_mutable_fields io;
     io.event := Events_raylib.update !clock_ref prev_event;
     incr clock_ref;
+    let io = { io with view = Transform.scale dpi_scale io.view } in
     state := update ~io !state;
     Window.finalize_frame ~io;
     Sound.update_current_music ();

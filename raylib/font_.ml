@@ -30,6 +30,9 @@ let load_font_with_codepoints data size codepoints =
       (Ctypes.CArray.start arr) n
   in
   assert (Raylib.is_font_valid f);
+  Raylib.set_texture_filter
+    (Raylib.Font.texture f)
+    Raylib.TextureFilter.Bilinear;
   f
 
 let iter_codepoints text f =
@@ -53,7 +56,7 @@ let ensure_codepoints font_s sf size text =
         (Hashtbl.fold (fun cp () acc -> cp :: acc) sf.codepoint_set [])
     in
     Raylib.unload_font sf.raylib_font;
-    sf.raylib_font <- load_font_with_codepoints font_s.data size all_cps
+    sf.raylib_font <- load_font_with_codepoints font_s.data (size * 2) all_cps
   end
 
 let get_sized_font ~io font size =
@@ -64,7 +67,7 @@ let get_sized_font ~io font size =
       let cp_set = Hashtbl.create 2048 in
       Array.iter (fun cp -> Hashtbl.replace cp_set cp ()) initial_codepoints;
       let raylib_font =
-        load_font_with_codepoints font_s.data size initial_codepoints
+        load_font_with_codepoints font_s.data (size * 2) initial_codepoints
       in
       let sf = { raylib_font; codepoint_set = cp_set } in
       clean_io ~io (fun () ->
