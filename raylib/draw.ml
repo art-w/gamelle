@@ -82,12 +82,14 @@ let draw_rect ~io ?color rect =
        ])
 
 let fill_rect ~io ?color rect =
+  let x0, y0 = project ~io (Box.top_left rect) in
+  let x1, y1 = project ~io (Box.bottom_right rect) in
   with_scissor ~io @@ fun () ->
   Raylib.draw_rectangle
-    (int_of_float (Box.x_left rect))
-    (int_of_float (Box.y_top rect))
-    (int_of_float (Box.width rect))
-    (int_of_float (Box.height rect))
+    (int_of_float x0)
+    (int_of_float y0)
+    (int_of_float (x1 -. x0))
+    (int_of_float (y1 -. y0))
     (get_color ~io color)
 
 let draw_circle ~io ?color circle =
