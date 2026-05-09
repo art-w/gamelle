@@ -53,6 +53,7 @@ module Window = struct
 end
 
 let finalize_frame ~io =
+  Sound.end_frame ~io;
   Window.set_size ~io;
   let ctx = io.backend.ctx in
   let w, h = !Window.current_size in

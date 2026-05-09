@@ -31,7 +31,7 @@ let extension_loader ~sysname ~ext =
         in
         Some (Parts (raw, "Gamelle.Bitmap.sub", parts))
       else Some (Raw raw)
-  | ".mp3" | ".wav" -> Some (Raw "Gamelle.Sound.load")
+  | ".mp3" | ".wav" | ".ogg" | ".flac" -> Some (Raw "Gamelle.Sound.load")
   | _ -> Some (Raw "Fun.id")
 
 let rec traverse sysname =

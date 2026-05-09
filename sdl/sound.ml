@@ -2,7 +2,7 @@ open Common
 module Delayed = Gamelle_common.Delayed
 module Mixer = Tsdl_mixer.Mixer
 
-type sound = (io, Mixer.chunk) Delayed.t
+type sound_chunk = (io, Mixer.chunk) Delayed.t
 
 let load_sound binstring =
   Delayed.make @@ fun ~io ->
@@ -18,7 +18,7 @@ let play_sound ~io sound =
     ()
   with Failure msg -> Format.printf "WARNING: play sound: %s@." msg
 
-type music = (io, Mixer.music) Delayed.t
+type music_chunk = (io, Mixer.music) Delayed.t
 
 let load_music binstring =
   Delayed.make @@ fun ~io ->
@@ -27,15 +27,16 @@ let load_music binstring =
   let _ = Sys.opaque_identity rw in
   music
 
-let play_music ~io music =
+let play_music_chunk ~io music =
   let music = Delayed.force ~io music in
   let& _ = Tsdl_mixer.Mixer.play_music music (-1) in
   ()
 
-type t = { sound : sound; music : music }
+type data = { sound : sound_chunk; music : music_chunk }
 
 let load str = { sound = load_sound str; music = load_music str }
-let play ~io t = play_sound ~io t.sound
+let data_duration _data = failwith "TODO"
+let play_until_end ~io:_ _data = failwith "TODO"
 let current_music = ref None
 
 let play_music ~io t =
@@ -43,8 +44,17 @@ let play_music ~io t =
   | Some music when t == music -> ()
   | _ ->
       current_music := Some t;
-      play_music ~io t.music
+      play_music_chunk ~io t.music
 
 let stop_music ~io:_ =
   Mixer.pause_music ();
   current_music := None
+
+type t = unit
+
+let init ~io:_ _data = failwith "TODO"
+let play ~io:_ _t = failwith "TODO"
+let play_loop ~io:_ _t = failwith "TODO"
+let time_left _t = failwith "TODO"
+let current_time _t = failwith "TODO"
+let duration _t = failwith "TODO"

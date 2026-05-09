@@ -1,0 +1,43 @@
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))
+
+(executable
+ (public_name sound)
+ (name sound_bin)
+ (modules sound_bin)
+ (libraries sound gamelle.sdl))
+
+(rule
+ (target sound_bin.ml)
+ (action
+  (with-stdout-to
+   sound_bin.ml
+   (run echo "include Sound"))))
+
+(executable
+ (name sound_js)
+ (modules sound_js)
+ (modes js)
+ (flags)
+ (libraries sound gamelle.jsoo))
+
+(rule
+ (target sound_js.ml)
+ (action
+  (with-stdout-to
+   sound_js.ml
+   (run echo "include Sound"))))
+
+(rule
+ (target sound.html)
+ (deps sound.template.html sound_js.bc.js)
+ (action
+  (with-stdout-to
+   sound.html
+   (run
+    %{bin:gamelle}
+    html
+    --template=sound.template.html
+    --script=sound_js.bc.js))))

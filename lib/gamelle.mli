@@ -675,13 +675,13 @@ val draw_string :
 module Sound : sig
   (** Audio sounds and musics: MP3, OGG. *)
 
-  type t
-  (** The type of sounds and musics (mp3, ogg). *)
+  type data
+  (** The type of sound and music data (mp3, ogg). *)
 
-  val play : io:io -> t -> unit
-  (** [play ~io t] plays the sound [t] once. *)
+  val play_until_end : io:io -> data -> unit
+  (** [play_until_end ~io t] plays the sound [t] every frame until its done. *)
 
-  val play_music : io:io -> t -> unit
+  val play_music : io:io -> data -> unit
   (** [play_music ~io t] plays the music [t] on a loop. If the music [t] was
       already playing, this function does nothing. Otherwise there can only be
       one music playing at a time, so the previous one is stopped. *)
@@ -689,9 +689,46 @@ module Sound : sig
   val stop_music : io:io -> unit
   (** [stop_music ~io] stops the currently playing music. *)
 
+  val data_duration : data -> float
+  (** [data_duration d] returns the duration in seconds of the sound data [d].
+  *)
+
+  type t
+  (** The type of a sound. Holds more than the audio data: also has internal
+      state that store what time the sound is at.
+
+      There can be multiple [t]s for the same {!data}. *)
+
+  val init : io:io -> data -> t
+  (** [init f] is a sound that can be used to play the audio file [f]. *)
+
+  val play : io:io -> t -> bool
+  (** [play ~io t] plays the sound [t] during the current frame.
+
+      If this is not called on a given frame, the sound [t] will be paused until
+      the next time [play] is called on it.
+
+      When the sound is finished playing, calling this will do nothing and
+      return [false].
+
+      Returns [true] if the sound is not finished playing. *)
+
+  val play_loop : io:io -> t -> unit
+  (** [play_loop ~io t] plays the sound [t] on a loop. When its finished playing
+      calling this will start again from the start. *)
+
+  val time_left : t -> float
+  (** [time_left t] returns the remaining time in seconds of the sound [t]. *)
+
+  val current_time : t -> float
+  (** [current_time t] returns the current time in seconds of the sound [t]. *)
+
+  val duration : t -> float
+  (** [duration t] returns the total duration in seconds of the sound [t]. *)
+
   (**/**)
 
-  val load : string -> t
+  val load : string -> data
 end
 
 (** {1 Player inputs} *)

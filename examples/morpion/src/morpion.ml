@@ -175,7 +175,7 @@ let () =
           let cell_x = Int.of_float (floor x /. 64.)
           and cell_y = Int.of_float (floor (y /. 64.)) in
           if cell_x < 0 || cell_x >= 3 || cell_y < 0 || cell_y >= 3 then (
-            Sound.play ~io failsound;
+            Sound.play_until_end ~io failsound;
             state)
           else if Option.is_some (cell_of_coord board cell_x cell_y) then state
           else
