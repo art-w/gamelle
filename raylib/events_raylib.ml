@@ -77,7 +77,7 @@ let rec collect_chars acc =
   else collect_chars (Strings.add (uchar_to_utf8 u) acc)
 
 let update clock previous =
-  let wheel_delta = Raylib.get_mouse_wheel_move () in
+  let wheel_delta = Raylib.get_mouse_wheel_move () *. 4.0 in
   let pos = Raylib.get_mouse_position () in
   let mouse_x = Raylib.Vector2.x pos in
   let mouse_y = Raylib.Vector2.y pos in
