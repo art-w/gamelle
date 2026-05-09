@@ -35,10 +35,8 @@ let play_music_chunk ~io music =
 type data = { sound : sound_chunk; music : music_chunk }
 
 let load str = { sound = load_sound str; music = load_music str }
-
 let data_duration _data = failwith "TODO"
 let play_until_end ~io:_ _data = failwith "TODO"
-
 let current_music = ref None
 
 let play_music ~io t =

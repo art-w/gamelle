@@ -20,7 +20,7 @@
  (name sound_js)
  (modules sound_js)
  (modes js)
- (flags )
+ (flags)
  (libraries sound gamelle.jsoo))
 
 (rule

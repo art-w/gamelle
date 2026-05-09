@@ -10,7 +10,9 @@ let bar_y = 200.0
 let () =
   run { sound = None; playing = false } @@ fun ~io state ->
   let sound =
-    match state.sound with Some s -> s | None -> Sound.init ~io Assets.studiokolomna_open_sky_promotional_289410
+    match state.sound with
+    | Some s -> s
+    | None -> Sound.init ~io Assets.studiokolomna_open_sky_promotional_289410
   in
 
   let playing =
