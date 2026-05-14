@@ -92,18 +92,137 @@ let fill_rect ~io ?color rect =
     (int_of_float (y1 -. y0))
     (get_color ~io color)
 
+(* --- SDF circle shaders --- *)
+
+let vs = {glsl|
+#version 330
+in vec3 vertexPosition;
+in vec2 vertexTexCoord;
+in vec4 vertexColor;
+uniform mat4 mvp;
+out vec2 fragTexCoord;
+out vec4 fragColor;
+void main() {
+    fragTexCoord = vertexTexCoord;
+    fragColor = vertexColor;
+    gl_Position = mvp * vec4(vertexPosition, 1.0);
+}
+|glsl}
+
+let fs_fill = {glsl|
+#version 330
+precision mediump float;
+uniform vec2 center;
+uniform float radius;
+uniform vec4 circleColor;
+uniform float screenHeight;
+out vec4 finalColor;
+void main() {
+    vec2 pos = vec2(gl_FragCoord.x, screenHeight - gl_FragCoord.y);
+    float d = length(pos - center) - radius;
+    float alpha = 1.0 - smoothstep(-1.0, 1.0, d);
+    finalColor = vec4(circleColor.rgb, circleColor.a * alpha);
+}
+|glsl}
+
+let fs_draw = {glsl|
+#version 330
+precision mediump float;
+uniform vec2 center;
+uniform float radius;
+uniform vec4 circleColor;
+uniform float screenHeight;
+out vec4 finalColor;
+void main() {
+    vec2 pos = vec2(gl_FragCoord.x, screenHeight - gl_FragCoord.y);
+    float d = abs(length(pos - center) - radius) - 0.5;
+    float alpha = 1.0 - smoothstep(-1.0, 1.0, d);
+    finalColor = vec4(circleColor.rgb, circleColor.a * alpha);
+}
+|glsl}
+
+type circle_shader = {
+  shader : Raylib.Shader.t;
+  loc_center : Raylib.ShaderLoc.t;
+  loc_radius : Raylib.ShaderLoc.t;
+  loc_color : Raylib.ShaderLoc.t;
+  loc_screen_height : Raylib.ShaderLoc.t;
+}
+
+let load_circle_shader fs =
+  let shader = Raylib.load_shader_from_memory vs fs in
+  {
+    shader;
+    loc_center = Raylib.get_shader_location shader "center";
+    loc_radius = Raylib.get_shader_location shader "radius";
+    loc_color = Raylib.get_shader_location shader "circleColor";
+    loc_screen_height = Raylib.get_shader_location shader "screenHeight";
+  }
+
+let fill_shader : circle_shader option ref = ref None
+let draw_shader : circle_shader option ref = ref None
+
+let get_shader r fs =
+  match !r with
+  | Some s -> s
+  | None ->
+      let s = load_circle_shader fs in
+      r := Some s;
+      s
+
+let set_float shader loc v =
+  let p = Ctypes.(allocate Ctypes.float v |> to_voidp) in
+  Raylib.set_shader_value shader loc p Raylib.ShaderUniformDataType.Float
+
+let set_vec2 shader loc x y =
+  let a = Ctypes.CArray.of_list Ctypes.float [ x; y ] in
+  Raylib.set_shader_value shader loc
+    Ctypes.(CArray.start a |> to_voidp)
+    Raylib.ShaderUniformDataType.Vec2
+
+let set_vec4 shader loc x y z w =
+  let a = Ctypes.CArray.of_list Ctypes.float [ x; y; z; w ] in
+  Raylib.set_shader_value shader loc
+    Ctypes.(CArray.start a |> to_voidp)
+    Raylib.ShaderUniformDataType.Vec4
+
+let circle_uniforms s cx cy radius color =
+  set_vec2 s.shader s.loc_center cx cy;
+  set_float s.shader s.loc_radius radius;
+  let cr = float (Raylib.Color.r color) /. 255.0 in
+  let cg = float (Raylib.Color.g color) /. 255.0 in
+  let cb = float (Raylib.Color.b color) /. 255.0 in
+  let ca = float (Raylib.Color.a color) /. 255.0 in
+  set_vec4 s.shader s.loc_color cr cg cb ca;
+  set_float s.shader s.loc_screen_height (float (Raylib.get_render_height ()));
+  let pad = 2.0 in
+  let qx = int_of_float (cx -. radius -. pad) in
+  let qy = int_of_float (cy -. radius -. pad) in
+  let qs = int_of_float (2.0 *. (radius +. pad)) in
+  (qx, qy, qs)
+
 let draw_circle ~io ?color circle =
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  let x, y = project ~io center in
+  let cx, cy = project ~io center in
   let radius = io.view.Transform.scale *. radius in
   let color = get_color ~io color in
-  with_scissor ~io @@ fun () -> Raylib.draw_circle_lines_v (v2 x y) radius color
+  let s = get_shader draw_shader fs_draw in
+  let qx, qy, qs = circle_uniforms s cx cy radius color in
+  with_scissor ~io @@ fun () ->
+  Raylib.begin_shader_mode s.shader;
+  Raylib.draw_rectangle qx qy qs qs Raylib.Color.white;
+  Raylib.end_shader_mode ()
 
 let fill_circle ~io ?color circle =
   let center = Circle.center circle in
   let radius = Circle.radius circle in
-  let x, y = project ~io center in
+  let cx, cy = project ~io center in
   let radius = io.view.Transform.scale *. radius in
   let color = get_color ~io color in
-  with_scissor ~io @@ fun () -> Raylib.draw_circle_v (v2 x y) radius color
+  let s = get_shader fill_shader fs_fill in
+  let qx, qy, qs = circle_uniforms s cx cy radius color in
+  with_scissor ~io @@ fun () ->
+  Raylib.begin_shader_mode s.shader;
+  Raylib.draw_rectangle qx qy qs qs Raylib.Color.white;
+  Raylib.end_shader_mode ()
