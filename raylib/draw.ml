@@ -170,20 +170,30 @@ let get_shader r fs =
       r := Some s;
       s
 
+let buf1 = Ctypes.CArray.make Ctypes.float 1
+let buf2 = Ctypes.CArray.make Ctypes.float 2
+let buf4 = Ctypes.CArray.make Ctypes.float 4
+
 let set_float shader loc v =
-  let p = Ctypes.(allocate Ctypes.float v |> to_voidp) in
-  Raylib.set_shader_value shader loc p Raylib.ShaderUniformDataType.Float
+  Ctypes.CArray.set buf1 0 v;
+  Raylib.set_shader_value shader loc
+    Ctypes.(CArray.start buf1 |> to_voidp)
+    Raylib.ShaderUniformDataType.Float
 
 let set_vec2 shader loc x y =
-  let a = Ctypes.CArray.of_list Ctypes.float [ x; y ] in
+  Ctypes.CArray.set buf2 0 x;
+  Ctypes.CArray.set buf2 1 y;
   Raylib.set_shader_value shader loc
-    Ctypes.(CArray.start a |> to_voidp)
+    Ctypes.(CArray.start buf2 |> to_voidp)
     Raylib.ShaderUniformDataType.Vec2
 
 let set_vec4 shader loc x y z w =
-  let a = Ctypes.CArray.of_list Ctypes.float [ x; y; z; w ] in
+  Ctypes.CArray.set buf4 0 x;
+  Ctypes.CArray.set buf4 1 y;
+  Ctypes.CArray.set buf4 2 z;
+  Ctypes.CArray.set buf4 3 w;
   Raylib.set_shader_value shader loc
-    Ctypes.(CArray.start a |> to_voidp)
+    Ctypes.(CArray.start buf4 |> to_voidp)
     Raylib.ShaderUniformDataType.Vec4
 
 let circle_uniforms s cx cy radius color =
