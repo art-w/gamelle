@@ -1,11 +1,16 @@
 open Common
 open Gamelle_common
 
-(* LoadMusicStreamFromMemory stores the data pointer for streaming, but ctypes
-   frees the temporary buffer after the call. We write to a temp file instead
-   so raylib reads from a persistent file path. *)
+(* LoadMusicStreamFromMemory stores the data pointer for streaming, so the
+   buffer must outlive the music stream. We rebind it with ptr uint8_t instead
+   of string so we can pass a Bigarray: C-heap memory that the GC never moves
+   or frees. Keeping the Bigarray in the data struct keeps it alive. *)
+let load_music_stream_raw =
+  Foreign.(foreign "LoadMusicStreamFromMemory"
+    Ctypes.(string @-> ptr uint8_t @-> int @-> returning Raylib.Music.t))
 
-let music_temp_files : string list ref = ref []
+type music_buf =
+  (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 
 let detect_ext binstring =
   let starts_with prefix =
@@ -23,56 +28,47 @@ let detect_ext binstring =
   then ".mp3"
   else ".wav"
 
-let load_music_from_file binstring =
-  let ext = detect_ext binstring in
-  let tmp = Filename.temp_file "gamelle_sound" ext in
-  music_temp_files := tmp :: !music_temp_files;
-  let oc = open_out_bin tmp in
-  output_string oc binstring;
-  close_out oc;
-  Raylib.load_music_stream tmp
-
 type sound_delayed = (io, Raylib.Sound.t) Delayed.t
-type music_delayed = (io, Raylib.Music.t) Delayed.t
+type music_delayed = (io, Raylib.Music.t * music_buf) Delayed.t
 
 (* LoadWaveFromMemory is safe: it fully decodes into wave.data before returning *)
 let load_sound binstring =
   Delayed.make @@ fun ~io:_ ->
   let ext = detect_ext binstring in
-  let wave =
-    Raylib.load_wave_from_memory ext binstring (String.length binstring)
-  in
+  let wave = Raylib.load_wave_from_memory ext binstring (String.length binstring) in
   let sound = Raylib.load_sound_from_wave wave in
   Raylib.unload_wave wave;
   sound
 
 let load_music binstring =
-  Delayed.make @@ fun ~io:_ -> load_music_from_file binstring
+  Delayed.make @@ fun ~io:_ ->
+  let ext = detect_ext binstring in
+  let n = String.length binstring in
+  let buf = Bigarray.Array1.create Bigarray.int8_unsigned Bigarray.c_layout n in
+  String.iteri (fun i c -> buf.{i} <- Char.code c) binstring;
+  let ptr = Ctypes.(bigarray_start array1 buf |> to_voidp |> from_voidp uint8_t) in
+  (load_music_stream_raw ext ptr n, buf)
 
 type data = {
   sound_delayed : sound_delayed;
   music_delayed : music_delayed;
-  mutable loaded_music : Raylib.Music.t option;
+  mutable loaded : (Raylib.Music.t * music_buf) option;
 }
 
 let load str =
-  {
-    sound_delayed = load_sound str;
-    music_delayed = load_music str;
-    loaded_music = None;
-  }
+  { sound_delayed = load_sound str; music_delayed = load_music str; loaded = None }
 
 let ensure_music_loaded ~io data =
-  match data.loaded_music with
-  | Some m -> m
+  match data.loaded with
+  | Some (m, _) -> m
   | None ->
-      let m = Delayed.force ~io data.music_delayed in
-      data.loaded_music <- Some m;
-      m
+      let pair = Delayed.force ~io data.music_delayed in
+      data.loaded <- Some pair;
+      fst pair
 
 let data_duration data =
-  match data.loaded_music with
-  | Some m -> Raylib.get_music_time_length m
+  match data.loaded with
+  | Some (m, _) -> Raylib.get_music_time_length m
   | None -> 0.0
 
 let play_until_end ~io data =
@@ -107,17 +103,13 @@ let stop_music ~io:_ =
 
 let cleanup () =
   Option.iter Raylib.stop_music_stream !current_music;
-  current_music := None;
-  List.iter (fun f -> try Sys.remove f with _ -> ()) !music_temp_files;
-  music_temp_files := []
+  current_music := None
 
 type status = Idle | Playing | Done
 
 type t = { music : Raylib.Music.t; mutable status : status }
 
-let init ~io (data : data) =
-  let music = ensure_music_loaded ~io data in
-  { music; status = Idle }
+let init ~io (data : data) = { music = ensure_music_loaded ~io data; status = Idle }
 
 let duration t = Raylib.get_music_time_length t.music
 let current_time t = Raylib.get_music_time_played t.music

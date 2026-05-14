@@ -5,5 +5,5 @@
  (name gamelle_raylib)
  (optional)
  (private_modules bitmap common draw events_raylib font_ sound text window)
- (libraries gamelle_common uuseg raylib ctypes)
+ (libraries gamelle_common uuseg raylib ctypes ctypes-foreign)
  (implements gamelle))
