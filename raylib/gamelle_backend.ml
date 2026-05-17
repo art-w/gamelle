@@ -22,12 +22,15 @@ let run state update =
   let clock_ref = ref 0 in
   let state = ref state in
 
-  while not (Raylib.window_should_close ()) do
+  let running = ref true in
+  while !running do
     Raylib.begin_drawing ();
     let prev_event = !(io.event) in
     Gamelle_common.io_reset_mutable_fields io;
     io.event := Events_raylib.update !clock_ref prev_event;
     incr clock_ref;
+    if Gamelle_common.Events_backend.is_pressed !(io.event) `quit then
+      running := false;
     let io = { io with view = Transform.scale dpi_scale io.view } in
     state := update ~io !state;
     Window.finalize_frame ~io;

@@ -84,6 +84,10 @@ let update clock previous =
   let pressed_chars = collect_chars Strings.empty in
   let keypressed = build_keypressed () in
   let keypressed =
+    if Raylib.window_should_close () then Keys.add `quit keypressed
+    else keypressed
+  in
+  let keypressed =
     Strings.fold
       (fun s k -> Keys.add (`input_char s) k)
       pressed_chars keypressed
