@@ -48,6 +48,8 @@ let special_key_pairs =
     (Raylib.Key.Right_control, `control_right);
     (Raylib.Key.Delete, `delete);
     (Raylib.Key.Escape, `escape);
+    (Raylib.Key.Left_super, `meta);
+    (Raylib.Key.Right_super, `meta);
     (Raylib.Key.Left_shift, `shift);
     (Raylib.Key.Right_shift, `shift);
     (Raylib.Key.Space, `space);

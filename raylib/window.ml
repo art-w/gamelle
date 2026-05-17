@@ -23,7 +23,7 @@ let is_fullscreen () =
 
 let get_fullscreen ~io:_ = is_fullscreen ()
 
-let windowed_size = ref (1010, 1020)
+let windowed_size = ref (640, 640)
 
 let set_fullscreen ~io:_ fullscreen =
   if fullscreen <> is_fullscreen () then begin
