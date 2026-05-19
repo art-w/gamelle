@@ -7,7 +7,7 @@
  (public_name sound)
  (name sound_bin)
  (modules sound_bin)
- (libraries sound gamelle.sdl))
+ (libraries sound gamelle.raylib))
 
 (rule
  (target sound_bin.ml)

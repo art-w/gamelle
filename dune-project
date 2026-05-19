@@ -53,7 +53,9 @@
    (>= 0.6))
   (tsdl-ttf
    (>= 0.6))
-  conf-sdl2-gfx))
+  conf-sdl2-gfx
+  (raylib
+   (>= 1.0.0))))
 
 (package
  (name conf-sdl2-gfx)
@@ -62,5 +64,5 @@
 (package
  (name gamelle-all)
  (synopsis "Gamelle with all optional deps")
- (depends gamelle inotify tsdl tsdl-image tsdl-mixer tsdl-ttf conf-sdl2-gfx)
+ (depends gamelle raylib inotify tsdl tsdl-image tsdl-mixer tsdl-ttf conf-sdl2-gfx)
  (allow_empty))

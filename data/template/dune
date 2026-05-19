@@ -7,7 +7,7 @@
  (public_name mygame)
  (name mygame_bin)
  (modules mygame_bin)
- (libraries mygame gamelle.sdl))
+ (libraries mygame gamelle.raylib))
 
 (rule
  (target mygame_bin.ml)
@@ -17,10 +17,23 @@
    (run echo "include Mygame"))))
 
 (executable
+ (name mygame_sdl)
+ (modules mygame_sdl)
+ (optional)
+ (libraries mygame gamelle.sdl))
+
+(rule
+ (target mygame_sdl.ml)
+ (action
+  (with-stdout-to
+   mygame_sdl.ml
+   (run echo "include Mygame"))))
+
+(executable
  (name mygame_js)
  (modules mygame_js)
  (modes js)
- (flags )
+ (flags)
  (libraries mygame gamelle.jsoo))
 
 (rule

@@ -7,7 +7,7 @@
  (public_name ui)
  (name ui_bin)
  (modules ui_bin)
- (libraries ui gamelle.sdl))
+ (libraries ui gamelle.raylib))
 
 (rule
  (target ui_bin.ml)
@@ -17,9 +17,23 @@
    (run echo "include Ui"))))
 
 (executable
+ (name ui_sdl)
+ (modules ui_sdl)
+ (optional)
+ (libraries ui gamelle.sdl))
+
+(rule
+ (target ui_sdl.ml)
+ (action
+  (with-stdout-to
+   ui_sdl.ml
+   (run echo "include Ui"))))
+
+(executable
  (name ui_js)
  (modules ui_js)
  (modes js)
+ (flags)
  (libraries ui gamelle.jsoo))
 
 (rule

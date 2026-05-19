@@ -1,4 +1,7 @@
-.PHONY: run html
+.PHONY: run run-sdl html
+
+run-bin:
+	dune exec --root=. ./morpion_bin.exe
 
 run:
 	dune build --root=. --watch _build/default/src/morpion.cmxs & \
