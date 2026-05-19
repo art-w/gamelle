@@ -20,6 +20,9 @@
  (name basic_js)
  (modules basic_js)
  (modes js)
+ (js_of_ocaml
+  (flags
+   (:standard --effects=cps)))
  (libraries basic gamelle.jsoo))
 
 (rule

@@ -4,7 +4,8 @@ open Infix
 let test =
   let* () = goto (Printf.sprintf "file://%s/%s" (Sys.getcwd ()) Sys.argv.(1)) in
   Unix.sleepf 0.5;
-  let* img = screenshot () in
+  let* canvas = find_first `tag_name "canvas" in
+  let* img = screenshot ~elt:canvas () in
   return img
 
 let host = "http://127.0.0.1:4444"
