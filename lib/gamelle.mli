@@ -577,8 +577,8 @@ val draw : io:io -> at:Point.t -> Bitmap.t -> unit
     Example:
 
     {[
-      (* draw the assets/player.png bitmap at position x=100, y=200 *)
-      draw ~io Assets.player ~at:(Point.v 100. 200.)
+    (* draw the assets/player.png bitmap at position x=100, y=200 *)
+    draw ~io Assets.player ~at:(Point.v 100. 200.)
     ]} *)
 
 (** {3 Text} *)
@@ -664,10 +664,10 @@ val draw_string :
     Examples:
 
     {[
-      draw_string ~io "Hello World" ~at:(Input.mouse_pos ~io);
-      draw_string ~io ~color:Color.red ~at:(Point.v 200. 100.) "Bloody!";
-      draw_string ~io ~at:Point.zero "Why so serious?" ~font:Assets.comic_sans
-        ~size:50
+    draw_string ~io "Hello World" ~at:(Input.mouse_pos ~io);
+    draw_string ~io ~color:Color.red ~at:(Point.v 200. 100.) "Bloody!";
+    draw_string ~io ~at:Point.zero "Why so serious?" ~font:Assets.comic_sans
+      ~size:50
     ]} *)
 
 (** {3 Audio} *)
@@ -1004,7 +1004,7 @@ module Window : sig
       Example:
 
       {[
-        Window.set_size ~io (Size.v 800. 800.)
+      Window.set_size ~io (Size.v 800. 800.)
       ]} *)
 
   val size : io:io -> Size.t
@@ -1016,8 +1016,8 @@ module Window : sig
       Example:
 
       {[
-        (* clear the screen *)
-        Box.fill ~io ~color:Color.white (Window.box ~io)
+      (* clear the screen *)
+      Box.fill ~io ~color:Color.white (Window.box ~io)
       ]} *)
 end
 
@@ -1032,24 +1032,22 @@ val clock : io:io -> float
     Examples:
 
     {[
-      (* circle moving around a circle *)
-      let center =
-        Vec.(100.0 * v (1. +. cos (clock ~io)) (1. +. sin (clock ~io)))
-      in
-      Circle.fill ~io (Circle.v center 10.0)
+    (* circle moving around a circle *)
+    let center =
+      Vec.(100.0 * v (1. +. cos (clock ~io)) (1. +. sin (clock ~io)))
+    in
+    Circle.fill ~io (Circle.v center 10.0)
     ]}
 
     {[
-      (* show elapsed time since the last click *)
-      Gamelle.run 0. @@ fun ~io last_click ->
-      let now = clock ~io in
-      let last_click =
-        if Input.is_up ~io `click_left then now else last_click
-      in
-      let elapsed = now -. last_click in
-      draw_string ~io ~at:Point.zero
-        (Printf.sprintf "Time since clicked: %fs" elapsed);
-      last_click
+    (* show elapsed time since the last click *)
+    Gamelle.run 0. @@ fun ~io last_click ->
+    let now = clock ~io in
+    let last_click = if Input.is_up ~io `click_left then now else last_click in
+    let elapsed = now -. last_click in
+    draw_string ~io ~at:Point.zero
+      (Printf.sprintf "Time since clicked: %fs" elapsed);
+    last_click
     ]} *)
 
 val dt : io:io -> float
@@ -1058,14 +1056,13 @@ val dt : io:io -> float
     Example:
 
     {[
-      Gamelle.run (Point.v 200. 200., Vec.zero)
-      @@ fun ~io (position, velocity) ->
-      let acceleration = Vec.v 0. 9.81 in
-      (* gravity *)
-      let velocity = Vec.(velocity + (dt ~io * acceleration)) in
-      let position = Vec.(position + (dt ~io * velocity)) in
-      Circle.draw ~io (Circle.v position 20.0);
-      (position, velocity)
+    Gamelle.run (Point.v 200. 200., Vec.zero) @@ fun ~io (position, velocity) ->
+    let acceleration = Vec.v 0. 9.81 in
+    (* gravity *)
+    let velocity = Vec.(velocity + (dt ~io * acceleration)) in
+    let position = Vec.(position + (dt ~io * velocity)) in
+    Circle.draw ~io (Circle.v position 20.0);
+    (position, velocity)
     ]} *)
 
 module Ease : sig

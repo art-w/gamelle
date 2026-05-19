@@ -48,11 +48,11 @@ let run_no_loop (f : io:io -> unit) : unit =
   let routine : (unit, unit, unit) state = Start in
   run_no_handler (routine : (unit, unit, unit) state) begin fun ~io state ->
     match state with
-    | Start -> begin
-        try Finished (f ~io)
+    | Start ->
+        begin try Finished (f ~io)
         with effect Wait_for_next_frame (), k ->
           Running ((), (k : (unit, _) Effect.Deep.continuation))
-      end
+        end
     | Running (_o, k) -> Effect.Deep.continue k ()
     | Finished v -> Finished v
     end

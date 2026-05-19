@@ -25,8 +25,8 @@ let get_fullscreen ~io:_ = is_fullscreen ()
 let windowed_size = ref (640, 640)
 
 let set_fullscreen ~io:_ fullscreen =
-  if fullscreen <> is_fullscreen () then begin
-    if fullscreen then begin
+  if fullscreen <> is_fullscreen () then
+    begin if fullscreen then begin
       windowed_size := (Raylib.get_screen_width (), Raylib.get_screen_height ());
       let m = Raylib.get_current_monitor () in
       Raylib.set_window_size
@@ -39,7 +39,7 @@ let set_fullscreen ~io:_ fullscreen =
       let w, h = !windowed_size in
       Raylib.set_window_size w h
     end
-  end
+    end
 
 let finalize_frame ~io =
   set_size ~io;
