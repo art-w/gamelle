@@ -1,0 +1,29 @@
+  $ SRCROOT=$(realpath "$(cat examples_root.txt)/../..") && EXAMPLES=$SRCROOT/examples
+  $ for game in $(ls $EXAMPLES); do
+  >   gamelle init "$game"
+  >   echo "=== $game ==="
+  >   find "$game" -type f | sed "s|^$game/||" | sort > tmpl
+  >   find "$EXAMPLES/$game" -not -path "*/_build/*" -type f | sed "s|$EXAMPLES/$game/||" | sort > exam
+  >   while IFS= read -r f; do echo "EXTRA: $f"; done < <(comm -13 tmpl exam)
+  >   while IFS= read -r f; do echo "MISSING: $f"; done < <(comm -23 tmpl exam)
+  >   while IFS= read -r file; do
+  >     [ "$file" = "src/$game.ml" ] && continue
+  >     diff -u --label "template/$file" --label "example/$file" "$game/$file" "$EXAMPLES/$game/$file" || true
+  >   done < <(comm -12 tmpl exam)
+  >   rm -rf "$game"
+  > done
+  === morpion ===
+  EXTRA: assets/audio/balloonPop1.wav
+  EXTRA: assets/audio/balloonride1.wav
+  EXTRA: assets/audio/cancel1.wav
+  EXTRA: assets/audio/confirm1.wav
+  EXTRA: assets/circle.png
+  EXTRA: assets/cross.png
+  === pong ===
+  === routine ===
+  === snake ===
+  === sound ===
+  EXTRA: assets/studiokolomna_open_sky_promotional_289410.mp3
+  === trigonometry_sprint ===
+  === ui ===
+  === volley ===

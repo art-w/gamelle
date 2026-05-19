@@ -1,0 +1,21 @@
+(rule
+ (target examples_root.txt)
+ (action
+  (with-stdout-to examples_root.txt
+   (run sh -c "pwd"))))
+
+(cram
+ (package gamelle)
+ (deps
+  %{bin:gamelle}
+  (package gamelle)
+  examples_root.txt
+  (glob_files_rec examples/*)
+  (glob_files_rec examples/morpion/**)
+  (glob_files_rec examples/pong/**)
+  (glob_files_rec examples/routine/**)
+  (glob_files_rec examples/snake/**)
+  (glob_files_rec examples/sound/**)
+  (glob_files_rec examples/trigonometry_sprint/**)
+  (glob_files_rec examples/ui/**)
+  (source_tree examples/volley)))

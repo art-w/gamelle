@@ -7,13 +7,26 @@
  (public_name trigonometry_sprint)
  (name trigonometry_sprint_bin)
  (modules trigonometry_sprint_bin)
- (libraries trigonometry_sprint gamelle.sdl))
+ (libraries trigonometry_sprint gamelle.raylib))
 
 (rule
  (target trigonometry_sprint_bin.ml)
  (action
   (with-stdout-to
    trigonometry_sprint_bin.ml
+   (run echo "include Trigonometry_sprint"))))
+
+(executable
+ (name trigonometry_sprint_sdl)
+ (modules trigonometry_sprint_sdl)
+ (optional)
+ (libraries trigonometry_sprint gamelle.sdl))
+
+(rule
+ (target trigonometry_sprint_sdl.ml)
+ (action
+  (with-stdout-to
+   trigonometry_sprint_sdl.ml
    (run echo "include Trigonometry_sprint"))))
 
 (executable
