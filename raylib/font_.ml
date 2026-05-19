@@ -46,8 +46,9 @@ let iter_codepoints text f =
 (* Reload the font if any codepoint in [text] is not yet in the atlas. *)
 let ensure_codepoints font_s sf size text =
   let missing = ref [] in
-  iter_codepoints text (fun cp ->
-      if not (Hashtbl.mem sf.codepoint_set cp) then missing := cp :: !missing);
+  iter_codepoints text begin fun cp ->
+      if not (Hashtbl.mem sf.codepoint_set cp) then missing := cp :: !missing
+    end;
   if !missing <> [] then begin
     List.iter (fun cp -> Hashtbl.replace sf.codepoint_set cp ()) !missing;
     let all_cps =

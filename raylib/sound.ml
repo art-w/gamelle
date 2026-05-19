@@ -6,8 +6,9 @@ open Gamelle_common
    of string so we can pass a Bigarray: C-heap memory that the GC never moves
    or frees. Keeping the Bigarray in the data struct keeps it alive. *)
 let load_music_stream_raw =
-  Foreign.(foreign "LoadMusicStreamFromMemory"
-    Ctypes.(string @-> ptr uint8_t @-> int @-> returning Raylib.Music.t))
+  let open Foreign in
+  foreign "LoadMusicStreamFromMemory"
+    Ctypes.(string @-> ptr uint8_t @-> int @-> returning Raylib.Music.t)
 
 type music_buf =
   (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
@@ -35,7 +36,9 @@ type music_delayed = (io, Raylib.Music.t * music_buf) Delayed.t
 let load_sound binstring =
   Delayed.make @@ fun ~io:_ ->
   let ext = detect_ext binstring in
-  let wave = Raylib.load_wave_from_memory ext binstring (String.length binstring) in
+  let wave =
+    Raylib.load_wave_from_memory ext binstring (String.length binstring)
+  in
   let sound = Raylib.load_sound_from_wave wave in
   Raylib.unload_wave wave;
   sound
@@ -46,7 +49,9 @@ let load_music binstring =
   let n = String.length binstring in
   let buf = Bigarray.Array1.create Bigarray.int8_unsigned Bigarray.c_layout n in
   String.iteri (fun i c -> buf.{i} <- Char.code c) binstring;
-  let ptr = Ctypes.(bigarray_start array1 buf |> to_voidp |> from_voidp uint8_t) in
+  let ptr =
+    Ctypes.(bigarray_start array1 buf |> to_voidp |> from_voidp uint8_t)
+  in
   (load_music_stream_raw ext ptr n, buf)
 
 type data = {
@@ -56,7 +61,11 @@ type data = {
 }
 
 let load str =
-  { sound_delayed = load_sound str; music_delayed = load_music str; loaded = None }
+  {
+    sound_delayed = load_sound str;
+    music_delayed = load_music str;
+    loaded = None;
+  }
 
 let ensure_music_loaded ~io data =
   match data.loaded with
@@ -106,10 +115,10 @@ let cleanup () =
   current_music := None
 
 type status = Idle | Playing | Done
-
 type t = { music : Raylib.Music.t; mutable status : status }
 
-let init ~io (data : data) = { music = ensure_music_loaded ~io data; status = Idle }
+let init ~io (data : data) =
+  { music = ensure_music_loaded ~io data; status = Idle }
 
 let duration t = Raylib.get_music_time_length t.music
 let current_time t = Raylib.get_music_time_played t.music

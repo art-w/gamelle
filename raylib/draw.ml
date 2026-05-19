@@ -39,28 +39,29 @@ let draw_line ~io ?color segment =
 let project_points ~io pts =
   let n = List.length pts in
   let arr = Raylib.CArray.make Raylib.Vector2.t n in
-  List.iteri
-    (fun i p ->
+  pts
+  |> List.iteri begin fun i p ->
       let x, y = project ~io p in
-      Raylib.CArray.set arr i (v2 x y))
-    pts;
+      Raylib.CArray.set arr i (v2 x y)
+    end;
   (arr, n)
 
 let draw_poly ~io ?color poly =
   let pts = Polygon.points poly in
   let n = List.length pts in
-  if n >= 2 then (
+  if n >= 2 then begin
     let color = get_color ~io color in
     let arr = Raylib.CArray.make Raylib.Vector2.t (n + 1) in
-    List.iteri
-      (fun i p ->
+    pts
+    |> List.iteri begin fun i p ->
         let x, y = project ~io p in
-        Raylib.CArray.set arr i (v2 x y))
-      pts;
+        Raylib.CArray.set arr i (v2 x y)
+      end;
     let x, y = project ~io (List.hd pts) in
     Raylib.CArray.set arr n (v2 x y);
     with_scissor ~io @@ fun () ->
-    Raylib.draw_line_strip (Raylib.CArray.start arr) (n + 1) color)
+    Raylib.draw_line_strip (Raylib.CArray.start arr) (n + 1) color
+  end
 
 let fill_poly ~io ?color poly =
   let pts = Polygon.points poly in
@@ -73,28 +74,29 @@ let fill_poly ~io ?color poly =
 
 let draw_rect ~io ?color rect =
   draw_poly ~io ?color
-    (Polygon.v
-       [
-         Box.top_left rect;
-         Box.top_right rect;
-         Box.bottom_right rect;
-         Box.bottom_left rect;
-       ])
+    begin
+      Polygon.v
+        [
+          Box.top_left rect;
+          Box.top_right rect;
+          Box.bottom_right rect;
+          Box.bottom_left rect;
+        ]
+    end
 
 let fill_rect ~io ?color rect =
   let x0, y0 = project ~io (Box.top_left rect) in
   let x1, y1 = project ~io (Box.bottom_right rect) in
   with_scissor ~io @@ fun () ->
-  Raylib.draw_rectangle
-    (int_of_float x0)
-    (int_of_float y0)
+  Raylib.draw_rectangle (int_of_float x0) (int_of_float y0)
     (int_of_float (x1 -. x0))
     (int_of_float (y1 -. y0))
     (get_color ~io color)
 
 (* --- SDF circle shaders --- *)
 
-let vs = {glsl|
+let vs =
+  {glsl|
 #version 330
 in vec3 vertexPosition;
 in vec2 vertexTexCoord;
@@ -109,7 +111,8 @@ void main() {
 }
 |glsl}
 
-let fs_fill = {glsl|
+let fs_fill =
+  {glsl|
 #version 330
 precision mediump float;
 uniform vec2 center;
@@ -125,7 +128,8 @@ void main() {
 }
 |glsl}
 
-let fs_draw = {glsl|
+let fs_draw =
+  {glsl|
 #version 330
 precision mediump float;
 uniform vec2 center;

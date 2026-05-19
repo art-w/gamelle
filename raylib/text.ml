@@ -6,9 +6,10 @@ let length s =
 let sub s start n =
   let inner s start n acc =
     Uuseg_string.fold_utf_8 `Grapheme_cluster
-      (fun (pos, collected, s) c ->
+      begin fun (pos, collected, s) c ->
         if pos >= start && collected < n then (pos + 1, collected + 1, s ^ c)
-        else (pos + 1, collected, s))
+        else (pos + 1, collected, s)
+      end
       acc s
   in
   let _, _, r = inner s start n (0, 0, "") in

@@ -22,7 +22,6 @@ let is_fullscreen () =
   Raylib.is_window_state Raylib.ConfigFlags.Borderless_windowed_mode
 
 let get_fullscreen ~io:_ = is_fullscreen ()
-
 let windowed_size = ref (640, 640)
 
 let set_fullscreen ~io:_ fullscreen =
@@ -30,9 +29,12 @@ let set_fullscreen ~io:_ fullscreen =
     if fullscreen then begin
       windowed_size := (Raylib.get_screen_width (), Raylib.get_screen_height ());
       let m = Raylib.get_current_monitor () in
-      Raylib.set_window_size (Raylib.get_monitor_width m) (Raylib.get_monitor_height m);
+      Raylib.set_window_size
+        (Raylib.get_monitor_width m)
+        (Raylib.get_monitor_height m);
       Raylib.set_window_state [ Raylib.ConfigFlags.Borderless_windowed_mode ]
-    end else begin
+    end
+    else begin
       Raylib.clear_window_state [ Raylib.ConfigFlags.Borderless_windowed_mode ];
       let w, h = !windowed_size in
       Raylib.set_window_size w h

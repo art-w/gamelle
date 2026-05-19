@@ -37,7 +37,6 @@ let run state update =
     Sound.update_current_music ();
     Raylib.end_drawing ()
   done;
-
   Sound.cleanup ();
   Raylib.close_audio_device ();
   Raylib.close_window ()
