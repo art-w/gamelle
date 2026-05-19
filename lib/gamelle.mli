@@ -835,49 +835,51 @@ module Ui : sig
   (** [text_area [%ui] txt] Multiline text area. *)
 
   val vscroll : ui -> ?min_height:float -> (unit -> 'a) -> 'a
-  (** {ocaml[
-vscroll [%ui] ?height begin fun () ->
-  ...
-end
-]}
+  (** {@ocaml[
+      vscroll [%ui] ?height begin fun () ->
+         ...
+      end
+      ]}
 
-displays whatever is displayed by [...] with a vertical scroll bar.
+      displays whatever is displayed by [...] with a vertical scroll bar.
 
-The height of the content inside can be anything, and the outside height will
-always be what was passed to the [?height] parameter (defaults to [100.0]). *)
+      The height of the content inside can be anything, and the outside height
+      will always be what was passed to the [?height] parameter (defaults to
+      [100.0]). *)
 
   val horizontal : ui -> ?gap:float -> (unit -> 'a) -> 'a
-  (** ocaml[
-horizontal [%ui] ?gap begin fun () ->
-  ...
-end
-]}
+  (** {@ocaml[
+      horizontal [%ui] ?gap begin fun () ->
+        ...
+      end
+      ]}
 
-displays whatever is displayed by [...] horizontally (not the default for {!window}).
+      displays whatever is displayed by [...] horizontally (not the default for
+      {!window}).
 
-The gap between items of the content is [?gap] (default [8.0]). *)
+      The gap between items of the content is [?gap] (default [8.0]). *)
 
   val vertical : ui -> ?gap:float -> (unit -> 'a) -> 'a
-  (** ocaml[
-vertical [%ui] ?gap begin fun () ->
-  ...
-end
-]}
+  (** {@ocaml[
+      vertical [%ui] ?gap begin fun () ->
+        ...
+      end
+      ]}
 
-displays whatever is displayed by [...] vertically (which the default for
-{!window}, so it only makes sense inside {!horizontal}).
+      displays whatever is displayed by [...] vertically (which the default for
+      {!window}, so it only makes sense inside {!horizontal}).
 
-The gap between items of the content is [?gap] (default [8.0]). *)
+      The gap between items of the content is [?gap] (default [8.0]). *)
 
   val over : ui -> (unit -> 'a) -> 'a
-  (** ocaml[
-over [%ui] begin fun () ->
-  ...
-end
-]}
+  (** {@ocaml[
+      over [%ui] begin fun () ->
+        ...
+      end
+      ]}
 
-displays whatever is displayed by [...] on top of each other. Can be used to
-draw a background and put text over it. *)
+      displays whatever is displayed by [...] on top of each other. Can be used
+      to draw a background and put text over it. *)
 
   type constrain = { min : float; flex : float; max : float }
 
@@ -887,22 +889,23 @@ draw a background and put text over it. *)
     ?height:(constrain -> constrain) ->
     (unit -> 'a) ->
     'a
-  (** ocaml[
-reshape [%ui] ?width ?height begin fun () ->
-  ...
-end
-]}
+  (** {@ocaml[
+      reshape [%ui] ?width ?height begin fun () ->
+        ...
+      end
+      ]}
 
-displays whatever is displayed by [...] with modified layout constraints.
-[?width] and [?height] are functions transforming the child's natural
-{!constrain}; both default to the identity.
+      displays whatever is displayed by [...] with modified layout constraints.
+      [?width] and [?height] are functions transforming the child's natural
+      {!constrain}; both default to the identity.
 
-This is an escape hatch for adjusting constraints that the child does not
-expose directly — for example adding [flex] to a widget that has none, or
-capping its [max].
+      This is an escape hatch for adjusting constraints that the child does not
+      expose directly — for example adding [flex] to a widget that has none, or
+      capping its [max].
 
-Note: reporting a [min] smaller than the child actually needs will cause it
-to be rendered in a box that is too small, resulting in clipping or overflow. *)
+      Note: reporting a [min] smaller than the child actually needs will cause
+      it to be rendered in a box that is too small, resulting in clipping or
+      overflow. *)
 
   val draw :
     ui ->
@@ -914,29 +917,29 @@ to be rendered in a box that is too small, resulting in clipping or overflow. *)
     ?flex_height:float ->
     (io:io -> Box.t -> unit) ->
     unit
-  (** {ocaml[
-draw [%ui] ?min_width ?max_width ?min_height ?max_height
-  ?flex_width ?flex_height begin fun ~io box ->
-    ...
-  end
-]}
+  (** {@ocaml[
+      draw [%ui] ?min_width ?max_width ?min_height ?max_height
+        ?flex_width ?flex_height begin fun ~io box ->
+          ...
+        end
+      ]}
 
-The primitive leaf widget. Declares a box with the given layout constraints and
-calls the drawing function with the allocated [~io] and {!Box.t}.
+      The primitive leaf widget. Declares a box with the given layout
+      constraints and calls the drawing function with the allocated [~io] and
+      {!Box.t}.
 
-The code [...] should draw the desired inside the [box] its given by the layout.
+      The code [...] should draw the desired inside the [box] its given by the
+      layout.
 
-All size parameters default to [0.0] except [max_width] and [max_height] which
-default to [infinity]. A [flex] value of [0.0] means the widget takes exactly
-its [min] size; a positive value means it competes for extra space
-proportionally to that value.
+      All size parameters default to [0.0] except [max_width] and [max_height]
+      which default to [infinity]. A [flex] value of [0.0] means the widget
+      takes exactly its [min] size; a positive value means it competes for extra
+      space proportionally to that value.
 
-No clipping is applied: drawing outside [box] is not prevented. If you want
-clipping you can use {!View.clip}.
+      No clipping is applied: drawing outside [box] is not prevented. If you
+      want clipping you can use {!View.clip}.
 
-You can combine this with {!over} to create "reskins" of other widgets.
-
-*)
+      You can combine this with {!over} to create "reskins" of other widgets. *)
 
   (**/**)
 
