@@ -1,6 +1,7 @@
   $ SRCROOT=$(realpath "$(cat examples_root.txt)/../..") && EXAMPLES=$SRCROOT/examples
   $ for game in $(ls $EXAMPLES); do
   >   gamelle init "$game"
+  >   find "$game" -name dune | while read f; do dune format-dune-file < "$f" > "$f.fmt" && mv "$f.fmt" "$f"; done
   >   echo "=== $game ==="
   >   find "$game" -type f | sed "s|^$game/||" | sort > tmpl
   >   find "$EXAMPLES/$game" -not -path "*/_build/*" -type f | sed "s|$EXAMPLES/$game/||" | sort > exam

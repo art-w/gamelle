@@ -1,7 +1,8 @@
 (rule
  (target examples_root.txt)
  (action
-  (with-stdout-to examples_root.txt
+  (with-stdout-to
+   examples_root.txt
    (run sh -c "pwd"))))
 
 (cram
