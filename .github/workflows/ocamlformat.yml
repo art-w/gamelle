@@ -1,0 +1,30 @@
+name: Check formatting
+
+on:
+  push:
+  pull_request:
+
+permissions: read-all
+
+jobs:
+  fmt:
+    name: fmt
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Set-up OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.4"
+
+      - name: Install ocamlformat
+        run: opam install ocamlformat=0.29.0
+
+      - name: Check formatting
+        run: |
+          opam exec -- dune fmt
+          git diff --exit-code
